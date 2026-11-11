@@ -2243,7 +2243,7 @@
       const stills = { day: 'desk', evening: 'dark', late: 'off', night: 'bed' };
       tile.img.src = asset(id + '_' + stills[period] + '.jpg');
       tile.el.dataset.period = period;
-      const useVideo = period === 'day' && !reduceMotion;
+      const useVideo = period === 'day'; // desk loops are gentle: play even with reduced motion
       if (useVideo) {
         tile.vid.classList.add('on');
         const play = tile.vid.play();
