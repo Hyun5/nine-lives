@@ -502,12 +502,25 @@
       top: 50%;
       transform: translateY(-50%);
       z-index: 31;
-      width: min(280px, calc(100vw - 76px));
+      width: min(300px, calc(100vw - 76px));
+      max-height: calc(100svh - 24px);
+      max-height: calc(100dvh - 24px);
+      overflow-x: hidden;
+      overflow-y: auto;
+      overscroll-behavior: contain;
       padding: 12px 10px 8px;
       border-radius: 14px;
       border: 1px solid var(--line);
       background: rgba(12, 10, 20, 0.96);
       box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 79, 216, 0.08);
+    }
+    @media (max-height: 500px) {
+      .settings-panel {
+        top: 12px;
+        transform: none;
+        max-height: calc(100svh - 24px);
+        max-height: calc(100dvh - 24px);
+      }
     }
     .settings-panel.open { display: block; }
     .settings-panel h2 {
@@ -531,12 +544,17 @@
     .theme-pick {
       width: 100%;
       text-align: left;
-      padding: 8px 8px;
+      padding: 7px 8px;
       border-radius: 8px;
       display: flex;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 8px;
+      align-items: center;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+      gap: 4px 8px;
+    }
+    .theme-pick-name {
+      flex: 0 1 auto;
+      min-width: 0;
     }
     .theme-pick:hover, .theme-pick:focus-visible {
       background: rgba(93, 255, 233, 0.08);
@@ -589,8 +607,8 @@
       text-transform: uppercase;
       color: var(--cyan);
     }
-    .theme-pick .meta {
-      display: flex;
+    .theme-pick-tags {
+      display: inline-flex;
       align-items: baseline;
       gap: 6px;
       flex: 0 0 auto;
@@ -756,7 +774,7 @@
     .page-sky[data-wx="cloudy"] .sky-wx { opacity: 1; background: linear-gradient(180deg, rgba(50, 54, 70, 0.4), rgba(10, 10, 16, 0.25)); }
     .page-sky[data-wx="clear"][data-tod="day"] .sky-wx { opacity: 1; background: radial-gradient(800px 500px at 80% 0%, rgba(255, 220, 140, 0.18), transparent 50%); }
     .page-sky[data-wx="clear"][data-tod="night"] .sky-wx { opacity: 1; background: radial-gradient(600px 400px at 75% 10%, rgba(180, 200, 255, 0.16), transparent 55%); }
-    header.chrome, main, footer, .menu-btn, .settings-panel { position: relative; z-index: 5; }
+    header.chrome, main, footer { position: relative; z-index: 5; }
     .menu-btn { z-index: 21; }
     .settings-panel { z-index: 20; }
 
@@ -2214,7 +2232,7 @@
       function appendMeta(el, parts) {
         if (!parts.length) return;
         const meta = document.createElement('span');
-        meta.className = 'meta';
+        meta.className = 'theme-pick-tags';
         parts.forEach(function (part) { meta.appendChild(part); });
         el.appendChild(meta);
       }
@@ -3463,7 +3481,9 @@
       settingsPanel.hidden = false;
       settingsPanel.classList.add('open');
       menuBtn.setAttribute('aria-expanded', 'true');
-      englishToggle.focus();
+      settingsPanel.scrollTop = 0;
+      const first = settingsPanel.querySelector('[role="radio"], button, input');
+      if (first && first.focus) first.focus({ preventScroll: true });
     }
     function closeSettings(restoreFocus) {
       if (settingsPanel.hidden) return;
