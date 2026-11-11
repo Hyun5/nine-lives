@@ -1366,9 +1366,21 @@
     /* __MEDIA_MAP__ */
     const MEDIA = null;
 
+    function artFolder() {
+      // Rainy Window uses the dedicated rainy stills and loops.
+      // Every other theme uses the base (dry) set, including themes
+      // that do not yet have their own art.
+      return currentTheme === 'rainy' ? 'rooms_rainy' : 'rooms';
+    }
+    function sceneKey(period) {
+      return ({ day: 'desk', evening: 'dark', late: 'off', night: 'bed' })[period] || 'desk';
+    }
     function asset(file) {
+      const dir = artFolder();
+      const key = dir + '/' + file;
+      if (MEDIA && MEDIA[key]) return MEDIA[key];
       if (MEDIA && MEDIA[file]) return MEDIA[file];
-      return new URL('./assets/rooms/' + file, document.baseURI).href;
+      return new URL('./assets/' + dir + '/' + file, document.baseURI).href;
     }
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1838,10 +1850,12 @@
     }
 
     // Local-time variant rules (documented in README.md):
-    //   07:00–16:59  day      looping idle clip (desk / studying); still fallback: desk
-    //   17:00–21:59  evening  dark still (lamp-lit, quieter room)
-    //   22:00–23:59  late     off still (lights off)
-    //   00:00–06:59  night    bed still (asleep)
+    //   07:00–16:59  day      desk loop (study); still fallback: desk
+    //   17:00–21:59  evening  lamp-lit dark loop; still fallback: dark
+    //   22:00–23:59  late     lights-off loop; still fallback: off
+    //   00:00–06:59  night    bed loop (breathing); still fallback: bed
+    // Every scene video plays even with prefers-reduced-motion.
+    // Rainy Window uses assets/rooms_rainy; every other theme uses assets/rooms.
     function periodForHour(h) {
       if (h >= 7 && h < 17) return 'day';
       if (h >= 17 && h < 22) return 'evening';
@@ -1921,11 +1935,10 @@
       vid.muted = true;
       vid.loop = true;
       vid.playsInline = true;
-      vid.preload = 'metadata';
+      vid.preload = 'none';
       vid.setAttribute('playsinline', '');
       vid.setAttribute('muted', '');
-      vid.poster = asset(room.id + '_desk.jpg');
-      vid.src = asset(room.id + '_idle.mp4');
+      vid.setAttribute('preload', 'none');
       const shade = document.createElement('div');
       shade.className = 'shade';
       wrap.appendChild(img);
@@ -2026,10 +2039,9 @@
       tile.room = room;
       tile.el.dataset.room = room.id;
       if (artChanged) {
-        tile.vid.pause();
-        tile.vid.poster = asset(room.id + '_desk.jpg');
-        tile.vid.src = asset(room.id + '_idle.mp4');
+        if (typeof unloadVideo === 'function') unloadVideo(tile);
         tile.el.dataset.period = '';
+        tile.el.dataset.artSet = '';
         if (typeof settleStills === 'function' && tile.img) settleStills(tile, tile.img);
       }
       labelTile(tile);
@@ -2105,33 +2117,79 @@
       keep.style.opacity = '1';
     }
 
+    function unloadVideo(tile) {
+      const vid = tile && tile.vid;
+      if (!vid) return;
+      tile.vidGen = (tile.vidGen || 0) + 1;
+      if (tile.vidFadeTimer) { clearTimeout(tile.vidFadeTimer); tile.vidFadeTimer = null; }
+      try { vid.pause(); } catch (e) {}
+      vid.classList.remove('on');
+      vid.removeAttribute('src');
+      vid.removeAttribute('poster');
+      try { vid.load(); } catch (e2) {}
+      delete vid.dataset.scene;
+      delete vid.dataset.set;
+    }
+
+    function loadSceneVideo(tile, period) {
+      const vid = tile.vid;
+      if (!vid) return;
+      const scene = sceneKey(period);
+      const set = artFolder();
+      const url = asset(tile.room.id + '_' + scene + '.mp4');
+      const poster = asset(tile.room.id + '_' + scene + '.jpg');
+      const cur = vid.getAttribute('src');
+      if (vid.dataset.scene === scene && vid.dataset.set === set && cur && !vid.error) {
+        vid.classList.add('on');
+        const play = vid.play();
+        if (play && play.catch) play.catch(function () {});
+        return;
+      }
+      const gen = (tile.vidGen = (tile.vidGen || 0) + 1);
+      // Snap the outgoing clip off before swapping src so frames don't flash mid-fade.
+      tile.el.classList.add('no-fade');
+      vid.classList.remove('on');
+      void vid.offsetWidth;
+      tile.el.classList.remove('no-fade');
+      try { vid.pause(); } catch (e) {}
+      vid.poster = poster;
+      vid.preload = 'none';
+      vid.dataset.scene = scene;
+      vid.dataset.set = set;
+      function ready() {
+        if (tile.vidGen !== gen) return;
+        vid.classList.add('on');
+        const play = vid.play();
+        if (play && play.catch) play.catch(function () {});
+      }
+      function fail() {
+        if (tile.vidGen !== gen) return;
+        vid.classList.remove('on');
+        vid.removeAttribute('src');
+        try { vid.load(); } catch (e3) {}
+      }
+      vid.oncanplay = ready;
+      vid.onloadeddata = ready;
+      vid.onerror = fail;
+      vid.src = url;
+      const play = vid.play();
+      if (play && play.then) play.then(ready, function () {});
+    }
+
     function applyVariant(tile, period) {
       const stills = { day: 'desk', evening: 'dark', late: 'off', night: 'bed' };
       const nextSrc = asset(tile.room.id + '_' + stills[period] + '.jpg');
       const prevPeriod = tile.el.dataset.period;
-      const shouldFade = !!(prevPeriod && prevPeriod !== period);
+      const prevArt = tile.el.dataset.artSet;
+      const nextArt = artFolder();
+      const shouldFade = !!((prevPeriod && prevPeriod !== period) || (prevArt && prevArt !== nextArt));
       tile.el.dataset.period = period;
-      const useVideo = period === 'day'; // desk loops are gentle: play even with reduced motion
+      tile.el.dataset.artSet = nextArt;
+      // Every scene loop plays even with prefers-reduced-motion.
 
       function setVideo(fade) {
         if (!fade) tile.el.classList.add('no-fade');
-        if (useVideo) {
-          tile.vid.classList.add('on');
-          const play = tile.vid.play();
-          if (play && play.catch) play.catch(function () {});
-          if (tile.vidFadeTimer) { clearTimeout(tile.vidFadeTimer); tile.vidFadeTimer = null; }
-        } else {
-          tile.vid.classList.remove('on');
-          if (tile.vidFadeTimer) clearTimeout(tile.vidFadeTimer);
-          if (fade) {
-            tile.vidFadeTimer = setTimeout(function () {
-              tile.vid.pause();
-              tile.vidFadeTimer = null;
-            }, STILL_FADE_MS);
-          } else {
-            tile.vid.pause();
-          }
-        }
+        loadSceneVideo(tile, period);
         if (!fade) {
           void tile.el.offsetWidth;
           tile.el.classList.remove('no-fade');
@@ -2560,13 +2618,22 @@
     }
     function setTheme(id) {
       const cfg = (id && themeConfig(id) && themeConfig(id).id === id) ? themeConfig(id) : themeConfig(THEME_SCHEDULE_DEFAULT);
+      const prevArt = artFolder();
       currentTheme = cfg.id;
+      const nextArt = artFolder();
       try {
         document.documentElement.dataset.theme = currentTheme;
         document.documentElement.dataset.visualTheme = visualThemeId();
+        document.documentElement.dataset.artSet = nextArt;
       } catch (e) {}
       if (typeof applyAllAtmosphere === 'function') applyAllAtmosphere(virtualNow());
       if (typeof renderThemePicker === 'function') renderThemePicker();
+      if (prevArt !== nextArt && typeof tiles !== 'undefined' && tiles && tiles.length && typeof applyVariant === 'function') {
+        tiles.forEach(function (tile) {
+          const p = tile.el.dataset.period;
+          if (p) applyVariant(tile, p);
+        });
+      }
       return currentTheme;
     }
     function applyResolvedTheme() {
@@ -3799,7 +3866,7 @@
     syncFsChrome();
 
     // Expose a tiny hook so future settings can swap room art without rewriting clocks/themes.
-    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, CHAR_NAMES, locChar, displayName, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
+    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, CHAR_NAMES, locChar, displayName, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, artFolder, sceneKey, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
   })();
   </script>
 </body>

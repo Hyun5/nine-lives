@@ -2,16 +2,16 @@
 
 An interactive page of nine study rooms, each in a different city, with a live digital clock in that city's local time. Neon is used only as a visual style for the clock text and glow — it is not part of the project name.
 
-v1 is the **home** setting only, using the SuperAlex 9-woman room art from `/workspace/study-video/grid9/`. The current mood is **Rainy Window** (비 오는 창가). Open `index.html` next to `music.m4a`. Room art is inlined, so the page works without a server; music, live weather, and IP city lookup need those sibling/network files.
+v1 is the **home** setting only, using the SuperAlex 9-woman room art from `/workspace/study-video/grid9/`. The current mood is **Rainy Window** (비 오는 창가). Open `index.html` next to `music.m4a` and the `assets/` folders. Stills and scene loops are separate files under `assets/rooms/` (base set) and `assets/rooms_rainy/` (Rainy Window). Music, live weather, and IP city lookup need those sibling/network files.
 
 ## Files
 
 | Path | What it is |
 |---|---|
-| `index.html` | The packed page, with room stills and idle clips inlined. Keep this filename for Netlify. |
+| `index.html` | The page (no media inlined). Keep this filename for Netlify. |
 | `index.template.html` | The page source, with media loaded from `assets/rooms/`. |
 | `music.m4a` | 1-hour original chillhop soundtrack (AAC ~64 kb/s). Served next to `index.html`, not inlined. Loaded only when Music is pressed. |
-| `assets/rooms/` | Compressed sources used by the packer: `r0N_idle.mp4` plus `r0N_{desk,dark,off,bed}.jpg`. |
+| `assets/rooms/` | Base stills and loops: `r0N_{desk,dark,off,bed}.{jpg,mp4}`. |
 | `build.py` | Rebuilds `index.html` from the template and `assets/rooms/`. Run `python3 build.py`. Does not pack `music.m4a`. |
 | `previews/` | Headless screenshots, including 1280×800 Case A/B visitor layouts. |
 | `manifest.webmanifest` | Web app manifest for Add to Home Screen / standalone display. |
@@ -102,10 +102,12 @@ The still or clip shown in a room follows **that city's local hour**:
 
 | Local time | Period | Visual |
 |---|---|---|
-| 07:00–16:59 | day | Looping idle clip of the character studying at the desk. If motion is reduced or the clip cannot play, the `desk` still is used. |
-| 17:00–21:59 | evening | `dark` still (lamp-lit, quieter room). |
-| 22:00–23:59 | late | `off` still (lights off). |
-| 00:00–06:59 | night | `bed` still (asleep). |
+| 07:00–16:59 | day | Desk loop (study). Still fallback if the clip cannot play. Plays even with reduced motion. |
+| 17:00–21:59 | evening | Lamp-lit dark loop. Still fallback if the clip cannot play. Plays even with reduced motion. |
+| 22:00–23:59 | late | Lights-off loop. Still fallback if the clip cannot play. Plays even with reduced motion. |
+| 00:00–06:59 | night | Bed loop (breathing). Still fallback if the clip cannot play. Plays even with reduced motion. |
+
+Rainy Window uses `assets/rooms_rainy/`. Every other theme uses the base set in `assets/rooms/`. Videos are loaded lazily (`preload="none"`), one per visible cell, and are never inlined. Only card-flip/layout animations and twinkling stars respect `prefers-reduced-motion`.
 
 These rules live in `periodForHour` in the page script. Tap a room to enlarge it; the panel shows the city, character, date, time zone, and a short weather-mood line for the active theme.
 
