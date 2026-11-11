@@ -176,17 +176,10 @@
       border-radius: var(--tile-radius);
       border: 1px solid rgba(180, 160, 255, 0.18);
       background: #120e18;
-      cursor: pointer;
       text-align: left;
       color: inherit;
       min-height: 0;
       box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
-      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
-    }
-    .tile:hover, .tile:focus-visible {
-      border-color: rgba(93, 255, 233, 0.65);
-      box-shadow: 0 0 0 1px rgba(93, 255, 233, 0.25), 0 0 28px rgba(93, 255, 233, 0.18);
-      outline: none;
     }
     .tile .vis, .tile video, .tile img.still {
       position: absolute;
@@ -416,71 +409,6 @@
       #fsLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
     }
 
-    /* Focused room */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 40;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      padding: 24px;
-      background: rgba(4, 3, 8, 0.72);
-      backdrop-filter: blur(8px);
-    }
-    .overlay.open { display: flex; }
-    .focus-card {
-      position: relative;
-      width: min(1040px, 100%);
-      height: min(680px, 100%);
-      display: grid;
-      grid-template-rows: 1fr auto;
-      border-radius: 18px;
-      overflow: hidden;
-      border: 1px solid rgba(93, 255, 233, 0.35);
-      box-shadow: 0 0 0 1px rgba(255, 79, 216, 0.12), 0 30px 80px rgba(0, 0, 0, 0.65), 0 0 60px rgba(93, 255, 233, 0.1);
-      background: #0a0810;
-    }
-    .focus-vis { position: relative; min-height: 0; background: #120e18; }
-    .focus-vis video, .focus-vis img, .focus-vis .shade, .focus-vis .rain-layer, .focus-vis .wet-glass, .focus-vis .fx {
-      position: absolute; inset: 0; width: 100%; height: 100%;
-    }
-    .focus-vis video, .focus-vis img { object-fit: cover; object-position: center 40%; }
-    .focus-vis video { opacity: 0; transition: opacity 0.45s ease; }
-    .focus-vis video.on { opacity: 1; }
-    .focus-panel {
-      display: flex;
-      justify-content: space-between;
-      gap: 20px;
-      align-items: flex-end;
-      padding: 16px 20px 18px;
-      background: linear-gradient(180deg, #100c18, #0a0812);
-      border-top: 1px solid var(--line);
-    }
-    .focus-panel .city-lg {
-      font-size: 1.15rem;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-    }
-    .focus-panel .sub { margin-top: 4px; color: var(--muted); font-size: 0.88rem; }
-    .focus-panel .mood { margin-top: 8px; color: #d8e7ff; font-size: 0.92rem; max-width: 46ch; }
-    .focus-panel .neon { font-size: clamp(1.6rem, 4vw, 2.4rem); }
-    .close-btn {
-      position: absolute;
-      top: 12px; right: 12px;
-      z-index: 5;
-      width: 36px; height: 36px;
-      border-radius: 50%;
-      border: 1px solid var(--line);
-      background: rgba(8, 6, 14, 0.7);
-      color: var(--ink);
-      font-size: 1.2rem;
-      line-height: 1;
-    }
-    .close-btn:hover { border-color: var(--cyan); color: var(--cyan); }
-
-    .focus-vis .vis { position: absolute; inset: 0; }
-
     @media (max-width: 720px) {
       .theme-btn .label-extra { display: none !important; }
       #soundLabel, #musicLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
@@ -539,9 +467,6 @@
       .wx { font-size: 0.68rem; }
       .wx-icon { width: 13px; height: 13px; }
       .wx-label { display: none; }
-      .focus-card { height: 100%; }
-      .focus-panel { padding: 8px 12px; }
-      .focus-panel .mood { display: none; }
       footer { font-size: 0.62rem; }
     }
 
@@ -831,8 +756,7 @@
     .page-sky[data-wx="cloudy"] .sky-wx { opacity: 1; background: linear-gradient(180deg, rgba(50, 54, 70, 0.4), rgba(10, 10, 16, 0.25)); }
     .page-sky[data-wx="clear"][data-tod="day"] .sky-wx { opacity: 1; background: radial-gradient(800px 500px at 80% 0%, rgba(255, 220, 140, 0.18), transparent 50%); }
     .page-sky[data-wx="clear"][data-tod="night"] .sky-wx { opacity: 1; background: radial-gradient(600px 400px at 75% 10%, rgba(180, 200, 255, 0.16), transparent 55%); }
-    header.chrome, main, footer, .menu-btn, .settings-panel, .overlay { position: relative; z-index: 5; }
-    .overlay { z-index: 40; }
+    header.chrome, main, footer, .menu-btn, .settings-panel { position: relative; z-index: 5; }
     .menu-btn { z-index: 21; }
     .settings-panel { z-index: 20; }
 
@@ -987,7 +911,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .rain-layer span, .tile video, .tile img.still, .focus-vis video, .fx-rain span, .fx-snow span, .fx-stars span { animation: none; transition: none; }
+      .rain-layer span, .tile video, .tile img.still, .fx-rain span, .fx-snow span, .fx-stars span { animation: none; transition: none; }
     }
   </style>
 </head>
@@ -1055,23 +979,6 @@
     <p>© 2026 SuperAlex <a class="yt-btn" id="ytLink" href="https://www.youtube.com/@SuperAlex5" target="_blank" rel="noopener" aria-label="SuperAlex on YouTube" title="SuperAlex on YouTube"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="1.5" y="4.5" width="21" height="15" rx="4" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M10 9.2v5.6l5.2-2.8z" fill="currentColor"/></svg></a> <span id="footerRights">All rights reserved.</span> · <a class="weather-credit" href="https://open-meteo.com/" target="_blank" rel="noopener">Weather data by Open-Meteo.com</a></p>
   </footer>
 
-  <div class="overlay" id="overlay" hidden>
-    <div class="focus-card" role="dialog" aria-modal="true" aria-labelledby="focusCity" id="focusCard">
-      <button type="button" class="close-btn" id="closeBtn" aria-label="Close">×</button>
-      <div class="focus-vis" id="focusVis"></div>
-      <div class="focus-panel">
-        <div>
-          <div class="city-lg" id="focusCity"></div>
-          <div class="sub" id="focusSub"></div>
-          <p class="mood" id="focusMood"></p>
-        </div>
-        <div>
-          <div class="neon" id="focusClock"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <script>
   (function () {
     const SETTINGS = {
@@ -1111,144 +1018,80 @@
         title: 'Nine Lives', dateLocale: 'en-US',
         settings: 'Settings', settingsBtn: 'Settings', english: 'English', tempUnit: 'Temperature', tempC: 'Celsius', tempF: 'Fahrenheit',
         rainSound: 'Rain sound', rainOn: 'Rain on', musicSound: 'Music', musicOn: 'Music on', ambience: 'Ambience', ambienceOn: 'Ambience on', comingSoon: 'Coming soon', themeAuto: 'This week\'s theme (auto)', themeFixed: 'Fixed', themeTimeLinked: 'Time-linked', themeNowShowing: 'Now showing: {name}', themeNowShowingSoon: 'Now showing: {shown} ({upcoming} coming soon)', themeThisWeek: 'This week', themeYourPick: 'your pick',
-        close: 'Close', themes: 'Themes',
+        themes: 'Themes',
         roomsLabel: 'Nine rooms, each in a different city',
         inCity: '{name} in {city}', footerRights: 'All rights reserved.', yourCity: 'Your City', yourTime: 'Your time', ytLabel: 'SuperAlex on YouTube', fsBtn: 'Full screen', fsExit: 'Exit full screen', fsHint: 'Tap for full screen', a2hsHint: 'Add to Home Screen for full screen',
         theme: { rainy: 'Rainy Window', moonlight: 'Moonlight Window', christmas: 'Christmas', snow: 'Snow', fireplace: 'Fireplace', library: 'Library', cafe: 'Cafe', classroom: 'Classroom' },
-        moods: {
-          rainy: {
-            day: 'Rain taps the window. A calm day to stay in and study.',
-            evening: 'Evening rain. The lamp keeps the desk warm.',
-            late: 'Rain in the dark. The lights are off.',
-            night: 'Rain through the night. The room is asleep.'
-          }
-        },
         wx: { clear: 'Clear', cloudy: 'Cloudy', fog: 'Fog', drizzle: 'Drizzle', rain: 'Rain', snow: 'Snow', thunder: 'Thunder' }
       },
       ko: {
         title: '나인 라이브스', dateLocale: 'ko-KR',
         settings: '설정', settingsBtn: '설정', english: '영어', tempUnit: '온도', tempC: '섭씨', tempF: '화씨',
         rainSound: '빗소리', rainOn: '빗소리 켜짐', musicSound: '음악', musicOn: '음악 켜짐', ambience: '배경음', ambienceOn: '배경음 켜짐', comingSoon: '곧 공개', themeAuto: '이번 주 테마 (자동)', themeFixed: '고정', themeTimeLinked: '시간에 맞춤', themeNowShowing: '지금 보이는 테마: {name}', themeNowShowingSoon: '지금 보이는 테마: {shown} ({upcoming} 곧 공개)', themeThisWeek: '이번 주', themeYourPick: '직접 선택',
-        close: '닫기', themes: '테마',
+        themes: '테마',
         roomsLabel: '서로 다른 도시에 있는 아홉 개의 방',
         inCity: '{city}의 {name}', footerRights: '모든 권리 보유.', yourCity: '당신의 도시', yourTime: '당신의 시간', ytLabel: 'YouTube의 SuperAlex', fsBtn: '전체 화면', fsExit: '전체 화면 종료', fsHint: '탭하면 전체 화면', a2hsHint: '전체 화면은 홈 화면에 추가하세요',
         theme: { rainy: '비 오는 창가', moonlight: '달빛 창가', christmas: '크리스마스', snow: '눈', fireplace: '화롯불', library: '도서관', cafe: '카페', classroom: '교실' },
-        moods: {
-          rainy: {
-            day: '창가에 비가 내립니다. 차분히 머물며 공부하기 좋은 낮이에요.',
-            evening: '저녁비가 내립니다. 스탠드가 책상을 따뜻하게 비춰요.',
-            late: '어두운 빗소리. 불은 꺼져 있어요.',
-            night: '밤새 비가 내립니다. 방은 잠들어 있어요.'
-          }
-        },
         wx: { clear: '맑음', cloudy: '흐림', fog: '안개', drizzle: '이슬비', rain: '비', snow: '눈', thunder: '천둥' }
       },
       ja: {
         title: 'ナインライブス', dateLocale: 'ja-JP',
         settings: '設定', settingsBtn: '設定', english: '英語', tempUnit: '気温', tempC: '摂氏', tempF: '華氏',
         rainSound: '雨の音', rainOn: '雨の音オン', musicSound: '音楽', musicOn: '音楽オン', ambience: '環境音', ambienceOn: '環境音オン', comingSoon: '近日公開', themeAuto: '今週のテーマ（自動）', themeFixed: '固定', themeTimeLinked: '時間連動', themeNowShowing: '表示中: {name}', themeNowShowingSoon: '表示中: {shown}（{upcoming} 近日公開）', themeThisWeek: '今週', themeYourPick: 'あなたの選択',
-        close: '閉じる', themes: 'テーマ',
+        themes: 'テーマ',
         roomsLabel: 'それぞれ違う街にある、9つの部屋',
         inCity: '{city}の{name}', footerRights: '全著作権所有.', yourCity: 'あなたの街', yourTime: 'あなたの時間', ytLabel: 'YouTubeのSuperAlex', fsBtn: '全画面', fsExit: '全画面を終了', fsHint: 'タップで全画面', a2hsHint: '全画面表示はホーム画面に追加してください',
         theme: { rainy: '雨の窓', moonlight: '月明かりの窓', christmas: 'クリスマス', snow: '雪', fireplace: '暖炉', library: '図書館', cafe: 'カフェ', classroom: '教室' },
-        moods: {
-          rainy: {
-            day: '窓に雨が当たっています。部屋で静かに勉強するのにいい昼です。',
-            evening: '夕方の雨。ランプが机を暖かく照らしています。',
-            late: '暗い雨。照明は消えています。',
-            night: '夜の雨。部屋は眠っています。'
-          }
-        },
         wx: { clear: '晴れ', cloudy: '曇り', fog: '霧', drizzle: '霧雨', rain: '雨', snow: '雪', thunder: '雷' }
       },
       'zh-Hans': {
         title: '九命', dateLocale: 'zh-CN',
         settings: '设置', settingsBtn: '设置', english: '英语', tempUnit: '温度', tempC: '摄氏', tempF: '华氏',
         rainSound: '雨声', rainOn: '雨声开', musicSound: '音乐', musicOn: '音乐开', ambience: '环境声', ambienceOn: '环境声开', comingSoon: '即将推出', themeAuto: '本周主题（自动）', themeFixed: '固定', themeTimeLinked: '随时间变化', themeNowShowing: '当前显示: {name}', themeNowShowingSoon: '当前显示: {shown}（{upcoming}即将推出）', themeThisWeek: '本周', themeYourPick: '你的选择',
-        close: '关闭', themes: '主题',
+        themes: '主题',
         roomsLabel: '九个房间，各自在一座不同的城市',
         inCity: '{city}的{name}', footerRights: '版权所有。', yourCity: '你的城市', yourTime: '你的时间', ytLabel: 'YouTube 上的 SuperAlex', fsBtn: '全屏', fsExit: '退出全屏', fsHint: '点按即可全屏', a2hsHint: '添加到主屏幕即可全屏显示',
         theme: { rainy: '雨窗', moonlight: '月光窗', christmas: '圣诞节', snow: '雪', fireplace: '壁炉', library: '图书馆', cafe: '咖啡馆', classroom: '教室' },
-        moods: {
-          rainy: {
-            day: '雨点打在窗上。适合待在屋里安静学习的白天。',
-            evening: '傍晚的雨。台灯让书桌暖了起来。',
-            late: '暗处的雨。灯已经关了。',
-            night: '雨下了一夜。房间里的人睡着了。'
-          }
-        },
         wx: { clear: '晴', cloudy: '多云', fog: '雾', drizzle: '毛毛雨', rain: '雨', snow: '雪', thunder: '雷' }
       },
       es: {
         title: 'Nueve Vidas', dateLocale: 'es-ES',
         settings: 'Ajustes', settingsBtn: 'Ajustes', english: 'Inglés', tempUnit: 'Temperatura', tempC: 'Celsius', tempF: 'Fahrenheit',
         rainSound: 'Sonido de lluvia', rainOn: 'Lluvia activada', musicSound: 'Música', musicOn: 'Música activada', ambience: 'Ambiente', ambienceOn: 'Ambiente activado', comingSoon: 'Próximamente', themeAuto: 'Tema de esta semana (auto)', themeFixed: 'Fijo', themeTimeLinked: 'Según la hora', themeNowShowing: 'Ahora se muestra: {name}', themeNowShowingSoon: 'Ahora se muestra: {shown} ({upcoming} próximamente)', themeThisWeek: 'Esta semana', themeYourPick: 'tu elección',
-        close: 'Cerrar', themes: 'Temas',
+        themes: 'Temas',
         roomsLabel: 'Nueve habitaciones, cada una en una ciudad distinta',
         inCity: '{name} en {city}', footerRights: 'Todos los derechos reservados.', yourCity: 'Tu ciudad', yourTime: 'Tu hora', ytLabel: 'SuperAlex en YouTube', fsBtn: 'Pantalla completa', fsExit: 'Salir de pantalla completa', fsHint: 'Toca para pantalla completa', a2hsHint: 'Añade a la pantalla de inicio para ver a pantalla completa',
         theme: { rainy: 'Ventana lluviosa', moonlight: 'Ventana de luna', christmas: 'Navidad', snow: 'Nieve', fireplace: 'Chimenea', library: 'Biblioteca', cafe: 'Café', classroom: 'Aula' },
-        moods: {
-          rainy: {
-            day: 'La lluvia golpea la ventana. Un día tranquilo para quedarse a estudiar.',
-            evening: 'Lluvia de la tarde. La lámpara mantiene cálido el escritorio.',
-            late: 'Lluvia en la oscuridad. Las luces están apagadas.',
-            night: 'Lluvia durante la noche. La habitación duerme.'
-          }
-        },
         wx: { clear: 'Despejado', cloudy: 'Nublado', fog: 'Niebla', drizzle: 'Llovizna', rain: 'Lluvia', snow: 'Nieve', thunder: 'Trueno' }
       },
       fr: {
         title: 'Neuf Vies', dateLocale: 'fr-FR',
         settings: 'Paramètres', settingsBtn: 'Paramètres', english: 'Anglais', tempUnit: 'Température', tempC: 'Celsius', tempF: 'Fahrenheit',
         rainSound: 'Bruit de pluie', rainOn: 'Pluie activée', musicSound: 'Musique', musicOn: 'Musique activée', ambience: 'Ambiance', ambienceOn: 'Ambiance activée', comingSoon: 'Bientôt', themeAuto: 'Thème de cette semaine (auto)', themeFixed: 'Fixe', themeTimeLinked: 'Selon l’heure', themeNowShowing: 'Affichage : {name}', themeNowShowingSoon: 'Affichage : {shown} ({upcoming} bientôt)', themeThisWeek: 'Cette semaine', themeYourPick: 'votre choix',
-        close: 'Fermer', themes: 'Thèmes',
+        themes: 'Thèmes',
         roomsLabel: 'Neuf chambres, chacune dans une ville différente',
         inCity: '{name} à {city}', footerRights: 'Tous droits réservés.', yourCity: 'Votre ville', yourTime: 'Votre heure', ytLabel: 'SuperAlex sur YouTube', fsBtn: 'Plein écran', fsExit: 'Quitter le plein écran', fsHint: 'Touchez pour le plein écran', a2hsHint: 'Ajoutez à l’écran d’accueil pour le plein écran',
         theme: { rainy: 'Fenêtre sous la pluie', moonlight: 'Fenêtre au clair de lune', christmas: 'Noël', snow: 'Neige', fireplace: 'Cheminée', library: 'Bibliothèque', cafe: 'Café', classroom: 'Salle de classe' },
-        moods: {
-          rainy: {
-            day: 'La pluie tape contre la fenêtre. Une journée calme pour rester étudier.',
-            evening: 'Pluie du soir. La lampe réchauffe le bureau.',
-            late: 'Pluie dans le noir. Les lumières sont éteintes.',
-            night: 'Pluie toute la nuit. La chambre dort.'
-          }
-        },
         wx: { clear: 'Clair', cloudy: 'Nuageux', fog: 'Brouillard', drizzle: 'Bruine', rain: 'Pluie', snow: 'Neige', thunder: 'Orage' }
       },
       de: {
         title: 'Neun Leben', dateLocale: 'de-DE',
         settings: 'Einstellungen', settingsBtn: 'Einstellungen', english: 'Englisch', tempUnit: 'Temperatur', tempC: 'Celsius', tempF: 'Fahrenheit',
         rainSound: 'Regenklang', rainOn: 'Regen an', musicSound: 'Musik', musicOn: 'Musik an', ambience: 'Atmosphäre', ambienceOn: 'Atmosphäre an', comingSoon: 'Demnächst', themeAuto: 'Thema dieser Woche (auto)', themeFixed: 'Fest', themeTimeLinked: 'Zeitabhängig', themeNowShowing: 'Gerade zu sehen: {name}', themeNowShowingSoon: 'Gerade zu sehen: {shown} ({upcoming} demnächst)', themeThisWeek: 'Diese Woche', themeYourPick: 'deine Auswahl',
-        close: 'Schließen', themes: 'Themen',
+        themes: 'Themen',
         roomsLabel: 'Neun Zimmer, jedes in einer anderen Stadt',
         inCity: '{name} in {city}', footerRights: 'Alle Rechte vorbehalten.', yourCity: 'Deine Stadt', yourTime: 'Deine Zeit', ytLabel: 'SuperAlex auf YouTube', fsBtn: 'Vollbild', fsExit: 'Vollbild beenden', fsHint: 'Tippen für Vollbild', a2hsHint: 'Für Vollbild zum Home-Bildschirm hinzufügen',
         theme: { rainy: 'Regenfenster', moonlight: 'Mondscheinfenster', christmas: 'Weihnachten', snow: 'Schnee', fireplace: 'Kamin', library: 'Bibliothek', cafe: 'Café', classroom: 'Klassenzimmer' },
-        moods: {
-          rainy: {
-            day: 'Regen klopft ans Fenster. Ein ruhiger Tag, um drinnen zu lernen.',
-            evening: 'Abendregen. Die Lampe hält den Schreibtisch warm.',
-            late: 'Regen im Dunkeln. Das Licht ist aus.',
-            night: 'Regen durch die Nacht. Das Zimmer schläft.'
-          }
-        },
         wx: { clear: 'Klar', cloudy: 'Bewölkt', fog: 'Nebel', drizzle: 'Niesel', rain: 'Regen', snow: 'Schnee', thunder: 'Gewitter' }
       },
       pt: {
         title: 'Nove Vidas', dateLocale: 'pt-BR',
         settings: 'Configurações', settingsBtn: 'Configurações', english: 'Inglês', tempUnit: 'Temperatura', tempC: 'Celsius', tempF: 'Fahrenheit',
         rainSound: 'Som de chuva', rainOn: 'Chuva ligada', musicSound: 'Música', musicOn: 'Música ligada', ambience: 'Ambiente', ambienceOn: 'Ambiente ligado', comingSoon: 'Em breve', themeAuto: 'Tema desta semana (auto)', themeFixed: 'Fixo', themeTimeLinked: 'Conforme o horário', themeNowShowing: 'Mostrando agora: {name}', themeNowShowingSoon: 'Mostrando agora: {shown} ({upcoming} em breve)', themeThisWeek: 'Esta semana', themeYourPick: 'sua escolha',
-        close: 'Fechar', themes: 'Temas',
+        themes: 'Temas',
         roomsLabel: 'Nove quartos, cada um em uma cidade diferente',
         inCity: '{name} em {city}', footerRights: 'Todos os direitos reservados.', yourCity: 'Sua cidade', yourTime: 'Seu horário', ytLabel: 'SuperAlex no YouTube', fsBtn: 'Tela cheia', fsExit: 'Sair da tela cheia', fsHint: 'Toque para tela cheia', a2hsHint: 'Adicione à Tela de Início para tela cheia',
         theme: { rainy: 'Janela na chuva', moonlight: 'Janela ao luar', christmas: 'Natal', snow: 'Neve', fireplace: 'Lareira', library: 'Biblioteca', cafe: 'Café', classroom: 'Sala de aula' },
-        moods: {
-          rainy: {
-            day: 'A chuva bate na janela. Um dia calmo para ficar e estudar.',
-            evening: 'Chuva no início da noite. A luminária deixa a mesa aconchegante.',
-            late: 'Chuva no escuro. As luzes estão apagadas.',
-            night: 'Chuva pela noite. O quarto dorme.'
-          }
-        },
         wx: { clear: 'Limpo', cloudy: 'Nublado', fog: 'Nevoeiro', drizzle: 'Garoa', rain: 'Chuva', snow: 'Neve', thunder: 'Trovão' }
       }
     };
@@ -1989,15 +1832,6 @@
       return 'night';
     }
 
-    const MOODS = {
-      rainy: {
-        day: 'Rain taps the window. A calm day to stay in and study.',
-        evening: 'Evening rain. The lamp keeps the desk warm.',
-        late: 'Rain in the dark. The lights are off.',
-        night: 'Rain through the night. The room is asleep.'
-      }
-    };
-
     function neonHTML(p) {
       if (p.use12h) {
         return String(p.hour12) + ':' + p.minute + '<span class="ampm">' + p.ampm + '</span>';
@@ -2201,11 +2035,6 @@
         });
         flipToOrder(sorted, animate && !reduceMotion);
         tiles.forEach(function (tile) { tile.el.classList.remove('visitor-fade'); });
-        if (focused && focused.visitor) {
-          const you = sorted[CENTER_SLOT];
-          focused = you;
-          if (focusTile) focusTile.room = you;
-        }
         tick();
         refreshWeather();
       };
@@ -2215,25 +2044,23 @@
     }
 
     currentLayout.forEach(function (room) {
-      const btn = document.createElement('button');
-      btn.type = 'button';
-      btn.className = 'tile';
+      const el = document.createElement('div');
+      el.className = 'tile';
       const vis = makeVisual(room, 14);
       const meta = document.createElement('div');
       meta.className = 'meta';
       meta.innerHTML =
         '<div class="meta-row"><div class="who"><div class="city"></div><span class="name"></span><span class="tag"></span></div>' +
         '<div class="clock-col"><div class="neon" aria-live="off"></div><div class="wx" hidden></div></div></div>';
-      btn.appendChild(vis.wrap);
-      btn.appendChild(meta);
+      el.appendChild(vis.wrap);
+      el.appendChild(meta);
       const bubble = document.createElement('div');
       bubble.className = 'bubble';
       bubble.setAttribute('aria-hidden', 'true');
       bubble.innerHTML = '<span class="bubble-text"></span>';
-      if (!room.visitor) btn.appendChild(bubble);
-      const tile = { room: room, el: btn, img: vis.img, vid: vis.vid, fx: vis.fx, clock: meta.querySelector('.neon'), wx: meta.querySelector('.wx'), bubble: room.visitor ? null : bubble, bubbleText: room.visitor ? null : bubble.querySelector('.bubble-text') };
-      btn.addEventListener('click', function () { openFocus(tile.room); });
-      grid.appendChild(btn);
+      if (!room.visitor) el.appendChild(bubble);
+      const tile = { room: room, el: el, img: vis.img, vid: vis.vid, fx: vis.fx, clock: meta.querySelector('.neon'), wx: meta.querySelector('.wx'), bubble: room.visitor ? null : bubble, bubbleText: room.visitor ? null : bubble.querySelector('.bubble-text') };
+      grid.appendChild(el);
       tiles.push(tile);
       bindTile(tile, room);
     });
@@ -2275,63 +2102,11 @@
         const nextTheme = resolveActiveTheme();
         if (nextTheme !== currentTheme) setTheme(nextTheme);
       }
-      if (focused) updateFocus(now);
     }
 
-    let focused = null;
-    const overlay = document.getElementById('overlay');
-    const focusVis = document.getElementById('focusVis');
-    const focusClock = document.getElementById('focusClock');
-    let focusTile = null;
-
-    function openFocus(room) {
-      focused = room;
-      overlay.hidden = false;
-      overlay.classList.add('open');
-      focusVis.innerHTML = '';
-      const vis = makeVisual(room, 28);
-      focusVis.appendChild(vis.wrap);
-      focusTile = { room, el: focusVis, img: vis.img, vid: vis.vid, fx: vis.fx };
-      applyAtmosphereToVis(vis.wrap, room, virtualNow());
-      document.getElementById('focusCity').textContent = displayCity(room);
-      updateFocus(virtualNow());
-      document.getElementById('closeBtn').focus();
-    }
-
-    function updateFocus(now) {
-      if (!focused || !focusTile) return;
-      const p = cityParts(roomZone(focused), now);
-      const period = periodForHour(p.hour24);
-      applyVariant(focusTile, period);
-      focusClock.innerHTML = neonHTML(p);
-      document.getElementById('focusCity').textContent = focused.city;
-      const dateStr = p.weekday + ', ' + p.month + ' ' + p.day + ', ' + p.year;
-      const zone = (roomZone(focused) || '').replace(/_/g, ' ');
-      const bits = [displayName(focused)];
-      if (focused.visitor) bits.push(t().yourTime);
-      else if (focused.region) bits.push(focused.region);
-      bits.push(dateStr);
-      if (zone) bits.push(zone);
-      document.getElementById('focusSub').textContent = bits.join(' · ');
-      const pack = t();
-      const moods = (pack.moods && pack.moods[currentTheme]) || pack.moods.rainy || (MOODS.rainy);
-      document.getElementById('focusMood').textContent = moods[period];
-    }
-
-    function closeFocus() {
-      overlay.classList.remove('open');
-      overlay.hidden = true;
-      if (focusTile && focusTile.vid) focusTile.vid.pause();
-      focusTile = null;
-      focused = null;
-    }
-
-    document.getElementById('closeBtn').addEventListener('click', closeFocus);
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeFocus(); });
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        if (overlay.classList.contains('open')) closeFocus();
-        else if (settingsPanel && !settingsPanel.hidden) closeSettings(true);
+        if (settingsPanel && !settingsPanel.hidden) closeSettings(true);
         else closeThemeMenu();
         return;
       }
@@ -2721,10 +2496,6 @@
       tiles.forEach(function (tile) {
         applyAtmosphereToVis(tile.el.querySelector('.vis') || tile.fx && tile.fx.parentElement, tile.room, tnow);
       });
-      if (focusTile && focusTile.el) {
-        const vis = focusTile.el.querySelector && focusTile.el.querySelector('.vis') || focusTile.el;
-        applyAtmosphereToVis(vis, focusTile.room || focused, tnow);
-      }
       applyPageSky(tnow);
     }
 
@@ -3674,7 +3445,6 @@
       if (extra) extra.textContent = names.extra;
       if (themeMenu) themeMenu.setAttribute('aria-label', s.themes);
       document.getElementById('grid').setAttribute('aria-label', s.roomsLabel);
-      document.getElementById('closeBtn').setAttribute('aria-label', s.close);
       document.getElementById('footerRights').textContent = s.footerRights;
       const yt = document.getElementById('ytLink');
       if (yt) { yt.setAttribute('aria-label', s.ytLabel || 'SuperAlex on YouTube'); yt.setAttribute('title', s.ytLabel || 'SuperAlex on YouTube'); }
@@ -3690,7 +3460,6 @@
       paintAllWeather();
       renderThemeMenu();
       renderThemePicker();
-      if (focused) updateFocus(virtualNow());
     }
 
     englishToggle.checked = readForceEnglish();
