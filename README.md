@@ -1,22 +1,23 @@
 # Nine Lives / 나인 라이브스
 
-An interactive page of nine study rooms, each in a different city, with a live digital clock (12-hour AM/PM) in that city's local time. Neon is used only as a visual style for the clock text and glow — it is not part of the project name.
+An interactive page of nine study rooms, each in a different city, with a live digital clock in that city's local time. Neon is used only as a visual style for the clock text and glow — it is not part of the project name.
 
-v1 is the **home** setting only, using the SuperAlex 9-woman room art from `/workspace/study-video/grid9/`. The current mood is **Rainy Window** (비 오는 창가). Double-click `index.html` to open it — no server and no internet connection are required.
+v1 is the **home** setting only, using the SuperAlex 9-woman room art from `/workspace/study-video/grid9/`. The current mood is **Rainy Window** (비 오는 창가). Open `index.html` next to `music.m4a`. Room art is inlined, so the page works without a server; music, live weather, and IP city lookup need those sibling/network files.
 
 ## Files
 
 | Path | What it is |
 |---|---|
-| `index.html` | The deliverable. One self-contained file with room stills and idle clips inlined. Keep this filename for Netlify. |
+| `index.html` | The packed page, with room stills and idle clips inlined. Keep this filename for Netlify. |
 | `index.template.html` | The page source, with media loaded from `assets/rooms/`. |
+| `music.m4a` | 1-hour original chillhop soundtrack (AAC ~64 kb/s). Served next to `index.html`, not inlined. Loaded only when Music is pressed. |
 | `assets/rooms/` | Compressed sources used by the packer: `r0N_idle.mp4` plus `r0N_{desk,dark,off,bed}.jpg`. |
-| `build.py` | Rebuilds `index.html` from the template and `assets/rooms/`. Run `python3 build.py`. |
+| `build.py` | Rebuilds `index.html` from the template and `assets/rooms/`. Run `python3 build.py`. Does not pack `music.m4a`. |
 | `previews/` | Headless screenshots, including 1280×800 Case A/B visitor layouts. |
 
 ## Language
 
-`DEFAULT_LANG` is `'en'`. The static HTML (before JavaScript runs) is English, with `lang="en"`, the heading **Nine Lives**, and English chrome (Settings, Rain sound, and so on).
+`DEFAULT_LANG` is `'en'`. The static HTML (before JavaScript runs) is English, with `lang="en"`, the heading **Nine Lives**, and English chrome (Settings, Music, Ambience, and so on).
 
 After JS runs, the language is chosen in this order:
 
@@ -37,7 +38,7 @@ The empty `settings-slot` above the language row is the extension point for late
 
 ## City-to-room mapping
 
-The eight outer cells belong to Mia, Sora, Hana, Yuki, Nao, Lin, Mio, and Coco, each with a fixed city and IANA zone. Their clocks use that zone, 12-hour AM/PM time, and a neon numeral glow.
+The eight outer cells belong to Mia, Sora, Hana, Yuki, Nao, Lin, Mio, and Coco, each with a fixed city and IANA zone. Their clocks use that zone (DST-correct, including a swapped-in backup) and a neon numeral glow. Times are formatted with the visitor's locale hour cycle: 12-hour AM/PM when the visitor's locale is en-US, 24-hour elsewhere per Intl defaults. If the English switch is on, weekday and month names are English (`en` plus the visitor's region) but the hour cycle still follows the visitor's locale. The center YOU clock always uses the browser time zone (`Intl.DateTimeFormat().resolvedOptions().timeZone`), even if an IP lookup returns a different zone.
 
 | Default slot | Room art | Character | City | Time zone |
 |---|---|---|---|---|
@@ -76,6 +77,8 @@ The grid is painted immediately from the browser time zone, then updated with a 
 1. If the URL has `?city=` (for testing), that value is treated as the IP city.
 2. Otherwise the page asks `https://ipapi.co/json/`, then `https://ipwho.is/` as a fallback, each with a ~3 second timeout. There is no Geolocation permission prompt.
 3. If the lookup fails (offline, `file://`, blocked), the city is derived from the browser IANA zone (for example `Asia/Tokyo` → Tokyo, `America/Detroit` → Detroit), or the localized label **Your City** if there is no city in the zone.
+
+`?hour=` (0–23) is a test override: it shifts the virtual clock so the visitor's local hour is that value, and every other city stays in its real offset (DST-correct). Use it with `?city=` to preview a time of day.
 
 Matching is case-, accent-, and alias-insensitive (`Los Angeles` = `LA`, `New York City` = `New York`, `Sao Paulo` = `São Paulo`). A shared time zone is not enough: Detroit is not New York, and Seoul is not Tokyo.
 
@@ -140,6 +143,21 @@ To add a setting later:
 
 Idle clips were re-encoded from `grid9/clips/r0N_idle.mp4` to 640×360, 12 fps, H.264 CRF 28. Stills were resized from `grid9/src/r0N_{desk,dark,off,bed}.jpg` to 640×360 JPEG quality 80. After replacing files in `assets/rooms/`, run `python3 build.py`.
 
-## Rain sound
+## Music
 
-The rain toggle is synthesized with the Web Audio API (filtered noise, no audio files). It starts only after a click, as browsers require.
+`music.m4a` is a 64 kb/s AAC encode of the original 60-minute SuperAlex chillhop track (`music_chillhop_v6_60min.m4a`, 01:00:00, composed and synthesized in Python for the 9-woman series). It is not inlined. The file is loaded (`preload="none"`) only when the visitor presses **Music**. It loops, at a moderate volume. While music is playing, weather ambience is ducked slightly.
+
+## Weather ambience
+
+Ambience is synthesized with the Web Audio API (no audio files): drizzle and rain, heavier rain with occasional thunder, snow hush and wind, cloudy wind, a low fog drone, and optional quiet birds (clear day) or crickets (clear night). It follows the **YOU** cell's live weather and day/night flag, and crossfades when that weather changes (the weather feed refreshes about every 15 minutes). Browsers block audible autoplay, so ambience starts on the first `pointerdown` / `keydown` / `touchstart` anywhere on the page. A header **Ambience** mute toggle is saved in `localStorage['ninelives.ambienceMuted']` (default: unmuted).
+
+## Live weather
+
+Each visible city (the eight outer cells, including a swapped backup, and the YOU center) shows a live weather icon, localized label (clear, cloudy, fog, drizzle, rain, snow, thunder), and temperature. Data comes from [Open-Meteo](https://open-meteo.com/) (`/v1/forecast`, `current=weather_code,temperature_2m,is_day`), batched in one request using each city's latitude and longitude from `CITY_TABLE`. The YOU cell uses the visitor's coordinates from the IP lookup (`ipapi.co`, then `ipwho.is`); if those are missing, it uses the matched city's coordinates. Temperature is in °C, or °F when the visitor's IP country is US or the browser locale is `en-US`. The feed times out after about 4 seconds, refreshes every 15 minutes, and keeps the last successful values if a request fails. `?weather=off` hides the live figures. Weather data is © Open-Meteo (CC-BY 4.0); a footer credit links to Open-Meteo.com.
+
+
+## Daily activity
+
+Each cell shows a short line of what is happening there right now, and that line is the visual focus of the tile. Outer cells use the woman who lives in that room and her city's local hour. There are ten blocks across the day (night, before dawn, morning, late morning, midday, afternoon, dusk, evening, late evening, after 11). Each character has a slightly different routine. Live weather can nudge an awake line (rain → "listening to the rain"; also drizzle, thunder, snow, and fog). The center YOU line is a quiet aside to the visitor ("good morning", "you're up late too"). All lines exist in the eight UI languages and follow the English switch. The line updates when the hour block or the weather nudge changes, with a short fade (skipped if motion is reduced).
+
+Numeric weather on the tiles is kept small: icon and temperature only, no weather word. `?hour=22` (optionally with `?city=`) is the way to preview a given hour.
