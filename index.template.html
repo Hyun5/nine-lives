@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="dark">
+  <title>Nine Lives</title>
+  <meta name="description" content="Nine study rooms in nine cities, each with a live local clock.">
+  <style>
+    :root {
+      --bg: #07060c;
+      --bg-2: #0e0c16;
+      --ink: #f3eefc;
+      --muted: #9a92ad;
+      --line: rgba(160, 140, 255, 0.22);
+      --cyan: #5dffe9;
+      --cyan-dim: #1ad4c0;
+      --magenta: #ff4fd8;
+      --amber: #ffc857;
+      --rain: rgba(90, 160, 255, 0.55);
+      --tile-radius: 14px;
+      --header-h: 72px;
+      --footer-h: 36px;
+      --gap: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background:
+        radial-gradient(1200px 600px at 50% -10%, rgba(80, 20, 90, 0.35), transparent 55%),
+        radial-gradient(900px 500px at 100% 100%, rgba(0, 60, 70, 0.28), transparent 50%),
+        var(--bg);
+      color: var(--ink);
+      font-family: ui-sans-serif, system-ui, "Segoe UI", "Noto Sans", "Apple SD Gothic Neo", sans-serif;
+      letter-spacing: 0.01em;
+    }
+    body {
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    a { color: var(--cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .chrome {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      height: var(--header-h);
+      padding: 0 18px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(18, 14, 28, 0.92), rgba(10, 8, 16, 0.75));
+      backdrop-filter: blur(10px);
+      z-index: 5;
+    }
+    .brand { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+    .title-main {
+      font-size: 1.28rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      line-height: 1.15;
+      background: linear-gradient(90deg, var(--cyan), #d8b6ff 45%, var(--magenta));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: none;
+      filter: drop-shadow(0 0 10px rgba(93, 255, 233, 0.25));
+    }
+    .title-sub {
+      font-size: 0.68rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .controls { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+    .theme-wrap { position: relative; }
+    .theme-btn, .sound-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(20, 16, 32, 0.8);
+      color: var(--ink);
+      font-size: 0.82rem;
+      letter-spacing: 0.04em;
+      transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+    }
+    .theme-btn:hover, .sound-btn:hover,
+    .theme-btn[aria-expanded="true"] {
+      border-color: rgba(93, 255, 233, 0.55);
+      box-shadow: 0 0 16px rgba(93, 255, 233, 0.18);
+    }
+    .theme-btn .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: 0 0 8px var(--cyan);
+    }
+    .theme-menu {
+      display: none;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 8px);
+      width: min(280px, 70vw);
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(12, 10, 20, 0.96);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 79, 216, 0.08);
+      z-index: 20;
+    }
+    .theme-menu.open { display: block; }
+    .theme-item {
+      width: 100%;
+      text-align: left;
+      padding: 9px 10px;
+      border-radius: 8px;
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .theme-item:hover:not(:disabled) { background: rgba(93, 255, 233, 0.08); }
+    .theme-item[aria-current="true"] { background: rgba(93, 255, 233, 0.12); }
+    .theme-item:disabled { opacity: 0.55; cursor: not-allowed; }
+    .theme-item .ko { color: var(--muted); font-size: 0.78rem; }
+    .theme-item .soon {
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--magenta);
+    }
+    .sound-btn[aria-pressed="true"] {
+      border-color: rgba(93, 255, 233, 0.55);
+      color: var(--cyan);
+      box-shadow: 0 0 16px rgba(93, 255, 233, 0.18);
+    }
+    .sound-btn svg, .theme-btn .chev { flex: 0 0 auto; }
+
+    main {
+      flex: 1 1 auto;
+      min-height: 0;
+      padding: var(--gap);
+      display: flex;
+    }
+    .grid {
+      flex: 1;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: var(--gap);
+      min-height: 0;
+    }
+
+    .tile {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+      border-radius: var(--tile-radius);
+      border: 1px solid rgba(180, 160, 255, 0.18);
+      background: #120e18;
+      cursor: pointer;
+      text-align: left;
+      color: inherit;
+      min-height: 0;
+      box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+      transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    }
+    .tile:hover, .tile:focus-visible {
+      border-color: rgba(93, 255, 233, 0.65);
+      box-shadow: 0 0 0 1px rgba(93, 255, 233, 0.25), 0 0 28px rgba(93, 255, 233, 0.18);
+      outline: none;
+    }
+    .tile .vis, .tile video, .tile img.still {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 40%;
+    }
+    .tile video { opacity: 0; transition: opacity 0.45s ease; }
+    .tile video.on { opacity: 1; }
+    .tile img.still { opacity: 1; transition: opacity 0.45s ease; }
+    .tile .shade {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(6, 4, 12, 0.15) 0%, transparent 28%, transparent 52%, rgba(6, 4, 12, 0.82) 100%),
+        linear-gradient(90deg, rgba(10, 20, 50, 0.12), transparent 30%);
+      pointer-events: none;
+      z-index: 1;
+    }
+    .rain-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+      overflow: hidden;
+      opacity: 0.9;
+    }
+    .rain-layer span {
+      position: absolute;
+      top: -20%;
+      width: 1.2px;
+      height: 14%;
+      background: linear-gradient(180deg, transparent, var(--rain), transparent);
+      animation: fall linear infinite;
+      opacity: 0.7;
+    }
+    @keyframes fall {
+      from { transform: translateY(0); }
+      to { transform: translateY(900%); }
+    }
+    .wet-glass {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(200, 230, 255, 0.07), transparent 18%),
+        radial-gradient(circle at 70% 20%, rgba(200, 230, 255, 0.06), transparent 14%),
+        linear-gradient(180deg, rgba(140, 180, 255, 0.05), transparent 40%);
+      mix-blend-mode: screen;
+    }
+    .meta {
+      position: absolute;
+      left: 0; right: 0; bottom: 0;
+      z-index: 3;
+      padding: 10px 12px 11px;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .who { min-width: 0; }
+    .city {
+      font-size: 0.78rem;
+      font-weight: 650;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #f6f3ff;
+      text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8);
+    }
+    .who .name {
+      display: block;
+      margin-top: 1px;
+      font-size: 0.7rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+    .neon {
+      font-family: ui-monospace, "Cascadia Mono", "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+      font-weight: 700;
+      font-size: clamp(1.05rem, 1.6vw, 1.55rem);
+      letter-spacing: 0.06em;
+      color: var(--cyan);
+      text-shadow:
+        0 0 4px rgba(93, 255, 233, 0.9),
+        0 0 14px rgba(36, 230, 200, 0.7),
+        0 0 28px rgba(36, 230, 200, 0.35);
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .neon .ampm {
+      margin-left: 0.28em;
+      font-size: 0.48em;
+      letter-spacing: 0.14em;
+      color: var(--magenta);
+      text-shadow:
+        0 0 4px rgba(255, 79, 216, 0.95),
+        0 0 12px rgba(255, 79, 216, 0.55);
+      vertical-align: 0.35em;
+    }
+    .tile[data-period="evening"] .neon { color: var(--amber); text-shadow: 0 0 4px rgba(255, 200, 87, 0.9), 0 0 16px rgba(255, 180, 60, 0.55); }
+    .tile[data-period="evening"] .neon .ampm { color: #ff8a4c; text-shadow: 0 0 6px rgba(255, 120, 60, 0.8); }
+    .tile[data-period="late"] .neon,
+    .tile[data-period="night"] .neon { color: #8ad4ff; text-shadow: 0 0 4px rgba(100, 190, 255, 0.9), 0 0 16px rgba(40, 120, 255, 0.5); }
+
+    footer {
+      flex: 0 0 var(--footer-h);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.04em;
+      border-top: 1px solid var(--line);
+    }
+    footer a { color: #c8c0dc; }
+    footer a:hover { color: var(--cyan); }
+
+    /* Focused room */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 40;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(4, 3, 8, 0.72);
+      backdrop-filter: blur(8px);
+    }
+    .overlay.open { display: flex; }
+    .focus-card {
+      position: relative;
+      width: min(1040px, 100%);
+      height: min(680px, 100%);
+      display: grid;
+      grid-template-rows: 1fr auto;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid rgba(93, 255, 233, 0.35);
+      box-shadow: 0 0 0 1px rgba(255, 79, 216, 0.12), 0 30px 80px rgba(0, 0, 0, 0.65), 0 0 60px rgba(93, 255, 233, 0.1);
+      background: #0a0810;
+    }
+    .focus-vis { position: relative; min-height: 0; background: #120e18; }
+    .focus-vis video, .focus-vis img, .focus-vis .shade, .focus-vis .rain-layer, .focus-vis .wet-glass {
+      position: absolute; inset: 0; width: 100%; height: 100%;
+    }
+    .focus-vis video, .focus-vis img { object-fit: cover; object-position: center 40%; }
+    .focus-vis video { opacity: 0; transition: opacity 0.45s ease; }
+    .focus-vis video.on { opacity: 1; }
+    .focus-panel {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      align-items: flex-end;
+      padding: 16px 20px 18px;
+      background: linear-gradient(180deg, #100c18, #0a0812);
+      border-top: 1px solid var(--line);
+    }
+    .focus-panel .city-lg {
+      font-size: 1.15rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+    }
+    .focus-panel .sub { margin-top: 4px; color: var(--muted); font-size: 0.88rem; }
+    .focus-panel .mood { margin-top: 8px; color: #d8e7ff; font-size: 0.92rem; max-width: 46ch; }
+    .focus-panel .neon { font-size: clamp(1.6rem, 4vw, 2.4rem); }
+    .close-btn {
+      position: absolute;
+      top: 12px; right: 12px;
+      z-index: 5;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      border: 1px solid var(--line);
+      background: rgba(8, 6, 14, 0.7);
+      color: var(--ink);
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+    .close-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    .focus-vis .vis { position: absolute; inset: 0; }
+
+    @media (max-width: 720px) {
+      .theme-btn .label-extra { display: none !important; }
+      #soundLabel { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+      .title-main { font-size: 1.05rem; }
+    }
+
+    @media (max-width: 720px) and (orientation: portrait) {
+      :root { --header-h: 58px; --footer-h: 40px; --gap: 8px; }
+      html, body { height: auto; }
+      body { overflow: auto; }
+      .chrome {
+        position: sticky;
+        top: 0;
+        padding: 0 12px;
+      }
+      .title-sub { font-size: 0.6rem; }
+      main { display: block; height: auto; flex: 0 0 auto; min-height: auto; }
+      footer { position: relative; flex: 0 0 auto; }
+      .grid {
+        display: flex;
+        flex-direction: column;
+        height: auto;
+        gap: 8px;
+      }
+      .tile {
+        flex: 0 0 auto;
+        height: 52vw;
+        min-height: 200px;
+        max-height: 280px;
+      }
+      .neon { font-size: 1.35rem; }
+    }
+
+    @media (max-height: 500px) and (orientation: landscape) {
+      :root { --header-h: 42px; --footer-h: 22px; --gap: 5px; --tile-radius: 8px; }
+      .chrome { padding: 0 10px; }
+      .title-main { font-size: 0.95rem; letter-spacing: 0.06em; }
+      .title-sub { display: none; }
+      .theme-btn, .sound-btn { padding: 4px 9px; font-size: 0.72rem; }
+      .theme-btn .label-extra { display: none; }
+      .meta { padding: 6px 8px 7px; }
+      .city { font-size: 0.62rem; letter-spacing: 0.08em; }
+      .who .name { display: none; }
+      .neon { font-size: 0.95rem; }
+      .focus-card { height: 100%; }
+      .focus-panel { padding: 8px 12px; }
+      .focus-panel .mood { display: none; }
+      footer { font-size: 0.62rem; }
+    }
+
+
+    /* Hamburger + settings (language row at the bottom; theme toggles can be added above it later) */
+    .menu-btn {
+      position: fixed;
+      left: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 30;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(12, 10, 20, 0.94);
+      color: var(--ink);
+      font-size: 1.2rem;
+      line-height: 1;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+      transition: border-color 0.2s, box-shadow 0.2s, color 0.2s;
+    }
+    .menu-btn:hover, .menu-btn:focus-visible, .menu-btn[aria-expanded="true"] {
+      border-color: rgba(93, 255, 233, 0.55);
+      box-shadow: 0 0 16px rgba(93, 255, 233, 0.18);
+      outline: none;
+      color: var(--cyan);
+    }
+    .settings-panel {
+      display: none;
+      position: fixed;
+      left: 60px;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 31;
+      width: min(280px, calc(100vw - 76px));
+      padding: 12px 10px 8px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(12, 10, 20, 0.96);
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 79, 216, 0.08);
+    }
+    .settings-panel.open { display: block; }
+    .settings-panel h2 {
+      font-size: 0.72rem;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 650;
+      margin: 0 8px 10px;
+    }
+    .settings-slot { min-height: 0; }
+    .settings-lang {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 8px;
+      border-top: 1px solid var(--line);
+    }
+    .settings-lang span.label { font-size: 0.92rem; }
+    .switch {
+      position: relative;
+      width: 42px;
+      height: 24px;
+      flex: 0 0 auto;
+    }
+    .switch input {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      margin: 0;
+      cursor: pointer;
+    }
+    .switch .track {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 999px;
+      background: #2a2436;
+      border: 1px solid var(--line);
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .switch .track::after {
+      content: "";
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #d8d0e8;
+      transition: transform 0.2s, background 0.2s;
+    }
+    .switch input:checked + .track {
+      background: rgba(93, 255, 233, 0.22);
+      border-color: rgba(93, 255, 233, 0.7);
+    }
+    .switch input:checked + .track::after {
+      transform: translateX(18px);
+      background: var(--cyan);
+    }
+    .switch input:focus-visible + .track {
+      box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--cyan);
+    }
+    @media (min-width: 721px) {
+      main { padding-left: 56px; }
+    }
+    @media (max-width: 720px) and (orientation: portrait) {
+      main { padding-left: 8px; }
+      .menu-btn {
+        top: auto;
+        bottom: 16px;
+        left: 12px;
+        transform: none;
+      }
+      .settings-panel {
+        top: auto;
+        bottom: 68px;
+        left: 12px;
+        transform: none;
+      }
+    }
+    @media (max-height: 500px) and (orientation: landscape) {
+      .menu-btn { width: 32px; height: 32px; font-size: 1rem; left: 6px; }
+      .settings-panel { left: 44px; }
+      main { padding-left: 44px; }
+    }
+
+
+    .tile { transition: opacity 0.45s ease; }
+    .tile.visitor-fade { opacity: 0.4; }
+    .who .tag {
+      display: none;
+      margin-top: 2px;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--cyan);
+      text-shadow: 0 0 8px rgba(93, 255, 233, 0.45);
+    }
+    .tile.is-visitor .who .tag { display: block; }
+    .tile.is-visitor .name { letter-spacing: 0.14em; }
+    @media (max-height: 500px) and (orientation: landscape) {
+      .who .tag { font-size: 0.5rem; letter-spacing: 0.08em; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .rain-layer span, .tile video, .tile img.still, .focus-vis video { animation: none; transition: none; }
+    }
+  </style>
+</head>
+<body>
+  <header class="chrome">
+    <div class="brand">
+      <div class="title-main">Nine Lives</div>
+      <div class="title-sub">나인 라이브스</div>
+    </div>
+    <div class="controls">
+      <div class="theme-wrap">
+        <button type="button" class="theme-btn" id="themeBtn" aria-haspopup="listbox" aria-expanded="false" aria-controls="themeMenu">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="themeLabel">Rainy Window</span>
+          <span class="label-extra" style="color:var(--muted);font-size:0.78em">비 오는 창가</span>
+          <svg class="chev" width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><path fill="currentColor" d="M2 3.5 5 7l3-3.5H2z"/></svg>
+        </button>
+        <div class="theme-menu" id="themeMenu" role="listbox" aria-label="Themes"></div>
+      </div>
+      <button type="button" class="sound-btn" id="soundBtn" aria-pressed="false" title="Toggle rain sound">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M12 3v3M7 5l1.5 2.5M17 5l-1.5 2.5M5 14a7 7 0 0 0 14 0M8 13c0 2 1.5 4 4 5.5C14.5 17 16 15 16 13"/>
+        </svg>
+        <span id="soundLabel">Rain sound</span>
+      </button>
+    </div>
+  </header>
+
+  <button type="button" class="menu-btn" id="menuBtn" aria-label="Settings" aria-expanded="false" aria-controls="settingsPanel">☰</button>
+  <div class="settings-panel" id="settingsPanel" role="dialog" aria-labelledby="settingsHeading" hidden>
+    <h2 id="settingsHeading">Settings</h2>
+    <div class="settings-slot" id="settingsSlot"><!-- future theme toggles go here, above the language row --></div>
+    <div class="settings-lang">
+      <span class="label" id="englishLabel">English</span>
+      <label class="switch">
+        <input type="checkbox" id="englishToggle" role="switch" aria-labelledby="englishLabel">
+        <span class="track" aria-hidden="true"></span>
+      </label>
+    </div>
+  </div>
+
+  <main>
+    <section class="grid" id="grid" aria-label="Nine rooms, each in a different city"></section>
+  </main>
+
+  <footer>
+    <p>© 2026 Super Alex. <span id="footerRights">All rights reserved.</span> · <a href="https://www.youtube.com/@SuperAlex5" target="_blank" rel="noopener">youtube.com/@SuperAlex5</a></p>
+  </footer>
+
+  <div class="overlay" id="overlay" hidden>
+    <div class="focus-card" role="dialog" aria-modal="true" aria-labelledby="focusCity" id="focusCard">
+      <button type="button" class="close-btn" id="closeBtn" aria-label="Close">×</button>
+      <div class="focus-vis" id="focusVis"></div>
+      <div class="focus-panel">
+        <div>
+          <div class="city-lg" id="focusCity"></div>
+          <div class="sub" id="focusSub"></div>
+          <p class="mood" id="focusMood"></p>
+        </div>
+        <div>
+          <div class="neon" id="focusClock"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    const SETTINGS = {
+      home: { id: 'home', label: 'Home', ready: true }
+      // cafe / library are reserved for later settings and are not shown in the UI.
+    };
+    const CURRENT_SETTING = 'home';
+
+    const THEMES = [
+      { id: 'rainy', name: 'Rainy Window', nameKo: '비 오는 창가', status: 'ready' },
+      { id: 'moonlight', name: 'Moonlight Window', nameKo: '달빛 창가', status: 'coming' },
+      { id: 'christmas', name: 'Christmas', nameKo: '크리스마스', status: 'coming' },
+      { id: 'snow', name: 'Snow', nameKo: '눈', status: 'coming' },
+      { id: 'fireplace', name: 'Fireplace', nameKo: '화롯불', status: 'coming' }
+    ];
+    let currentTheme = 'rainy';
+
+    const DEFAULT_LANG = 'en';
+    const SUPPORTED_LANGS = ['en', 'ko', 'ja', 'zh-Hans', 'es', 'fr', 'de', 'pt'];
+    const FORCE_EN_KEY = 'ninelives.forceEnglish';
+    const I18N = {
+      en: {
+        title: 'Nine Lives', subtitle: '나인 라이브스', dateLocale: 'en-US',
+        settings: 'Settings', settingsBtn: 'Settings', english: 'English',
+        rainSound: 'Rain sound', rainOn: 'Rain on', comingSoon: 'Coming soon',
+        close: 'Close', themes: 'Themes',
+        roomsLabel: 'Nine rooms, each in a different city',
+        inCity: '{name} in {city}', footerRights: 'All rights reserved.', yourCity: 'Your City', yourTime: 'Your time',
+        theme: { rainy: 'Rainy Window', moonlight: 'Moonlight Window', christmas: 'Christmas', snow: 'Snow', fireplace: 'Fireplace' },
+        moods: {
+          rainy: {
+            day: 'Rain taps the window. A calm day to stay in and study.',
+            evening: 'Evening rain. The lamp keeps the desk warm.',
+            late: 'Rain in the dark. The lights are off.',
+            night: 'Rain through the night. The room is asleep.'
+          }
+        }
+      },
+      ko: {
+        title: '나인 라이브스', subtitle: 'Nine Lives', dateLocale: 'ko-KR',
+        settings: '설정', settingsBtn: '설정', english: '영어',
+        rainSound: '빗소리', rainOn: '빗소리 켜짐', comingSoon: '곧 공개',
+        close: '닫기', themes: '테마',
+        roomsLabel: '서로 다른 도시에 있는 아홉 개의 방',
+        inCity: '{city}의 {name}', footerRights: '모든 권리 보유.', yourCity: '당신의 도시', yourTime: '당신의 시간',
+        theme: { rainy: '비 오는 창가', moonlight: '달빛 창가', christmas: '크리스마스', snow: '눈', fireplace: '화롯불' },
+        moods: {
+          rainy: {
+            day: '창가에 비가 내립니다. 차분히 머물며 공부하기 좋은 낮이에요.',
+            evening: '저녁비가 내립니다. 스탠드가 책상을 따뜻하게 비춰요.',
+            late: '어두운 빗소리. 불은 꺼져 있어요.',
+            night: '밤새 비가 내립니다. 방은 잠들어 있어요.'
+          }
+        }
+      },
+      ja: {
+        title: 'ナインライブス', subtitle: 'Nine Lives', dateLocale: 'ja-JP',
+        settings: '設定', settingsBtn: '設定', english: '英語',
+        rainSound: '雨の音', rainOn: '雨の音オン', comingSoon: '近日公開',
+        close: '閉じる', themes: 'テーマ',
+        roomsLabel: 'それぞれ違う街にある、9つの部屋',
+        inCity: '{city}の{name}', footerRights: '全著作権所有.', yourCity: 'あなたの街', yourTime: 'あなたの時間',
+        theme: { rainy: '雨の窓', moonlight: '月明かりの窓', christmas: 'クリスマス', snow: '雪', fireplace: '暖炉' },
+        moods: {
+          rainy: {
+            day: '窓に雨が当たっています。部屋で静かに勉強するのにいい昼です。',
+            evening: '夕方の雨。ランプが机を暖かく照らしています。',
+            late: '暗い雨。照明は消えています。',
+            night: '夜の雨。部屋は眠っています。'
+          }
+        }
+      },
+      'zh-Hans': {
+        title: '九命', subtitle: 'Nine Lives', dateLocale: 'zh-CN',
+        settings: '设置', settingsBtn: '设置', english: '英语',
+        rainSound: '雨声', rainOn: '雨声开', comingSoon: '即将推出',
+        close: '关闭', themes: '主题',
+        roomsLabel: '九个房间，各自在一座不同的城市',
+        inCity: '{city}的{name}', footerRights: '版权所有。', yourCity: '你的城市', yourTime: '你的时间',
+        theme: { rainy: '雨窗', moonlight: '月光窗', christmas: '圣诞节', snow: '雪', fireplace: '壁炉' },
+        moods: {
+          rainy: {
+            day: '雨点打在窗上。适合待在屋里安静学习的白天。',
+            evening: '傍晚的雨。台灯让书桌暖了起来。',
+            late: '暗处的雨。灯已经关了。',
+            night: '雨下了一夜。房间里的人睡着了。'
+          }
+        }
+      },
+      es: {
+        title: 'Nueve Vidas', subtitle: 'Nine Lives', dateLocale: 'es-ES',
+        settings: 'Ajustes', settingsBtn: 'Ajustes', english: 'Inglés',
+        rainSound: 'Sonido de lluvia', rainOn: 'Lluvia activada', comingSoon: 'Próximamente',
+        close: 'Cerrar', themes: 'Temas',
+        roomsLabel: 'Nueve habitaciones, cada una en una ciudad distinta',
+        inCity: '{name} en {city}', footerRights: 'Todos los derechos reservados.', yourCity: 'Tu ciudad', yourTime: 'Tu hora',
+        theme: { rainy: 'Ventana lluviosa', moonlight: 'Ventana de luna', christmas: 'Navidad', snow: 'Nieve', fireplace: 'Chimenea' },
+        moods: {
+          rainy: {
+            day: 'La lluvia golpea la ventana. Un día tranquilo para quedarse a estudiar.',
+            evening: 'Lluvia de la tarde. La lámpara mantiene cálido el escritorio.',
+            late: 'Lluvia en la oscuridad. Las luces están apagadas.',
+            night: 'Lluvia durante la noche. La habitación duerme.'
+          }
+        }
+      },
+      fr: {
+        title: 'Neuf Vies', subtitle: 'Nine Lives', dateLocale: 'fr-FR',
+        settings: 'Paramètres', settingsBtn: 'Paramètres', english: 'Anglais',
+        rainSound: 'Bruit de pluie', rainOn: 'Pluie activée', comingSoon: 'Bientôt',
+        close: 'Fermer', themes: 'Thèmes',
+        roomsLabel: 'Neuf chambres, chacune dans une ville différente',
+        inCity: '{name} à {city}', footerRights: 'Tous droits réservés.', yourCity: 'Votre ville', yourTime: 'Votre heure',
+        theme: { rainy: 'Fenêtre sous la pluie', moonlight: 'Fenêtre au clair de lune', christmas: 'Noël', snow: 'Neige', fireplace: 'Cheminée' },
+        moods: {
+          rainy: {
+            day: 'La pluie tape contre la fenêtre. Une journée calme pour rester étudier.',
+            evening: 'Pluie du soir. La lampe réchauffe le bureau.',
+            late: 'Pluie dans le noir. Les lumières sont éteintes.',
+            night: 'Pluie toute la nuit. La chambre dort.'
+          }
+        }
+      },
+      de: {
+        title: 'Neun Leben', subtitle: 'Nine Lives', dateLocale: 'de-DE',
+        settings: 'Einstellungen', settingsBtn: 'Einstellungen', english: 'Englisch',
+        rainSound: 'Regenklang', rainOn: 'Regen an', comingSoon: 'Demnächst',
+        close: 'Schließen', themes: 'Themen',
+        roomsLabel: 'Neun Zimmer, jedes in einer anderen Stadt',
+        inCity: '{name} in {city}', footerRights: 'Alle Rechte vorbehalten.', yourCity: 'Deine Stadt', yourTime: 'Deine Zeit',
+        theme: { rainy: 'Regenfenster', moonlight: 'Mondscheinfenster', christmas: 'Weihnachten', snow: 'Schnee', fireplace: 'Kamin' },
+        moods: {
+          rainy: {
+            day: 'Regen klopft ans Fenster. Ein ruhiger Tag, um drinnen zu lernen.',
+            evening: 'Abendregen. Die Lampe hält den Schreibtisch warm.',
+            late: 'Regen im Dunkeln. Das Licht ist aus.',
+            night: 'Regen durch die Nacht. Das Zimmer schläft.'
+          }
+        }
+      },
+      pt: {
+        title: 'Nove Vidas', subtitle: 'Nine Lives', dateLocale: 'pt-BR',
+        settings: 'Configurações', settingsBtn: 'Configurações', english: 'Inglês',
+        rainSound: 'Som de chuva', rainOn: 'Chuva ligada', comingSoon: 'Em breve',
+        close: 'Fechar', themes: 'Temas',
+        roomsLabel: 'Nove quartos, cada um em uma cidade diferente',
+        inCity: '{name} em {city}', footerRights: 'Todos os direitos reservados.', yourCity: 'Sua cidade', yourTime: 'Seu horário',
+        theme: { rainy: 'Janela na chuva', moonlight: 'Janela ao luar', christmas: 'Natal', snow: 'Neve', fireplace: 'Lareira' },
+        moods: {
+          rainy: {
+            day: 'A chuva bate na janela. Um dia calmo para ficar e estudar.',
+            evening: 'Chuva no início da noite. A luminária deixa a mesa aconchegante.',
+            late: 'Chuva no escuro. As luzes estão apagadas.',
+            night: 'Chuva pela noite. O quarto dorme.'
+          }
+        }
+      }
+    };
+
+    function normalizeLang(tag) {
+      if (!tag || typeof tag !== 'string') return null;
+      const lower = tag.trim().replace(/_/g, '-').toLowerCase();
+      if (!lower) return null;
+      if (lower === 'zh-hans' || lower === 'zh-cn' || lower === 'zh-sg' || lower === 'zh') return 'zh-Hans';
+      if (lower.startsWith('zh')) return null;
+      const primary = lower.split('-')[0];
+      return SUPPORTED_LANGS.indexOf(primary) !== -1 ? primary : null;
+    }
+
+    function readForceEnglish() {
+      try {
+        const v = localStorage.getItem(FORCE_EN_KEY);
+        return v === '1' || v === 'true';
+      } catch (e) {
+        return false;
+      }
+    }
+
+    function writeForceEnglish(on) {
+      try {
+        if (on) localStorage.setItem(FORCE_EN_KEY, '1');
+        else localStorage.removeItem(FORCE_EN_KEY);
+      } catch (e) {}
+    }
+
+    function resolveLang() {
+      if (readForceEnglish()) return DEFAULT_LANG;
+      try {
+        const params = new URLSearchParams(window.location.search);
+        if (params.has('lang')) return normalizeLang(params.get('lang')) || DEFAULT_LANG;
+      } catch (e) {}
+      try {
+        const list = [];
+        if (navigator.languages && navigator.languages.length) {
+          for (let i = 0; i < navigator.languages.length; i++) list.push(navigator.languages[i]);
+        }
+        if (!list.length && navigator.language) list.push(navigator.language);
+        for (let i = 0; i < list.length; i++) {
+          const id = normalizeLang(list[i]);
+          if (id) return id;
+        }
+      } catch (e) {}
+      return DEFAULT_LANG;
+    }
+
+    let currentLang = resolveLang();
+    function t() { return I18N[currentLang] || I18N[DEFAULT_LANG]; }
+    function themeNames(id) {
+      const s = t();
+      const row = THEMES.filter(function (x) { return x.id === id; })[0];
+      const local = (s.theme && s.theme[id]) || (row && row.name) || id;
+      const ko = row ? row.nameKo : '';
+      if (currentLang === 'ko') return { main: ko || local, extra: row ? row.name : '' };
+      return { main: local, extra: ko };
+    }
+
+
+    const CITY_NAMES = {
+      'New York':     { en: 'New York',     ko: '뉴욕',           ja: 'ニューヨーク',           'zh-Hans': '纽约',         es: 'Nueva York',     fr: 'New York',     de: 'New York',     pt: 'Nova York' },
+      'Toronto':      { en: 'Toronto',      ko: '토론토',         ja: 'トロント',               'zh-Hans': '多伦多',       es: 'Toronto',        fr: 'Toronto',      de: 'Toronto',      pt: 'Toronto' },
+      'London':       { en: 'London',       ko: '런던',           ja: 'ロンドン',               'zh-Hans': '伦敦',         es: 'Londres',        fr: 'Londres',      de: 'London',       pt: 'Londres' },
+      'Dublin':       { en: 'Dublin',       ko: '더블린',         ja: 'ダブリン',               'zh-Hans': '都柏林',       es: 'Dublín',         fr: 'Dublin',       de: 'Dublin',       pt: 'Dublin' },
+      'Paris':        { en: 'Paris',        ko: '파리',           ja: 'パリ',                   'zh-Hans': '巴黎',         es: 'París',          fr: 'Paris',        de: 'Paris',        pt: 'Paris' },
+      'Berlin':       { en: 'Berlin',       ko: '베를린',         ja: 'ベルリン',               'zh-Hans': '柏林',         es: 'Berlín',         fr: 'Berlin',       de: 'Berlin',       pt: 'Berlim' },
+      'Tokyo':        { en: 'Tokyo',        ko: '도쿄',           ja: '東京',                   'zh-Hans': '东京',         es: 'Tokio',          fr: 'Tokyo',        de: 'Tokio',        pt: 'Tóquio' },
+      'Seoul':        { en: 'Seoul',        ko: '서울',           ja: 'ソウル',                 'zh-Hans': '首尔',         es: 'Seúl',           fr: 'Séoul',        de: 'Seoul',        pt: 'Seul' },
+      'Sydney':       { en: 'Sydney',       ko: '시드니',         ja: 'シドニー',               'zh-Hans': '悉尼',         es: 'Sídney',         fr: 'Sydney',       de: 'Sydney',       pt: 'Sydney' },
+      'Melbourne':    { en: 'Melbourne',    ko: '멜버른',         ja: 'メルボルン',             'zh-Hans': '墨尔本',       es: 'Melbourne',      fr: 'Melbourne',    de: 'Melbourne',    pt: 'Melbourne' },
+      'Singapore':    { en: 'Singapore',    ko: '싱가포르',       ja: 'シンガポール',           'zh-Hans': '新加坡',       es: 'Singapur',       fr: 'Singapour',    de: 'Singapur',     pt: 'Singapura' },
+      'Hong Kong':    { en: 'Hong Kong',    ko: '홍콩',           ja: '香港',                   'zh-Hans': '香港',         es: 'Hong Kong',      fr: 'Hong Kong',    de: 'Hongkong',     pt: 'Hong Kong' },
+      'São Paulo':    { en: 'São Paulo',    ko: '상파울루',       ja: 'サンパウロ',             'zh-Hans': '圣保罗',       es: 'São Paulo',      fr: 'São Paulo',    de: 'São Paulo',    pt: 'São Paulo' },
+      'Buenos Aires': { en: 'Buenos Aires', ko: '부에노스아이레스', ja: 'ブエノスアイレス',     'zh-Hans': '布宜诺斯艾利斯', es: 'Buenos Aires', fr: 'Buenos Aires', de: 'Buenos Aires', pt: 'Buenos Aires' },
+      'Dubai':        { en: 'Dubai',        ko: '두바이',         ja: 'ドバイ',                 'zh-Hans': '迪拜',         es: 'Dubái',          fr: 'Dubaï',        de: 'Dubai',        pt: 'Dubai' },
+      'Muscat':       { en: 'Muscat',       ko: '무스카트',       ja: 'マスカット',             'zh-Hans': '马斯喀特',     es: 'Mascate',        fr: 'Mascate',      de: 'Maskat',       pt: 'Mascate' },
+      'Los Angeles':  { en: 'Los Angeles',  ko: '로스앤젤레스',   ja: 'ロサンゼルス',           'zh-Hans': '洛杉矶',       es: 'Los Ángeles',    fr: 'Los Angeles',  de: 'Los Angeles',  pt: 'Los Angeles' },
+      'Vancouver':    { en: 'Vancouver',    ko: '밴쿠버',         ja: 'バンクーバー',           'zh-Hans': '温哥华',       es: 'Vancouver',      fr: 'Vancouver',    de: 'Vancouver',    pt: 'Vancouver' }
+    };
+
+    // {city, backup, IANA zone, longitude}. LA→Vancouver is data-only (never shown in the outer ring).
+    const CITY_TABLE = [
+      { city: 'New York',     backup: 'Toronto',      tz: 'America/New_York',                 backupTz: 'America/Toronto',                  lon: -74.01,  backupLon: -79.38, id: 'r01', character: 'Mia',  region: 'USA',       slot: 0 },
+      { city: 'London',       backup: 'Dublin',       tz: 'Europe/London',                    backupTz: 'Europe/Dublin',                    lon: -0.13,   backupLon: -6.26,  id: 'r02', character: 'Sora', region: 'UK',        slot: 1 },
+      { city: 'Paris',        backup: 'Berlin',       tz: 'Europe/Paris',                     backupTz: 'Europe/Berlin',                    lon: 2.35,    backupLon: 13.41,  id: 'r03', character: 'Hana', region: 'France',    slot: 2 },
+      { city: 'Tokyo',        backup: 'Seoul',        tz: 'Asia/Tokyo',                       backupTz: 'Asia/Seoul',                       lon: 139.69,  backupLon: 126.98, id: 'r04', character: 'Yuki', region: 'Japan',     slot: 3 },
+      { city: 'Los Angeles',  backup: 'Vancouver',    tz: 'America/Los_Angeles',              backupTz: 'America/Vancouver',                lon: -118.24, backupLon: -123.12,id: 'r05', character: 'Aya',  region: 'USA',       slot: 4, isLA: true },
+      { city: 'Sydney',       backup: 'Melbourne',    tz: 'Australia/Sydney',                 backupTz: 'Australia/Melbourne',              lon: 151.21,  backupLon: 144.96, id: 'r06', character: 'Nao',  region: 'Australia', slot: 5 },
+      { city: 'Singapore',    backup: 'Hong Kong',    tz: 'Asia/Singapore',                   backupTz: 'Asia/Hong_Kong',                   lon: 103.82,  backupLon: 114.17, id: 'r07', character: 'Lin',  region: 'Singapore', slot: 6 },
+      { city: 'São Paulo',    backup: 'Buenos Aires', tz: 'America/Sao_Paulo',                backupTz: 'America/Argentina/Buenos_Aires',   lon: -46.63,  backupLon: -58.38, id: 'r08', character: 'Mio',  region: 'Brazil',    slot: 7 },
+      { city: 'Dubai',        backup: 'Muscat',       tz: 'Asia/Dubai',                       backupTz: 'Asia/Muscat',                      lon: 55.27,   backupLon: 58.38,  id: 'r09', character: 'Coco', region: 'UAE',       slot: 8 }
+    ];
+    const ROOMS = CITY_TABLE.map(function (c) {
+      return { id: c.id, name: c.character, city: c.city, region: c.region, tz: c.tz, slot: c.slot, isLA: !!c.isLA };
+    });
+    const CENTER_SLOT = 4;
+    const YOU_NAME = 'YOU';
+
+    /* __MEDIA_MAP__ */
+    const MEDIA = null;
+
+    function asset(file) {
+      if (MEDIA && MEDIA[file]) return MEDIA[file];
+      return new URL('./assets/rooms/' + file, document.baseURI).href;
+    }
+
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function browserZone() {
+      try { return Intl.DateTimeFormat().resolvedOptions().timeZone || ''; }
+      catch (e) { return ''; }
+    }
+    function normalizeCity(s) {
+      if (!s) return '';
+      return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    }
+    function canonicalCity(s) {
+      const n = normalizeCity(s);
+      const c = n.replace(/ /g, '');
+      if (c === 'la') return 'los angeles';
+      if (c === 'nyc' || n === 'new york city') return 'new york';
+      if (c === 'hk' || c === 'hongkong') return 'hong kong';
+      return n;
+    }
+    function locName(city) {
+      const pack = CITY_NAMES[city];
+      if (!pack) return city;
+      return pack[currentLang] || pack.en || city;
+    }
+    function cityFromZone(tz) {
+      if (!tz || tz === 'UTC' || tz === 'GMT' || tz.indexOf('Etc/') === 0) return '';
+      const last = tz.split('/').pop();
+      if (!last || /^(utc|gmt|uct|zulu|universal|greenwich)$/i.test(last)) return '';
+      return last.replace(/_/g, ' ');
+    }
+    function prettyCity(s) {
+      return String(s || '').trim().replace(/\s+/g, ' ').replace(/[^\s]+/g, function (w) {
+        return w.charAt(0).toUpperCase() + w.slice(1);
+      });
+    }
+    function findPrimary(cityName) {
+      const key = canonicalCity(cityName);
+      if (!key) return null;
+      for (let i = 0; i < CITY_TABLE.length; i++) {
+        if (canonicalCity(CITY_TABLE[i].city) === key) return CITY_TABLE[i];
+      }
+      return null;
+    }
+    function findByName(cityName) {
+      const key = canonicalCity(cityName);
+      if (!key) return null;
+      for (let i = 0; i < CITY_TABLE.length; i++) {
+        const c = CITY_TABLE[i];
+        if (canonicalCity(c.city) === key) return { entry: c, key: c.city, role: 'primary' };
+        if (canonicalCity(c.backup) === key) return { entry: c, key: c.backup, role: 'backup' };
+      }
+      return null;
+    }
+    function matchGridRoom(cityName) { return findPrimary(cityName); }
+    function roomZone(room) {
+      if (room && room.visitor) return browserZone() || undefined;
+      return room ? room.tz : undefined;
+    }
+    function youCell(city, meta) {
+      const cell = {
+        id: 'r05',
+        name: YOU_NAME,
+        city: city,
+        region: '',
+        tz: null,
+        visitor: true
+      };
+      if (meta) {
+        if (meta.cityKey) cell.cityKey = meta.cityKey;
+        if (meta.cityIsFallback) cell.cityIsFallback = true;
+      }
+      return cell;
+    }
+    function primaryOccupant(c) {
+      return {
+        id: c.id, name: c.character, city: locName(c.city), cityKey: c.city,
+        region: c.region, tz: c.tz, visitor: false, isBackup: false
+      };
+    }
+    function backupOccupant(c) {
+      return {
+        id: c.id, name: c.character, city: locName(c.backup), cityKey: c.backup,
+        region: '', tz: c.backupTz, visitor: false, isBackup: true, backupOf: c.city
+      };
+    }
+    // Center is always YOU (r05 art, browser clock). LA/Aya is never in the outer ring.
+    // Case A: an outer city is the visitor city → that slot shows its backup name + backup clock, same art.
+    // Case A-LA / Case B: the eight outer cells stay as their primary cities.
+    function buildLayout(visitorCity, swapPrimary, meta) {
+      const slots = new Array(9);
+      slots[CENTER_SLOT] = youCell(visitorCity, meta);
+      CITY_TABLE.forEach(function (c) {
+        if (c.isLA) return;
+        slots[c.slot] = (swapPrimary && c.id === swapPrimary.id) ? backupOccupant(c) : primaryOccupant(c);
+      });
+      return slots;
+    }
+    function layoutFromCityName(cityName) {
+      const found = findByName(cityName);
+      if (found && found.role === 'primary' && found.entry.isLA) {
+        return buildLayout(locName(found.key), null, { cityKey: found.key });
+      }
+      if (found && found.role === 'primary') {
+        return buildLayout(locName(found.key), found.entry, { cityKey: found.key });
+      }
+      if (found && found.role === 'backup') {
+        return buildLayout(locName(found.key), null, { cityKey: found.key });
+      }
+      const label = prettyCity(cityName) || t().yourCity;
+      return buildLayout(label, null, { cityIsFallback: !cityName });
+    }
+    function layoutFromZone() {
+      const city = cityFromZone(browserZone());
+      if (city) return layoutFromCityName(city);
+      const slots = buildLayout(t().yourCity, null, { cityIsFallback: true });
+      return slots;
+    }
+
+    function layoutsEqual(a, b) {
+      if (!a || !b) return false;
+      for (let i = 0; i < 9; i++) {
+        const x = a[i], y = b[i];
+        if (!x && !y) continue;
+        if (!x || !y) return false;
+        if (x.id !== y.id || x.name !== y.name || (x.cityKey || x.city) !== (y.cityKey || y.city) || !!x.visitor !== !!y.visitor || !!x.isBackup !== !!y.isBackup) return false;
+      }
+      return true;
+    }
+    function fetchJsonTimeout(url, ms) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(function () { ctrl.abort(); }, ms);
+      return fetch(url, { signal: ctrl.signal, mode: 'cors' })
+        .then(function (r) { if (!r.ok) throw new Error('http'); return r.json(); })
+        .finally(function () { clearTimeout(timer); });
+    }
+    function lookupIpCity() {
+      if (typeof fetch !== 'function') return Promise.reject(new Error('no fetch'));
+      return fetchJsonTimeout('https://ipapi.co/json/', 3000)
+        .then(function (data) {
+          const city = data && data.city;
+          if (city && String(city).trim()) return String(city).trim();
+          throw new Error('no city');
+        })
+        .catch(function () {
+          return fetchJsonTimeout('https://ipwho.is/', 3000).then(function (data) {
+            const city = data && data.success !== false && data.city;
+            if (city && String(city).trim()) return String(city).trim();
+            throw new Error('no city');
+          });
+        });
+    }
+
+    function cityParts(tz, date) {
+      const opts = {
+        hour: 'numeric',
+        minute: '2-digit',
+        second: '2-digit',
+        hourCycle: 'h23',
+        weekday: 'long',
+        month: 'long',
+        day: 'numeric',
+        year: 'numeric'
+      };
+      if (tz) opts.timeZone = tz;
+      let parts;
+      try {
+        parts = new Intl.DateTimeFormat(t().dateLocale || 'en-US', opts).formatToParts(date);
+      } catch (e) {
+        delete opts.timeZone;
+        parts = new Intl.DateTimeFormat(t().dateLocale || 'en-US', opts).formatToParts(date);
+      }
+      const get = (t) => (parts.find((p) => p.type === t) || {}).value || '';
+      const hour24 = Number(get('hour'));
+      const hour12 = hour24 % 12 || 12;
+      const minute = get('minute');
+      const second = get('second');
+      const ampm = hour24 >= 12 ? 'PM' : 'AM';
+      return {
+        hour24, hour12, minute, second, ampm,
+        weekday: get('weekday'),
+        month: get('month'),
+        day: get('day'),
+        year: get('year')
+      };
+    }
+
+    // Local-time variant rules (documented in README.md):
+    //   07:00–16:59  day      looping idle clip (desk / studying); still fallback: desk
+    //   17:00–21:59  evening  dark still (lamp-lit, quieter room)
+    //   22:00–23:59  late     off still (lights off)
+    //   00:00–06:59  night    bed still (asleep)
+    function periodForHour(h) {
+      if (h >= 7 && h < 17) return 'day';
+      if (h >= 17 && h < 22) return 'evening';
+      if (h >= 22) return 'late';
+      return 'night';
+    }
+
+    const MOODS = {
+      rainy: {
+        day: 'Rain taps the window. A calm day to stay in and study.',
+        evening: 'Evening rain. The lamp keeps the desk warm.',
+        late: 'Rain in the dark. The lights are off.',
+        night: 'Rain through the night. The room is asleep.'
+      }
+    };
+
+    function neonHTML(p) {
+      const h = String(p.hour12);
+      return h + ':' + p.minute + '<span class="ampm">' + p.ampm + '</span>';
+    }
+
+    function rainDrops(count) {
+      const layer = document.createElement('div');
+      layer.className = 'rain-layer';
+      layer.setAttribute('aria-hidden', 'true');
+      if (reduceMotion) return layer;
+      for (let i = 0; i < count; i++) {
+        const s = document.createElement('span');
+        s.style.left = (Math.random() * 100).toFixed(2) + '%';
+        s.style.animationDuration = (0.7 + Math.random() * 0.9).toFixed(2) + 's';
+        s.style.animationDelay = (-Math.random() * 2).toFixed(2) + 's';
+        s.style.height = (10 + Math.random() * 16).toFixed(1) + '%';
+        s.style.opacity = (0.35 + Math.random() * 0.5).toFixed(2);
+        layer.appendChild(s);
+      }
+      const wet = document.createElement('div');
+      wet.className = 'wet-glass';
+      wet.setAttribute('aria-hidden', 'true');
+      const wrap = document.createDocumentFragment();
+      wrap.appendChild(layer);
+      wrap.appendChild(wet);
+      return wrap;
+    }
+
+    const grid = document.getElementById('grid');
+    const tiles = [];
+
+    function makeVisual(room, dropCount) {
+      const wrap = document.createElement('div');
+      wrap.className = 'vis';
+      const img = document.createElement('img');
+      img.className = 'still';
+      img.alt = '';
+      img.draggable = false;
+      const vid = document.createElement('video');
+      vid.muted = true;
+      vid.loop = true;
+      vid.playsInline = true;
+      vid.preload = 'metadata';
+      vid.setAttribute('playsinline', '');
+      vid.setAttribute('muted', '');
+      vid.poster = asset(room.id + '_desk.jpg');
+      vid.src = asset(room.id + '_idle.mp4');
+      const shade = document.createElement('div');
+      shade.className = 'shade';
+      wrap.appendChild(img);
+      wrap.appendChild(vid);
+      wrap.appendChild(shade);
+      wrap.appendChild(rainDrops(dropCount));
+      return { wrap, img, vid };
+    }
+
+    let currentLayout = layoutFromZone();
+
+    function displayCity(room) {
+      if (room.cityIsFallback) return t().yourCity;
+      if (room.cityKey && CITY_NAMES[room.cityKey]) return locName(room.cityKey);
+      return room.city;
+    }
+    function labelTile(tile) {
+      const room = tile.room;
+      const s = t();
+      const city = displayCity(room);
+      room.city = city;
+      tile.el.querySelector('.city').textContent = city;
+      tile.el.querySelector('.name').textContent = room.name;
+      const tag = tile.el.querySelector('.tag');
+      if (tag) tag.textContent = room.visitor ? s.yourTime : '';
+      tile.el.setAttribute('aria-label', s.inCity.replace('{name}', room.name).replace('{city}', city));
+      tile.el.classList.toggle('is-visitor', !!room.visitor);
+    }
+
+    function bindTile(tile, room) {
+      const artChanged = !tile.room || tile.room.id !== room.id;
+      tile.room = room;
+      tile.el.dataset.room = room.id;
+      if (artChanged) {
+        tile.vid.pause();
+        tile.vid.poster = asset(room.id + '_desk.jpg');
+        tile.vid.src = asset(room.id + '_idle.mp4');
+        tile.el.dataset.period = '';
+      }
+      labelTile(tile);
+    }
+
+    function applyLayout(slots, animate) {
+      const same = layoutsEqual(currentLayout, slots);
+      currentLayout = slots;
+      const run = function () {
+        tiles.forEach(function (tile, i) {
+          bindTile(tile, slots[i]);
+          tile.el.classList.remove('visitor-fade');
+        });
+        if (focused && focused.visitor) {
+          const you = slots[CENTER_SLOT];
+          focused = you;
+          if (focusTile) focusTile.room = you;
+        }
+        tick();
+      };
+      if (!animate || same || reduceMotion) { run(); return; }
+      tiles.forEach(function (tile) { tile.el.classList.add('visitor-fade'); });
+      setTimeout(run, 280);
+    }
+
+    currentLayout.forEach(function (room) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'tile';
+      const vis = makeVisual(room, 14);
+      const meta = document.createElement('div');
+      meta.className = 'meta';
+      meta.innerHTML =
+        '<div class="who"><div class="city"></div><span class="name"></span><span class="tag"></span></div>' +
+        '<div class="neon" aria-live="off"></div>';
+      btn.appendChild(vis.wrap);
+      btn.appendChild(meta);
+      const tile = { room: room, el: btn, img: vis.img, vid: vis.vid, clock: meta.querySelector('.neon') };
+      btn.addEventListener('click', function () { openFocus(tile.room); });
+      grid.appendChild(btn);
+      tiles.push(tile);
+      bindTile(tile, room);
+    });
+
+    function applyVariant(tile, period) {
+      const id = tile.room.id;
+      const stills = { day: 'desk', evening: 'dark', late: 'off', night: 'bed' };
+      tile.img.src = asset(id + '_' + stills[period] + '.jpg');
+      tile.el.dataset.period = period;
+      const useVideo = period === 'day' && !reduceMotion;
+      if (useVideo) {
+        tile.vid.classList.add('on');
+        const play = tile.vid.play();
+        if (play && play.catch) play.catch(function () {});
+      } else {
+        tile.vid.classList.remove('on');
+        tile.vid.pause();
+      }
+    }
+
+    function tick() {
+      const now = new Date();
+      tiles.forEach((tile) => {
+        const p = cityParts(roomZone(tile.room), now);
+        const period = periodForHour(p.hour24);
+        tile.clock.innerHTML = neonHTML(p);
+        if (tile.el.dataset.period !== period) applyVariant(tile, period);
+      });
+      if (focused) updateFocus(now);
+    }
+
+    let focused = null;
+    const overlay = document.getElementById('overlay');
+    const focusVis = document.getElementById('focusVis');
+    const focusClock = document.getElementById('focusClock');
+    let focusTile = null;
+
+    function openFocus(room) {
+      focused = room;
+      overlay.hidden = false;
+      overlay.classList.add('open');
+      focusVis.innerHTML = '';
+      const vis = makeVisual(room, 28);
+      focusVis.appendChild(vis.wrap);
+      focusTile = { room, el: focusVis, img: vis.img, vid: vis.vid };
+      document.getElementById('focusCity').textContent = room.city;
+      updateFocus(new Date());
+      document.getElementById('closeBtn').focus();
+    }
+
+    function updateFocus(now) {
+      if (!focused || !focusTile) return;
+      const p = cityParts(roomZone(focused), now);
+      const period = periodForHour(p.hour24);
+      applyVariant(focusTile, period);
+      focusClock.innerHTML = neonHTML(p);
+      document.getElementById('focusCity').textContent = focused.city;
+      const dateStr = p.weekday + ', ' + p.month + ' ' + p.day + ', ' + p.year;
+      const zone = (roomZone(focused) || '').replace(/_/g, ' ');
+      const bits = [focused.name];
+      if (focused.visitor) bits.push(t().yourTime);
+      else if (focused.region) bits.push(focused.region);
+      bits.push(dateStr);
+      if (zone) bits.push(zone);
+      document.getElementById('focusSub').textContent = bits.join(' · ');
+      const pack = t();
+      const moods = (pack.moods && pack.moods[currentTheme]) || pack.moods.rainy || (MOODS.rainy);
+      document.getElementById('focusMood').textContent = moods[period];
+    }
+
+    function closeFocus() {
+      overlay.classList.remove('open');
+      overlay.hidden = true;
+      if (focusTile && focusTile.vid) focusTile.vid.pause();
+      focusTile = null;
+      focused = null;
+    }
+
+    document.getElementById('closeBtn').addEventListener('click', closeFocus);
+    overlay.addEventListener('click', (e) => { if (e.target === overlay) closeFocus(); });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (overlay.classList.contains('open')) closeFocus();
+        else if (settingsPanel && !settingsPanel.hidden) closeSettings(true);
+        else closeThemeMenu();
+        return;
+      }
+      if (e.key === 'Tab' && settingsPanel && !settingsPanel.hidden) {
+        const nodes = [menuBtn, document.getElementById('englishToggle')];
+        const first = nodes[0], last = nodes[nodes.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    });
+
+    // Theme menu (data-driven; coming-soon themes stay listed but disabled)
+    const themeMenu = document.getElementById('themeMenu');
+    const themeBtn = document.getElementById('themeBtn');
+    function renderThemeMenu() {
+      themeMenu.innerHTML = '';
+      THEMES.forEach((themeItem) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'theme-item';
+        b.setAttribute('role', 'option');
+        b.dataset.id = themeItem.id;
+        if (themeItem.status !== 'ready') b.disabled = true;
+        if (themeItem.id === currentTheme) b.setAttribute('aria-current', 'true');
+        const names = themeNames(themeItem.id);
+        b.innerHTML = '<span>' + names.main + ' <span class="ko">' + names.extra + '</span></span>' +
+          (themeItem.status === 'coming' ? '<span class="soon">' + t().comingSoon + '</span>' : '');
+        b.addEventListener('click', () => {
+          if (themeItem.status !== 'ready') return;
+          currentTheme = themeItem.id;
+          const n = themeNames(themeItem.id);
+          document.getElementById('themeLabel').textContent = n.main;
+          const extra = document.querySelector('.theme-btn .label-extra');
+          if (extra) extra.textContent = n.extra;
+          renderThemeMenu();
+          closeThemeMenu();
+          tick();
+        });
+        themeMenu.appendChild(b);
+      });
+    }
+    function closeThemeMenu() {
+      themeMenu.classList.remove('open');
+      themeBtn.setAttribute('aria-expanded', 'false');
+    }
+    themeBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = themeMenu.classList.toggle('open');
+      themeBtn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    });
+    document.addEventListener('click', (e) => {
+      if (!themeBtn.parentElement.contains(e.target)) closeThemeMenu();
+      if (settingsPanel && !settingsPanel.hidden &&
+          !settingsPanel.contains(e.target) && !menuBtn.contains(e.target)) {
+        closeSettings(false);
+      }
+    });
+    renderThemeMenu();
+
+    // WebAudio rain (synthesized, no external files)
+    let audio = null;
+    const soundBtn = document.getElementById('soundBtn');
+    function buildRain() {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return null;
+      const ctx = new AC();
+      const len = ctx.sampleRate * 3;
+      const buf = ctx.createBuffer(2, len, ctx.sampleRate);
+      for (let c = 0; c < 2; c++) {
+        const d = buf.getChannelData(c);
+        let last = 0;
+        for (let i = 0; i < len; i++) {
+          const white = Math.random() * 2 - 1;
+          last = last * 0.96 + white * 0.04;
+          const spray = (Math.random() * 2 - 1) * 0.18;
+          const drop = (Math.random() < 0.002) ? (Math.random() * 0.5) : 0;
+          d[i] = last * 0.85 + spray + drop;
+        }
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.loop = true;
+      const bp = ctx.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = 1600;
+      bp.Q.value = 0.45;
+      const hp = ctx.createBiquadFilter();
+      hp.type = 'highpass';
+      hp.frequency.value = 600;
+      const gain = ctx.createGain();
+      gain.gain.value = 0;
+      src.connect(bp);
+      bp.connect(hp);
+      hp.connect(gain);
+      gain.connect(ctx.destination);
+      src.start();
+      return { ctx, gain };
+    }
+    soundBtn.addEventListener('click', async () => {
+      if (!audio) audio = buildRain();
+      if (!audio) return;
+      if (audio.ctx.state === 'suspended') await audio.ctx.resume();
+      const on = soundBtn.getAttribute('aria-pressed') !== 'true';
+      soundBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      document.getElementById('soundLabel').textContent = on ? t().rainOn : t().rainSound;
+      const g = audio.gain.gain;
+      g.cancelScheduledValues(audio.ctx.currentTime);
+      g.linearRampToValueAtTime(on ? 0.22 : 0, audio.ctx.currentTime + 0.25);
+    });
+
+    const menuBtn = document.getElementById('menuBtn');
+    const settingsPanel = document.getElementById('settingsPanel');
+    const englishToggle = document.getElementById('englishToggle');
+
+    function openSettings() {
+      closeThemeMenu();
+      settingsPanel.hidden = false;
+      settingsPanel.classList.add('open');
+      menuBtn.setAttribute('aria-expanded', 'true');
+      englishToggle.focus();
+    }
+    function closeSettings(restoreFocus) {
+      if (settingsPanel.hidden) return;
+      settingsPanel.classList.remove('open');
+      settingsPanel.hidden = true;
+      menuBtn.setAttribute('aria-expanded', 'false');
+      if (restoreFocus) menuBtn.focus();
+    }
+    menuBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (settingsPanel.hidden) openSettings();
+      else closeSettings(false);
+    });
+
+    function applyI18n() {
+      const s = t();
+      document.documentElement.lang = currentLang;
+      document.title = s.title;
+      const main = document.querySelector('.title-main');
+      const sub = document.querySelector('.title-sub');
+      if (main) main.textContent = s.title;
+      if (sub) sub.textContent = s.subtitle;
+      const names = themeNames(currentTheme);
+      document.getElementById('themeLabel').textContent = names.main;
+      const extra = document.querySelector('.theme-btn .label-extra');
+      if (extra) extra.textContent = names.extra;
+      themeMenu.setAttribute('aria-label', s.themes);
+      document.getElementById('grid').setAttribute('aria-label', s.roomsLabel);
+      document.getElementById('closeBtn').setAttribute('aria-label', s.close);
+      document.getElementById('footerRights').textContent = s.footerRights;
+      document.getElementById('settingsHeading').textContent = s.settings;
+      document.getElementById('englishLabel').textContent = s.english;
+      menuBtn.setAttribute('aria-label', s.settingsBtn);
+      const raining = soundBtn.getAttribute('aria-pressed') === 'true';
+      document.getElementById('soundLabel').textContent = raining ? s.rainOn : s.rainSound;
+      soundBtn.setAttribute('title', s.rainSound);
+      tiles.forEach((tile) => {
+        if (tile.room.visitor && tile.room.cityIsFallback) tile.room.city = s.yourCity;
+        labelTile(tile);
+      });
+      renderThemeMenu();
+      if (focused) updateFocus(new Date());
+    }
+
+    englishToggle.checked = readForceEnglish();
+    englishToggle.addEventListener('change', () => {
+      writeForceEnglish(englishToggle.checked);
+      currentLang = resolveLang();
+      applyI18n();
+    });
+
+    applyI18n();
+    tick();
+    setInterval(tick, 1000);
+
+    function cityOverride() {
+      try {
+        const raw = new URLSearchParams(window.location.search).get('city');
+        if (raw && raw.trim()) return raw.trim();
+      } catch (e) {}
+      return '';
+    }
+    function startVisitorDetect() {
+      const override = cityOverride();
+      if (override) {
+        const next = layoutFromCityName(override);
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () { applyLayout(next, true); });
+        });
+        return;
+      }
+      lookupIpCity().then(function (city) {
+        applyLayout(layoutFromCityName(city), true);
+      }).catch(function () {
+        /* keep the zone-based layout already on screen */
+      });
+    }
+    startVisitorDetect();
+
+    // Expose a tiny hook so future settings can swap room art without rewriting clocks/themes.
+    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, ROOMS, CITY_TABLE, CITY_NAMES, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME };
+  })();
+  </script>
+</body>
+</html>
