@@ -922,14 +922,14 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .fx-rain span, .fx-snow span, .fx-stars span, .fx-flash, .bubble, .fx-tod, .fx-wet, .fx-fog, .fx-sun, .fx-overcast, .page-sky, .page-sky .sky-wash, .page-sky .sky-wx, .tile {
+      .fx-stars span, .fx-flash, .bubble, .fx-tod, .fx-wet, .fx-fog, .fx-sun, .fx-overcast, .page-sky, .page-sky .sky-wash, .page-sky .sky-wx, .tile {
         animation: none !important;
         transition: none !important;
       }
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .rain-layer span, .tile video, .tile img.still, .fx-rain span, .fx-snow span, .fx-stars span { animation: none; transition: none; }
+      .tile video, .tile img.still, .fx-stars span { animation: none; transition: none; }
     }
   </style>
 </head>
@@ -1860,7 +1860,8 @@
 
     function fillParticles(layer, count, kind) {
       layer.innerHTML = '';
-      if (reduceMotion || !count) return;
+      if (!count) return;
+      if (reduceMotion && kind !== 'rain' && kind !== 'snow') return;
       const cap = Math.min(count, kind === 'rain' ? 16 : 12);
       for (let i = 0; i < cap; i++) {
         const s = document.createElement('span');
@@ -1893,10 +1894,10 @@
       fx.setAttribute('aria-hidden', 'true');
       const tod = document.createElement('div'); tod.className = 'fx-tod';
       const rain = document.createElement('div'); rain.className = 'fx-rain rain-layer';
-      fillParticles(rain, reduceMotion ? 0 : (rainCount || 14), 'rain');
+      fillParticles(rain, rainCount || 14, 'rain');
       const wet = document.createElement('div'); wet.className = 'fx-wet wet-glass';
       const snow = document.createElement('div'); snow.className = 'fx-snow';
-      fillParticles(snow, reduceMotion ? 0 : 12, 'snow');
+      fillParticles(snow, 12, 'snow');
       const fog = document.createElement('div'); fog.className = 'fx-fog';
       const overcast = document.createElement('div'); overcast.className = 'fx-overcast';
       const sun = document.createElement('div'); sun.className = 'fx-sun';
