@@ -40,19 +40,21 @@ The empty `settings-slot` above the language row is the extension point for late
 
 ## City-to-room mapping
 
-The eight outer cells belong to Mia, Sora, Hana, Yuki, Nao, Lin, Mio, and Coco, each with a fixed city and IANA zone. Their clocks use that zone (DST-correct, including a swapped-in backup) and a neon numeral glow. Times are formatted with the visitor's locale hour cycle: 12-hour AM/PM when the visitor's locale is en-US, 24-hour elsewhere per Intl defaults. If the English switch is on, weekday and month names are English (`en` plus the visitor's region) but the hour cycle still follows the visitor's locale. The center YOU clock always uses the browser time zone (`Intl.DateTimeFormat().resolvedOptions().timeZone`), even if an IP lookup returns a different zone.
+The eight outer cells belong to Mia, Sora, Hana, Lani, Nao, Lin, Mio, and Coco, each with a fixed city and IANA zone. Their clocks use that zone (DST-correct, including a swapped-in backup) and a neon numeral glow. Times are formatted with the visitor's locale hour cycle: 12-hour AM/PM when the visitor's locale is en-US, 24-hour elsewhere per Intl defaults. If the English switch is on, weekday and month names are English (`en` plus the visitor's region) but the hour cycle still follows the visitor's locale. The center YOU clock always uses the browser time zone (`Intl.DateTimeFormat().resolvedOptions().timeZone`), even if an IP lookup returns a different zone.
 
 | Default slot | Room art | Character | City | Time zone |
 |---|---|---|---|---|
 | 1 | r01 | Mia | New York | `America/New_York` |
 | 2 | r02 | Sora | London | `Europe/London` |
 | 3 | r03 | Hana | Paris | `Europe/Paris` |
-| 4 | r04 | Yuki | Seoul | `Asia/Seoul` |
+| 4 | r04 | Lani | Seoul | `Asia/Seoul` |
 | 5 (center) | r05 | YOU | visitor city | browser time zone |
 | 6 | r06 | Nao | Sydney | `Australia/Sydney` |
 | 7 | r07 | Lin | Singapore | `Asia/Singapore` |
 | 8 | r08 | Mio | São Paulo | `America/Sao_Paulo` |
 | 9 | r09 | Coco | Dubai | `Asia/Dubai` |
+
+Lani's given name is localized as 라니 in Korean, ラニ in Japanese, and 拉妮 in Chinese; in the other five UI languages it stays **Lani**. The other characters keep their Latin names in every language.
 
 The center cell is always the visitor, displayed as **YOU** in every language (Latin letters, never translated). It uses the r05 room art and variants, and its clock always follows the browser time zone (`Intl.DateTimeFormat().resolvedOptions().timeZone`). Aya / Los Angeles is never shown in the outer ring, and never occupies the center.
 
@@ -84,7 +86,7 @@ The grid is painted immediately from the browser time zone, then updated with a 
 
 Matching is case-, accent-, and alias-insensitive (`Los Angeles` = `LA`, `New York City` = `New York`, `Sao Paulo` = `São Paulo`). A shared time zone is not enough: Detroit is not New York, and Seoul is not Tokyo.
 
-- **Case A — the visitor is in one of the eight outer cities.** That cell swaps to its backup (backup name and backup clock, same character art). The center shows YOU · the visitor city at browser time. Example: `?city=Seoul` puts Tokyo in Seoul's slot (Yuki's art, Tokyo clock) and labels the center **YOU · Seoul**.
+- **Case A — the visitor is in one of the eight outer cities.** That cell swaps to its backup (backup name and backup clock, same character art). The center shows YOU · the visitor city at browser time. Example: `?city=Seoul` puts Tokyo in Seoul's slot (Lani's art, Tokyo clock) and labels the center **YOU · Seoul**.
 - **Case A-LA — the visitor is in Los Angeles.** The center shows YOU · Los Angeles. The eight outer cells are unchanged. Vancouver is not shown.
 - **Case B — any other city, including a backup such as Tokyo or Toronto.** The center shows YOU · that city. The eight outer cells stay as their primary cities. Example: `?city=Tokyo` leaves Seoul in place and labels the center **YOU · Tokyo**.
 

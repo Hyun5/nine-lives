@@ -1472,12 +1472,25 @@
       'Detroit':      { en: 'Detroit',      ko: '디트로이트',     ja: 'デトロイト',             'zh-Hans': '底特律',       es: 'Detroit',        fr: 'Détroit',      de: 'Detroit',      pt: 'Detroit' }
     };
 
+    const CHAR_NAMES = {
+      Mia:  { en: 'Mia',  ko: 'Mia',  ja: 'Mia',  'zh-Hans': 'Mia',  es: 'Mia',  fr: 'Mia',  de: 'Mia',  pt: 'Mia' },
+      Sora: { en: 'Sora', ko: 'Sora', ja: 'Sora', 'zh-Hans': 'Sora', es: 'Sora', fr: 'Sora', de: 'Sora', pt: 'Sora' },
+      Hana: { en: 'Hana', ko: 'Hana', ja: 'Hana', 'zh-Hans': 'Hana', es: 'Hana', fr: 'Hana', de: 'Hana', pt: 'Hana' },
+      Lani: { en: 'Lani', ko: '라니', ja: 'ラニ', 'zh-Hans': '拉妮', es: 'Lani', fr: 'Lani', de: 'Lani', pt: 'Lani' },
+      Aya:  { en: 'Aya',  ko: 'Aya',  ja: 'Aya',  'zh-Hans': 'Aya',  es: 'Aya',  fr: 'Aya',  de: 'Aya',  pt: 'Aya' },
+      Nao:  { en: 'Nao',  ko: 'Nao',  ja: 'Nao',  'zh-Hans': 'Nao',  es: 'Nao',  fr: 'Nao',  de: 'Nao',  pt: 'Nao' },
+      Lin:  { en: 'Lin',  ko: 'Lin',  ja: 'Lin',  'zh-Hans': 'Lin',  es: 'Lin',  fr: 'Lin',  de: 'Lin',  pt: 'Lin' },
+      Mio:  { en: 'Mio',  ko: 'Mio',  ja: 'Mio',  'zh-Hans': 'Mio',  es: 'Mio',  fr: 'Mio',  de: 'Mio',  pt: 'Mio' },
+      Coco: { en: 'Coco', ko: 'Coco', ja: 'Coco', 'zh-Hans': 'Coco', es: 'Coco', fr: 'Coco', de: 'Coco', pt: 'Coco' }
+    };
+
+
     // {city, backup, IANA zone, latitude, longitude}. LA→Vancouver is data-only (never shown in the outer ring).
     const CITY_TABLE = [
       { city: 'New York',     backup: 'Toronto',      tz: 'America/New_York',                 backupTz: 'America/Toronto',                  lat: 40.71, lon: -74.01,  backupLat: 43.65, backupLon: -79.38, id: 'r01', character: 'Mia',  region: 'USA',       slot: 0 },
       { city: 'London',       backup: 'Dublin',       tz: 'Europe/London',                    backupTz: 'Europe/Dublin',                    lat: 51.51, lon: -0.13,   backupLat: 53.35, backupLon: -6.26,  id: 'r02', character: 'Sora', region: 'UK',        slot: 1 },
       { city: 'Paris',        backup: 'Berlin',       tz: 'Europe/Paris',                     backupTz: 'Europe/Berlin',                    lat: 48.86, lon: 2.35,    backupLat: 52.52, backupLon: 13.41,  id: 'r03', character: 'Hana', region: 'France',    slot: 2 },
-      { city: 'Seoul',        backup: 'Tokyo',        tz: 'Asia/Seoul',                       backupTz: 'Asia/Tokyo',                       lat: 37.5665, lon: 126.9780, backupLat: 35.6762, backupLon: 139.6503, id: 'r04', character: 'Yuki', region: 'South Korea', slot: 3 },
+      { city: 'Seoul',        backup: 'Tokyo',        tz: 'Asia/Seoul',                       backupTz: 'Asia/Tokyo',                       lat: 37.5665, lon: 126.9780, backupLat: 35.6762, backupLon: 139.6503, id: 'r04', character: 'Lani', region: 'South Korea', slot: 3 },
       { city: 'Los Angeles',  backup: 'Vancouver',    tz: 'America/Los_Angeles',              backupTz: 'America/Vancouver',                lat: 34.05, lon: -118.24, backupLat: 49.28, backupLon: -123.12,id: 'r05', character: 'Aya',  region: 'USA',       slot: 4, isLA: true },
       { city: 'Sydney',       backup: 'Melbourne',    tz: 'Australia/Sydney',                 backupTz: 'Australia/Melbourne',              lat: -33.87,lon: 151.21,  backupLat: -37.81,backupLon: 144.96, id: 'r06', character: 'Nao',  region: 'Australia', slot: 5 },
       { city: 'Singapore',    backup: 'Hong Kong',    tz: 'Asia/Singapore',                   backupTz: 'Asia/Hong_Kong',                   lat: 1.29,  lon: 103.82,  backupLat: 22.32, backupLon: 114.17, id: 'r07', character: 'Lin',  region: 'Singapore', slot: 6 },
@@ -1567,6 +1580,12 @@
       const pack = CITY_NAMES[city];
       if (!pack) return city;
       return pack[currentLang] || pack.en || city;
+    }
+    function locChar(name) {
+      if (!name) return name;
+      const pack = CHAR_NAMES[name];
+      if (!pack) return name;
+      return pack[currentLang] || pack.en || name;
     }
     function cityFromZone(tz) {
       if (!tz || tz === 'UTC' || tz === 'GMT' || tz.indexOf('Etc/') === 0) return '';
@@ -2120,6 +2139,10 @@
       if (room.cityKey && CITY_NAMES[room.cityKey]) return locName(room.cityKey);
       return room.city;
     }
+    function displayName(room) {
+      if (!room || room.visitor) return room ? room.name : '';
+      return locChar(room.name);
+    }
     const TIME_BLOCKS = [
       { id: 'night', start: 0, end: 7 },
       { id: 'morning', start: 7, end: 9 },
@@ -2184,10 +2207,10 @@
       const city = displayCity(room);
       room.city = city;
       tile.el.querySelector('.city').textContent = city;
-      tile.el.querySelector('.name').textContent = room.name;
+      tile.el.querySelector('.name').textContent = displayName(room);
       const tag = tile.el.querySelector('.tag');
       if (tag) tag.textContent = room.visitor ? s.yourTime : '';
-      const aria = s.inCity.replace('{name}', room.name).replace('{city}', city);
+      const aria = s.inCity.replace('{name}', displayName(room)).replace('{city}', city);
       tile.el.setAttribute('aria-label', aria);
       tile.el.classList.toggle('is-visitor', !!room.visitor);
     }
@@ -2286,7 +2309,7 @@
         if (tile.el.dataset.period !== period) applyVariant(tile, period);
         const s = t();
         const city = displayCity(tile.room);
-        const aria = s.inCity.replace('{name}', tile.room.name).replace('{city}', city);
+        const aria = s.inCity.replace('{name}', displayName(tile.room)).replace('{city}', city);
         tile.el.setAttribute('aria-label', aria);
       });
       applyAllAtmosphere(now);
@@ -2330,7 +2353,7 @@
       document.getElementById('focusCity').textContent = focused.city;
       const dateStr = p.weekday + ', ' + p.month + ' ' + p.day + ', ' + p.year;
       const zone = (roomZone(focused) || '').replace(/_/g, ' ');
-      const bits = [focused.name];
+      const bits = [displayName(focused)];
       if (focused.visitor) bits.push(t().yourTime);
       else if (focused.region) bits.push(focused.region);
       bits.push(dateStr);
@@ -3948,7 +3971,7 @@
     syncFsChrome();
 
     // Expose a tiny hook so future settings can swap room art without rewriting clocks/themes.
-    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
+    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, CHAR_NAMES, locChar, displayName, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
   })();
   </script>
 </body>
