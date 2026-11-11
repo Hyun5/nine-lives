@@ -250,17 +250,6 @@
       align-items: stretch;
       gap: 6px;
     }
-    .activity {
-      font-size: clamp(0.92rem, 1.55vw, 1.18rem);
-      font-weight: 560;
-      line-height: 1.3;
-      letter-spacing: 0.01em;
-      color: #fff8ff;
-      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.92), 0 0 18px rgba(93, 255, 233, 0.16);
-      min-height: 1.3em;
-      transition: opacity 0.4s ease;
-    }
-    .activity.is-fading { opacity: 0; }
     .meta-row {
       display: flex;
       align-items: flex-end;
@@ -328,10 +317,6 @@
       font-weight: 500;
     }
     .wx-label { display: none; }
-    .focus-panel .activity {
-      margin-top: 8px;
-      font-size: 1.15rem;
-    }
     .focus-panel .wx { margin-top: 6px; font-size: 0.72rem; opacity: 0.8; }
     .focus-panel .wx-icon { width: 13px; height: 13px; }
     .focus-panel .wx-label { display: none; }
@@ -552,7 +537,6 @@
       .city { font-size: 0.62rem; letter-spacing: 0.08em; }
       .who .name { display: none; }
       .neon { font-size: 0.8rem; }
-      .activity { font-size: 0.78rem; }
       .wx-label { display: none; }
       .focus-card { height: 100%; }
       .focus-panel { padding: 8px 12px; }
@@ -633,6 +617,52 @@
       outline: none;
     }
     .theme-pick[aria-checked="true"] { background: rgba(93, 255, 233, 0.12); }
+    .theme-now {
+      margin: 0 8px 10px;
+      font-size: 0.78rem;
+      line-height: 1.4;
+      color: #d8d2e8;
+    }
+    .theme-pick.is-radio {
+      align-items: center;
+      gap: 8px;
+    }
+    .theme-radio {
+      flex: 0 0 auto;
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(200, 196, 216, 0.7);
+      box-sizing: border-box;
+      display: inline-block;
+      position: relative;
+    }
+    .theme-pick[aria-checked="true"] .theme-radio {
+      border-color: var(--cyan);
+    }
+    .theme-pick[aria-checked="true"] .theme-radio::after {
+      content: "";
+      position: absolute;
+      top: 2px; left: 2px;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--cyan);
+    }
+    .theme-pick.is-coming {
+      opacity: 0.55;
+      pointer-events: none;
+      cursor: default;
+      color: #b8b0c6;
+    }
+    .theme-pick.is-coming:hover, .theme-pick.is-coming:focus-visible {
+      background: transparent;
+    }
+    .theme-week {
+      font-size: 0.64rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--cyan);
+    }
     .theme-pick .meta {
       display: flex;
       align-items: baseline;
@@ -650,6 +680,7 @@
       text-transform: uppercase;
       color: var(--magenta);
     }
+    .settings-temp,
     .settings-lang {
       display: flex;
       align-items: center;
@@ -658,7 +689,33 @@
       padding: 10px 8px;
       border-top: 1px solid var(--line);
     }
+    .settings-temp span.label,
     .settings-lang span.label { font-size: 0.92rem; }
+    .temp-toggle {
+      display: inline-flex;
+      flex: 0 0 auto;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      overflow: hidden;
+      background: #2a2436;
+    }
+    .temp-unit {
+      min-width: 42px;
+      padding: 4px 9px;
+      font-size: 0.78rem;
+      font-weight: 650;
+      letter-spacing: 0.04em;
+      color: #c8c0dc;
+      background: transparent;
+    }
+    .temp-unit[aria-pressed="true"] {
+      background: rgba(93, 255, 233, 0.22);
+      color: var(--cyan);
+    }
+    .temp-unit:focus-visible {
+      outline: none;
+      box-shadow: inset 0 0 0 2px var(--cyan);
+    }
     .switch {
       position: relative;
       width: 42px;
@@ -878,10 +935,12 @@
       position: absolute;
       top: 10px;
       left: 10px;
-      right: 28%;
       z-index: 4;
-      max-width: 72%;
+      display: inline-block;
+      width: max-content;
+      max-width: min(72%, calc(100% - 20px));
       padding: 6px 9px 7px;
+      overflow-wrap: break-word;
       border-radius: 12px 12px 12px 4px;
       background: rgba(14, 12, 22, 0.78);
       border: 1px solid rgba(255, 255, 255, 0.16);
@@ -903,6 +962,13 @@
       .bubble { opacity: 0; }
       .tile.is-speaking .bubble.is-on { opacity: 1; }
       .tile:hover .bubble.is-on, .tile:focus-within .bubble.is-on { opacity: 1; }
+    }
+
+    /* Hide bubbles on phone/tablet landscape so they don't cover the short screen.
+       Desktop landscape (fine pointer, taller than 540px) still shows them. */
+    @media (orientation: landscape) and (pointer: coarse),
+           (orientation: landscape) and (max-height: 540px) {
+      .bubble { display: none !important; }
     }
 
     body.wx-paused .fx-rain span,
@@ -964,6 +1030,13 @@
   <div class="settings-panel" id="settingsPanel" role="dialog" aria-labelledby="settingsHeading" hidden>
     <h2 id="settingsHeading">Settings</h2>
     <div class="settings-slot" id="settingsSlot"></div>
+    <div class="settings-temp" id="tempUnitRow">
+      <span class="label" id="tempUnitLabel">Temperature</span>
+      <div class="temp-toggle" role="radiogroup" aria-labelledby="tempUnitLabel">
+        <button type="button" class="temp-unit" id="tempUnitC" aria-pressed="false">°C</button>
+        <button type="button" class="temp-unit" id="tempUnitF" aria-pressed="false">°F</button>
+      </div>
+    </div>
     <div class="settings-lang">
       <span class="label" id="englishLabel">English</span>
       <label class="switch">
@@ -989,7 +1062,6 @@
         <div>
           <div class="city-lg" id="focusCity"></div>
           <div class="sub" id="focusSub"></div>
-          <div class="activity" id="focusActivity"></div>
           <div class="wx" id="focusWx" hidden></div>
           <p class="mood" id="focusMood"></p>
         </div>
@@ -1014,7 +1086,8 @@
       { id: 'snow',       name: 'Snow',              nameKo: '눈',         status: 'coming', linkWeather: false, linkTime: true },
       { id: 'fireplace',  name: 'Fireplace',         nameKo: '화롯불',     status: 'coming', linkWeather: false, linkTime: true },
       { id: 'library',    name: 'Library',           nameKo: '도서관',     status: 'coming', linkWeather: false, linkTime: true },
-      { id: 'cafe',       name: 'Cafe',              nameKo: '카페',       status: 'coming', linkWeather: false, linkTime: true }
+      { id: 'cafe',       name: 'Cafe',              nameKo: '카페',       status: 'coming', linkWeather: false, linkTime: true },
+      { id: 'classroom',  name: 'Classroom',         nameKo: '교실',       status: 'coming', linkWeather: false, linkTime: true }
     ];
     // Weekly auto theme. Switches at Wednesday 11:00 America/New_York.
     // Entries are inclusive start times; the last matching start wins. Default before the first entry is rainy.
@@ -1032,15 +1105,16 @@
     const DEFAULT_LANG = 'en';
     const SUPPORTED_LANGS = ['en', 'ko', 'ja', 'zh-Hans', 'es', 'fr', 'de', 'pt'];
     const FORCE_EN_KEY = 'ninelives.forceEnglish';
+    const TEMP_UNIT_KEY = 'ninelives.tempUnit';
     const I18N = {
       en: {
         title: 'Nine Lives', dateLocale: 'en-US',
-        settings: 'Settings', settingsBtn: 'Settings', english: 'English',
-        rainSound: 'Rain sound', rainOn: 'Rain on', musicSound: 'Music', musicOn: 'Music on', ambience: 'Ambience', ambienceOn: 'Ambience on', comingSoon: 'Coming soon', themeAuto: 'Auto (this week)', themeFixed: 'Fixed', themeTimeLinked: 'Time-linked',
+        settings: 'Settings', settingsBtn: 'Settings', english: 'English', tempUnit: 'Temperature', tempC: 'Celsius', tempF: 'Fahrenheit',
+        rainSound: 'Rain sound', rainOn: 'Rain on', musicSound: 'Music', musicOn: 'Music on', ambience: 'Ambience', ambienceOn: 'Ambience on', comingSoon: 'Coming soon', themeAuto: 'This week\'s theme (auto)', themeFixed: 'Fixed', themeTimeLinked: 'Time-linked', themeNowShowing: 'Now showing: {name}', themeNowShowingSoon: 'Now showing: {shown} ({upcoming} coming soon)', themeThisWeek: 'This week', themeYourPick: 'your pick',
         close: 'Close', themes: 'Themes',
         roomsLabel: 'Nine rooms, each in a different city',
         inCity: '{name} in {city}', footerRights: 'All rights reserved.', yourCity: 'Your City', yourTime: 'Your time', ytLabel: 'SuperAlex on YouTube', fsBtn: 'Full screen', fsExit: 'Exit full screen', fsHint: 'Tap for full screen', a2hsHint: 'Add to Home Screen for full screen',
-        theme: { rainy: 'Rainy Window', moonlight: 'Moonlight Window', christmas: 'Christmas', snow: 'Snow', fireplace: 'Fireplace', library: 'Library', cafe: 'Cafe' },
+        theme: { rainy: 'Rainy Window', moonlight: 'Moonlight Window', christmas: 'Christmas', snow: 'Snow', fireplace: 'Fireplace', library: 'Library', cafe: 'Cafe', classroom: 'Classroom' },
         moods: {
           rainy: {
             day: 'Rain taps the window. A calm day to stay in and study.',
@@ -1049,140 +1123,16 @@
             night: 'Rain through the night. The room is asleep.'
           }
         },
-        wx: { clear: 'Clear', cloudy: 'Cloudy', fog: 'Fog', drizzle: 'Drizzle', rain: 'Rain', snow: 'Snow', thunder: 'Thunder' },
-        activity: {
-          you: {
-            night: "get some rest",
-            predawn: "you're up early too",
-            morning: "good morning",
-            studyam: "a good hour to settle in",
-            midday: "a fine time for a break",
-            studypm: "afternoon with you",
-            dusk: "the day is softening",
-            evening: "good evening",
-            latenight: "you're up late too",
-            owl: "still here with them"
-          },
-          Mia: {
-            night: "asleep",
-            predawn: "already at the desk",
-            morning: "pouring coffee",
-            studyam: "deep in her notes",
-            midday: "a quick bite at the desk",
-            studypm: "still in the problem set",
-            dusk: "stretching by the window",
-            evening: "lamp on, second wind",
-            latenight: "one more chapter",
-            owl: "on the night bus"
-          },
-          Sora: {
-            night: "asleep",
-            predawn: "making the first tea",
-            morning: "opening the curtains",
-            studyam: "reading at the desk",
-            midday: "tea and toast",
-            studypm: "lost in a book",
-            dusk: "watching the grey street",
-            evening: "reading by the window",
-            latenight: "a last cup of tea",
-            owl: "half-asleep in a book"
-          },
-          Hana: {
-            night: "asleep",
-            predawn: "studying before dawn",
-            morning: "warm bread, a slow start",
-            studyam: "writing in the quiet",
-            midday: "a short walk downstairs",
-            studypm: "filling the notebook",
-            dusk: "watching the light go gold",
-            evening: "reading by the lamp",
-            latenight: "one quiet page more",
-            owl: "still at the table"
-          },
-          Yuki: {
-            night: "asleep",
-            predawn: "studying before dawn",
-            morning: "packing her notes",
-            studyam: "focused at the desk",
-            midday: "lunch in the room",
-            studypm: "working through examples",
-            dusk: "a short break at the window",
-            evening: "back to the desk",
-            latenight: "catching the last pages",
-            owl: "just caught the late subway"
-          },
-          Nao: {
-            night: "asleep",
-            predawn: "up with the early light",
-            morning: "opening the window",
-            studyam: "studying in the bright room",
-            midday: "stretching in the sun",
-            studypm: "reading by the window",
-            dusk: "watching the sky change",
-            evening: "lamp and notes",
-            latenight: "winding down",
-            owl: "already half dreaming"
-          },
-          Lin: {
-            night: "asleep",
-            predawn: "still under the lamp",
-            morning: "a slow start, a glass of water",
-            studyam: "at the desk at last",
-            midday: "a late lunch",
-            studypm: "catching up",
-            dusk: "lights on early",
-            evening: "her best hours begin",
-            latenight: "deep in the work",
-            owl: "still going, quietly"
-          },
-          Mio: {
-            night: "asleep",
-            predawn: "slowly waking",
-            morning: "music on, getting ready",
-            studyam: "humming over her notes",
-            midday: "a real lunch break",
-            studypm: "back to the books",
-            dusk: "a song at the window",
-            evening: "studying with music low",
-            latenight: "sketches in the margin",
-            owl: "drifting off"
-          },
-          Coco: {
-            night: "asleep",
-            predawn: "a quiet early start",
-            morning: "arranging the desk",
-            studyam: "calm, steady work",
-            midday: "a pause in the heat",
-            studypm: "reading in the cool room",
-            dusk: "watching the city lights",
-            evening: "lamp on, a clear mind",
-            latenight: "a few more pages",
-            owl: "lights down, almost asleep"
-          },
-          wx: {
-            rain: "listening to the rain",
-            drizzle: "listening to the drizzle",
-            thunder: "waiting out the storm",
-            snow: "watching the snow",
-            fog: "wrapped in the fog"
-          },
-          youWx: {
-            rain: "listening to the rain too",
-            drizzle: "listening to the drizzle too",
-            thunder: "waiting out the storm with them",
-            snow: "watching the snow too",
-            fog: "here in the fog with them"
-          }
-        }
+        wx: { clear: 'Clear', cloudy: 'Cloudy', fog: 'Fog', drizzle: 'Drizzle', rain: 'Rain', snow: 'Snow', thunder: 'Thunder' }
       },
       ko: {
         title: '나인 라이브스', dateLocale: 'ko-KR',
-        settings: '설정', settingsBtn: '설정', english: '영어',
-        rainSound: '빗소리', rainOn: '빗소리 켜짐', musicSound: '음악', musicOn: '음악 켜짐', ambience: '배경음', ambienceOn: '배경음 켜짐', comingSoon: '곧 공개', themeAuto: '자동 (이번 주)', themeFixed: '고정', themeTimeLinked: '시간에 맞춤',
+        settings: '설정', settingsBtn: '설정', english: '영어', tempUnit: '온도', tempC: '섭씨', tempF: '화씨',
+        rainSound: '빗소리', rainOn: '빗소리 켜짐', musicSound: '음악', musicOn: '음악 켜짐', ambience: '배경음', ambienceOn: '배경음 켜짐', comingSoon: '곧 공개', themeAuto: '이번 주 테마 (자동)', themeFixed: '고정', themeTimeLinked: '시간에 맞춤', themeNowShowing: '지금 보이는 테마: {name}', themeNowShowingSoon: '지금 보이는 테마: {shown} ({upcoming} 곧 공개)', themeThisWeek: '이번 주', themeYourPick: '직접 선택',
         close: '닫기', themes: '테마',
         roomsLabel: '서로 다른 도시에 있는 아홉 개의 방',
         inCity: '{city}의 {name}', footerRights: '모든 권리 보유.', yourCity: '당신의 도시', yourTime: '당신의 시간', ytLabel: 'YouTube의 SuperAlex', fsBtn: '전체 화면', fsExit: '전체 화면 종료', fsHint: '탭하면 전체 화면', a2hsHint: '전체 화면은 홈 화면에 추가하세요',
-        theme: { rainy: '비 오는 창가', moonlight: '달빛 창가', christmas: '크리스마스', snow: '눈', fireplace: '화롯불', library: '도서관', cafe: '카페' },
+        theme: { rainy: '비 오는 창가', moonlight: '달빛 창가', christmas: '크리스마스', snow: '눈', fireplace: '화롯불', library: '도서관', cafe: '카페', classroom: '교실' },
         moods: {
           rainy: {
             day: '창가에 비가 내립니다. 차분히 머물며 공부하기 좋은 낮이에요.',
@@ -1191,140 +1141,16 @@
             night: '밤새 비가 내립니다. 방은 잠들어 있어요.'
           }
         },
-        wx: { clear: '맑음', cloudy: '흐림', fog: '안개', drizzle: '이슬비', rain: '비', snow: '눈', thunder: '천둥' },
-        activity: {
-          you: {
-            night: "오늘은 일찍 쉬는 게 좋겠어요",
-            predawn: "당신도 일찍 일어났네요",
-            morning: "좋은 아침이에요",
-            studyam: "차분히 시작하기 좋은 시간이에요",
-            midday: "잠깐 쉬어가도 괜찮아요",
-            studypm: "오후를 같이 보내요",
-            dusk: "하루가 천천히 저물고 있어요",
-            evening: "좋은 저녁이에요",
-            latenight: "당신도 늦게까지 있네요",
-            owl: "여기 친구들과 함께예요"
-          },
-          Mia: {
-            night: "잠들어 있어요",
-            predawn: "벌써 책상 앞에 앉았어요",
-            morning: "커피를 내리고 있어요",
-            studyam: "노트에 깊이 빠져 있어요",
-            midday: "책상에서 간단히 먹어요",
-            studypm: "아직 문제 푸는 중이에요",
-            dusk: "창가에서 몸을 펴요",
-            evening: "스탠드를 켜고 다시 시작해요",
-            latenight: "한 장만 더 읽어요",
-            owl: "심야 버스를 타고 있어요"
-          },
-          Sora: {
-            night: "잠들어 있어요",
-            predawn: "첫 차를 우리고 있어요",
-            morning: "커튼을 걷고 있어요",
-            studyam: "책상 앞에서 읽고 있어요",
-            midday: "차와 토스트를 먹어요",
-            studypm: "책에 빠져 있어요",
-            dusk: "창밖의 거리를 바라봐요",
-            evening: "창가에서 책을 읽어요",
-            latenight: "마지막 차를 마셔요",
-            owl: "책 읽다 졸고 있어요"
-          },
-          Hana: {
-            night: "잠들어 있어요",
-            predawn: "동이 트기 전에 공부해요",
-            morning: "따뜻한 빵으로 느긋하게 시작해요",
-            studyam: "조용히 글을 쓰고 있어요",
-            midday: "잠깐 아래로 내려가요",
-            studypm: "노트를 채워 가요",
-            dusk: "노을 지는 빛을 바라봐요",
-            evening: "스탠드 옆에서 읽어요",
-            latenight: "조용히 한 장 더",
-            owl: "아직 테이블에 앉아 있어요"
-          },
-          Yuki: {
-            night: "잠들어 있어요",
-            predawn: "동이 트기 전에 공부해요",
-            morning: "노트를 챙겨 넣어요",
-            studyam: "책상에 집중하고 있어요",
-            midday: "방에서 점심을 먹어요",
-            studypm: "예제를 풀어 가는 중이에요",
-            dusk: "창가에서 잠깐 쉬어요",
-            evening: "다시 책상으로 돌아와요",
-            latenight: "마지막 페이지를 맞추고 있어요",
-            owl: "막차 지하철을 겨우 탔어요"
-          },
-          Nao: {
-            night: "잠들어 있어요",
-            predawn: "이른 빛과 함께 일어났어요",
-            morning: "창문을 열고 있어요",
-            studyam: "밝은 방에서 공부해요",
-            midday: "햇빛 아래 몸을 펴요",
-            studypm: "창가에서 읽고 있어요",
-            dusk: "하늘이 바뀌는 걸 봐요",
-            evening: "스탠드와 노트",
-            latenight: "슬슬 하루를 접어요",
-            owl: "어느새 졸고 있어요"
-          },
-          Lin: {
-            night: "잠들어 있어요",
-            predawn: "아직 스탠드 아래 있어요",
-            morning: "물 한 모금, 느린 아침",
-            studyam: "이제야 책상에 앉아요",
-            midday: "늦은 점심을 먹어요",
-            studypm: "오후를 따라잡고 있어요",
-            dusk: "일찍 불을 켜요",
-            evening: "지금부터가 집중되는 시간",
-            latenight: "일에 깊이 빠져 있어요",
-            owl: "조용히, 아직 하고 있어요"
-          },
-          Mio: {
-            night: "잠들어 있어요",
-            predawn: "천천히 잠에서 깨요",
-            morning: "음악을 켜고 준비해요",
-            studyam: "콧노래 하며 필기해요",
-            midday: "제대로 점심을 먹어요",
-            studypm: "다시 책을 펴요",
-            dusk: "창가에서 한 곡 들어요",
-            evening: "작은 음악과 함께 공부해요",
-            latenight: "여백에 낙서를 남기고 있어요",
-            owl: "슬며시 잠들어요"
-          },
-          Coco: {
-            night: "잠들어 있어요",
-            predawn: "조용히 하루를 시작해요",
-            morning: "책상을 정리하고 있어요",
-            studyam: "차분히, 일정하게 공부해요",
-            midday: "더위를 피해 잠시 쉬어요",
-            studypm: "서늘한 방에서 읽어요",
-            dusk: "도시의 불빛을 바라봐요",
-            evening: "스탠드 아래, 머리가 맑아요",
-            latenight: "몇 장만 더 읽어요",
-            owl: "불을 낮추고, 거의 잠들어요"
-          },
-          wx: {
-            rain: "빗소리를 듣고 있어요",
-            drizzle: "이슬비 소리를 듣고 있어요",
-            thunder: "소나기가 지나가길 기다려요",
-            snow: "창밖의 눈을 바라봐요",
-            fog: "안개 속에 잠겨 있어요"
-          },
-          youWx: {
-            rain: "당신도 빗소리를 듣고 있네요",
-            drizzle: "가느다란 비 소리를 같이 들어요",
-            thunder: "비바람을 같이 기다릴게요",
-            snow: "당신도 눈을 보고 있네요",
-            fog: "안개 속에서도 여기 있어요"
-          }
-        }
+        wx: { clear: '맑음', cloudy: '흐림', fog: '안개', drizzle: '이슬비', rain: '비', snow: '눈', thunder: '천둥' }
       },
       ja: {
         title: 'ナインライブス', dateLocale: 'ja-JP',
-        settings: '設定', settingsBtn: '設定', english: '英語',
-        rainSound: '雨の音', rainOn: '雨の音オン', musicSound: '音楽', musicOn: '音楽オン', ambience: '環境音', ambienceOn: '環境音オン', comingSoon: '近日公開', themeAuto: '自動（今週）', themeFixed: '固定', themeTimeLinked: '時間連動',
+        settings: '設定', settingsBtn: '設定', english: '英語', tempUnit: '気温', tempC: '摂氏', tempF: '華氏',
+        rainSound: '雨の音', rainOn: '雨の音オン', musicSound: '音楽', musicOn: '音楽オン', ambience: '環境音', ambienceOn: '環境音オン', comingSoon: '近日公開', themeAuto: '今週のテーマ（自動）', themeFixed: '固定', themeTimeLinked: '時間連動', themeNowShowing: '表示中: {name}', themeNowShowingSoon: '表示中: {shown}（{upcoming} 近日公開）', themeThisWeek: '今週', themeYourPick: 'あなたの選択',
         close: '閉じる', themes: 'テーマ',
         roomsLabel: 'それぞれ違う街にある、9つの部屋',
         inCity: '{city}の{name}', footerRights: '全著作権所有.', yourCity: 'あなたの街', yourTime: 'あなたの時間', ytLabel: 'YouTubeのSuperAlex', fsBtn: '全画面', fsExit: '全画面を終了', fsHint: 'タップで全画面', a2hsHint: '全画面表示はホーム画面に追加してください',
-        theme: { rainy: '雨の窓', moonlight: '月明かりの窓', christmas: 'クリスマス', snow: '雪', fireplace: '暖炉', library: '図書館', cafe: 'カフェ' },
+        theme: { rainy: '雨の窓', moonlight: '月明かりの窓', christmas: 'クリスマス', snow: '雪', fireplace: '暖炉', library: '図書館', cafe: 'カフェ', classroom: '教室' },
         moods: {
           rainy: {
             day: '窓に雨が当たっています。部屋で静かに勉強するのにいい昼です。',
@@ -1333,140 +1159,16 @@
             night: '夜の雨。部屋は眠っています。'
           }
         },
-        wx: { clear: '晴れ', cloudy: '曇り', fog: '霧', drizzle: '霧雨', rain: '雨', snow: '雪', thunder: '雷' },
-        activity: {
-          you: {
-            night: "そろそろ休みましょう",
-            predawn: "あなたも早起きですね",
-            morning: "おはよう",
-            studyam: "静かに始めるのにいい時間",
-            midday: "少し休みましょう",
-            studypm: "午後を一緒に",
-            dusk: "一日がゆっくり暮れていきます",
-            evening: "こんばんは",
-            latenight: "あなたもまだ起きていますね",
-            owl: "みんなと一緒にいます"
-          },
-          Mia: {
-            night: "眠っています",
-            predawn: "もう机に座っています",
-            morning: "コーヒーを入れています",
-            studyam: "ノートに集中しています",
-            midday: "机で軽く食べています",
-            studypm: "まだ課題の途中です",
-            dusk: "窓辺で体を伸ばしています",
-            evening: "ランプをつけて再開",
-            latenight: "もう一章だけ",
-            owl: "夜行バスに乗っています"
-          },
-          Sora: {
-            night: "眠っています",
-            predawn: "最初のお茶を淹れています",
-            morning: "カーテンを開けています",
-            studyam: "机で本を読んでいます",
-            midday: "お茶とトースト",
-            studypm: "本の中にいます",
-            dusk: "窓の外の通りを見ています",
-            evening: "窓辺で読んでいます",
-            latenight: "最後のお茶を",
-            owl: "本を読んだままうとうと"
-          },
-          Hana: {
-            night: "眠っています",
-            predawn: "夜明け前に勉強しています",
-            morning: "温かいパンでゆっくり",
-            studyam: "静かに書いています",
-            midday: "少し階下へ",
-            studypm: "ノートを埋めています",
-            dusk: "金色の光を見ています",
-            evening: "ランプのそばで読んでいます",
-            latenight: "静かに、もう一ページ",
-            owl: "まだテーブルにいます"
-          },
-          Yuki: {
-            night: "眠っています",
-            predawn: "夜明け前に勉強しています",
-            morning: "ノートをまとめています",
-            studyam: "机に集中しています",
-            midday: "部屋で昼食を",
-            studypm: "例題を解いているところ",
-            dusk: "窓辺で少し休憩",
-            evening: "また机に戻ります",
-            latenight: "最後のページを急いでいます",
-            owl: "遅い地下鉄に乗っています"
-          },
-          Nao: {
-            night: "眠っています",
-            predawn: "早い光と一緒に起きました",
-            morning: "窓を開けています",
-            studyam: "明るい部屋で勉強しています",
-            midday: "日向で体を伸ばしています",
-            studypm: "窓辺で読んでいます",
-            dusk: "空の色の変わりを見ています",
-            evening: "ランプとノート",
-            latenight: "そろそろ一日を閉じます",
-            owl: "もううとうとしています"
-          },
-          Lin: {
-            night: "眠っています",
-            predawn: "まだランプの下にいます",
-            morning: "水を一杯、ゆっくりした朝",
-            studyam: "やっと机に座ります",
-            midday: "遅めの昼食",
-            studypm: "午後を追いつめています",
-            dusk: "早めに電気をつけます",
-            evening: "これからが集中の時間",
-            latenight: "作業に深く入っています",
-            owl: "静かに、まだ続けています"
-          },
-          Mio: {
-            night: "眠っています",
-            predawn: "ゆっくり目を覚しています",
-            morning: "音楽をつけて準備中",
-            studyam: "鼻歌交じりにメモしています",
-            midday: "きちんと昼ごはんを",
-            studypm: "また本を開きます",
-            dusk: "窓辺で一曲",
-            evening: "小さな音楽と一緒に勉強",
-            latenight: "余白に落書きを残しています",
-            owl: "そろそろ眠りに落ちます"
-          },
-          Coco: {
-            night: "眠っています",
-            predawn: "静かに一日を始めます",
-            morning: "机を整えています",
-            studyam: "落ち着いて、着実に",
-            midday: "暑さを避けて一休み",
-            studypm: "涼しい部屋で読んでいます",
-            dusk: "街の明かりを見ています",
-            evening: "ランプの下、頭が澄んでいます",
-            latenight: "あと数ページ",
-            owl: "明かりを落として、もうほぼ眠っています"
-          },
-          wx: {
-            rain: "雨の音を聴いています",
-            drizzle: "霧雨の音を聴いています",
-            thunder: "通り雨が過ぎるのを待っています",
-            snow: "窓の外の雪を見ています",
-            fog: "霧の中にいます"
-          },
-          youWx: {
-            rain: "あなたも雨の音を聴いていますね",
-            drizzle: "霧雨の音を一緒に",
-            thunder: "嵐が過ぎるのを一緒に待ちましょう",
-            snow: "あなたも雪を見ていますね",
-            fog: "霧の中でも、ここにいます"
-          }
-        }
+        wx: { clear: '晴れ', cloudy: '曇り', fog: '霧', drizzle: '霧雨', rain: '雨', snow: '雪', thunder: '雷' }
       },
       'zh-Hans': {
         title: '九命', dateLocale: 'zh-CN',
-        settings: '设置', settingsBtn: '设置', english: '英语',
-        rainSound: '雨声', rainOn: '雨声开', musicSound: '音乐', musicOn: '音乐开', ambience: '环境声', ambienceOn: '环境声开', comingSoon: '即将推出', themeAuto: '自动（本周）', themeFixed: '固定', themeTimeLinked: '随时间变化',
+        settings: '设置', settingsBtn: '设置', english: '英语', tempUnit: '温度', tempC: '摄氏', tempF: '华氏',
+        rainSound: '雨声', rainOn: '雨声开', musicSound: '音乐', musicOn: '音乐开', ambience: '环境声', ambienceOn: '环境声开', comingSoon: '即将推出', themeAuto: '本周主题（自动）', themeFixed: '固定', themeTimeLinked: '随时间变化', themeNowShowing: '当前显示: {name}', themeNowShowingSoon: '当前显示: {shown}（{upcoming}即将推出）', themeThisWeek: '本周', themeYourPick: '你的选择',
         close: '关闭', themes: '主题',
         roomsLabel: '九个房间，各自在一座不同的城市',
         inCity: '{city}的{name}', footerRights: '版权所有。', yourCity: '你的城市', yourTime: '你的时间', ytLabel: 'YouTube 上的 SuperAlex', fsBtn: '全屏', fsExit: '退出全屏', fsHint: '点按即可全屏', a2hsHint: '添加到主屏幕即可全屏显示',
-        theme: { rainy: '雨窗', moonlight: '月光窗', christmas: '圣诞节', snow: '雪', fireplace: '壁炉', library: '图书馆', cafe: '咖啡馆' },
+        theme: { rainy: '雨窗', moonlight: '月光窗', christmas: '圣诞节', snow: '雪', fireplace: '壁炉', library: '图书馆', cafe: '咖啡馆', classroom: '教室' },
         moods: {
           rainy: {
             day: '雨点打在窗上。适合待在屋里安静学习的白天。',
@@ -1475,140 +1177,16 @@
             night: '雨下了一夜。房间里的人睡着了。'
           }
         },
-        wx: { clear: '晴', cloudy: '多云', fog: '雾', drizzle: '毛毛雨', rain: '雨', snow: '雪', thunder: '雷' },
-        activity: {
-          you: {
-            night: "今晚早点休息吧",
-            predawn: "你也起得很早呢",
-            morning: "早上好",
-            studyam: "很适合安静开始的一小时",
-            midday: "不妨稍作休息",
-            studypm: "下午陪你一起",
-            dusk: "一天正在慢慢变暗",
-            evening: "晚上好",
-            latenight: "你也还没睡呢",
-            owl: "和她们待在一起"
-          },
-          Mia: {
-            night: "睡着了",
-            predawn: "已经坐在书桌前",
-            morning: "正在煮咖啡",
-            studyam: "埋头在笔记里",
-            midday: "在书桌前随便吃一点",
-            studypm: "还在做习题",
-            dusk: "在窗边伸个懒腰",
-            evening: "打开台灯，重新开始",
-            latenight: "再读一章",
-            owl: "坐在夜班车上"
-          },
-          Sora: {
-            night: "睡着了",
-            predawn: "在泡第一杯茶",
-            morning: "拉开窗帘",
-            studyam: "在书桌前读书",
-            midday: "茶和吐司",
-            studypm: "沉浸在书里",
-            dusk: "看着窗外的街道",
-            evening: "在窗边读书",
-            latenight: "再喝最后一杯茶",
-            owl: "看着书就睡着了"
-          },
-          Hana: {
-            night: "睡着了",
-            predawn: "天亮前就开始学习",
-            morning: "热面包，慢慢开始",
-            studyam: "安静地写着",
-            midday: "下楼走一小会儿",
-            studypm: "把笔记本慢慢写满",
-            dusk: "看着光线变成金色",
-            evening: "在台灯旁阅读",
-            latenight: "再安静地翻一页",
-            owl: "还坐在桌前"
-          },
-          Yuki: {
-            night: "睡着了",
-            predawn: "天亮前就开始学习",
-            morning: "在整理笔记",
-            studyam: "专心坐在书桌前",
-            midday: "在房间里吃午饭",
-            studypm: "正在做例题",
-            dusk: "在窗边稍事休息",
-            evening: "又回到书桌前",
-            latenight: "赶着看完最后几页",
-            owl: "刚好赶上末班地铁"
-          },
-          Nao: {
-            night: "睡着了",
-            predawn: "伴随着晨光醒来",
-            morning: "正在打开窗户",
-            studyam: "在明亮的房间里学习",
-            midday: "在阳光下伸展一下",
-            studypm: "在窗边阅读",
-            dusk: "看着天空变色",
-            evening: "台灯和笔记",
-            latenight: "慢慢结束这一天",
-            owl: "已经有些困了"
-          },
-          Lin: {
-            night: "睡着了",
-            predawn: "还在台灯下面",
-            morning: "喝一口水，慢慢的早晨",
-            studyam: "终于坐到书桌前",
-            midday: "一份迟来的午餐",
-            studypm: "把下午补回来",
-            dusk: "很早就开了灯",
-            evening: "从现在起才是她的高效时间",
-            latenight: "深深进入状态",
-            owl: "还在安静地做着"
-          },
-          Mio: {
-            night: "睡着了",
-            predawn: "慢慢醒来",
-            morning: "开着音乐做准备",
-            studyam: "哼着歌记笔记",
-            midday: "好好吃一顿午饭",
-            studypm: "重新打开书",
-            dusk: "在窗边听一首歌",
-            evening: "伴着很小的音乐学习",
-            latenight: "在页边画着小画",
-            owl: "渐渐睡着了"
-          },
-          Coco: {
-            night: "睡着了",
-            predawn: "安静地开始一天",
-            morning: "在整理书桌",
-            studyam: "平静而稳定地学习",
-            midday: "躲过热气，休息一下",
-            studypm: "在凉爽的房间里阅读",
-            dusk: "看着城市的灯光",
-            evening: "台灯下，头脑很清亮",
-            latenight: "再看几页",
-            owl: "把灯调暗，几乎睡着了"
-          },
-          wx: {
-            rain: "在听雨声",
-            drizzle: "在听细雨",
-            thunder: "等这场雨过去",
-            snow: "看着窗外的雪",
-            fog: "沉在雾里"
-          },
-          youWx: {
-            rain: "你也在听雨呢",
-            drizzle: "一起听这阵细雨",
-            thunder: "陪你等暴风雨过去",
-            snow: "你也在看雪呢",
-            fog: "雾里也有你在"
-          }
-        }
+        wx: { clear: '晴', cloudy: '多云', fog: '雾', drizzle: '毛毛雨', rain: '雨', snow: '雪', thunder: '雷' }
       },
       es: {
         title: 'Nueve Vidas', dateLocale: 'es-ES',
-        settings: 'Ajustes', settingsBtn: 'Ajustes', english: 'Inglés',
-        rainSound: 'Sonido de lluvia', rainOn: 'Lluvia activada', musicSound: 'Música', musicOn: 'Música activada', ambience: 'Ambiente', ambienceOn: 'Ambiente activado', comingSoon: 'Próximamente', themeAuto: 'Automático (esta semana)', themeFixed: 'Fijo', themeTimeLinked: 'Según la hora',
+        settings: 'Ajustes', settingsBtn: 'Ajustes', english: 'Inglés', tempUnit: 'Temperatura', tempC: 'Celsius', tempF: 'Fahrenheit',
+        rainSound: 'Sonido de lluvia', rainOn: 'Lluvia activada', musicSound: 'Música', musicOn: 'Música activada', ambience: 'Ambiente', ambienceOn: 'Ambiente activado', comingSoon: 'Próximamente', themeAuto: 'Tema de esta semana (auto)', themeFixed: 'Fijo', themeTimeLinked: 'Según la hora', themeNowShowing: 'Ahora se muestra: {name}', themeNowShowingSoon: 'Ahora se muestra: {shown} ({upcoming} próximamente)', themeThisWeek: 'Esta semana', themeYourPick: 'tu elección',
         close: 'Cerrar', themes: 'Temas',
         roomsLabel: 'Nueve habitaciones, cada una en una ciudad distinta',
         inCity: '{name} en {city}', footerRights: 'Todos los derechos reservados.', yourCity: 'Tu ciudad', yourTime: 'Tu hora', ytLabel: 'SuperAlex en YouTube', fsBtn: 'Pantalla completa', fsExit: 'Salir de pantalla completa', fsHint: 'Toca para pantalla completa', a2hsHint: 'Añade a la pantalla de inicio para ver a pantalla completa',
-        theme: { rainy: 'Ventana lluviosa', moonlight: 'Ventana de luna', christmas: 'Navidad', snow: 'Nieve', fireplace: 'Chimenea', library: 'Biblioteca', cafe: 'Café' },
+        theme: { rainy: 'Ventana lluviosa', moonlight: 'Ventana de luna', christmas: 'Navidad', snow: 'Nieve', fireplace: 'Chimenea', library: 'Biblioteca', cafe: 'Café', classroom: 'Aula' },
         moods: {
           rainy: {
             day: 'La lluvia golpea la ventana. Un día tranquilo para quedarse a estudiar.',
@@ -1617,140 +1195,16 @@
             night: 'Lluvia durante la noche. La habitación duerme.'
           }
         },
-        wx: { clear: 'Despejado', cloudy: 'Nublado', fog: 'Niebla', drizzle: 'Llovizna', rain: 'Lluvia', snow: 'Nieve', thunder: 'Trueno' },
-        activity: {
-          you: {
-            night: "descansa un poco",
-            predawn: "tú también madrugaste",
-            morning: "buenos días",
-            studyam: "una buena hora para empezar",
-            midday: "buen momento para una pausa",
-            studypm: "la tarde contigo",
-            dusk: "el día se va suavizando",
-            evening: "buenas tardes",
-            latenight: "tú también estás despierta a estas horas",
-            owl: "sigues aquí con ellas"
-          },
-          Mia: {
-            night: "dormida",
-            predawn: "ya está en el escritorio",
-            morning: "sirviendo café",
-            studyam: "concentrada en sus apuntes",
-            midday: "un bocado en el escritorio",
-            studypm: "sigue con los problemas",
-            dusk: "se estira junto a la ventana",
-            evening: "lámpara encendida, segundo aire",
-            latenight: "un capítulo más",
-            owl: "en el bus de la noche"
-          },
-          Sora: {
-            night: "dormida",
-            predawn: "preparando el primer té",
-            morning: "abriendo las cortinas",
-            studyam: "leyendo en el escritorio",
-            midday: "té y tostadas",
-            studypm: "perdida en un libro",
-            dusk: "mirando la calle gris",
-            evening: "leyendo junto a la ventana",
-            latenight: "una última taza de té",
-            owl: "adormilada sobre el libro"
-          },
-          Hana: {
-            night: "dormida",
-            predawn: "estudiando antes del alba",
-            morning: "pan caliente, un comienzo lento",
-            studyam: "escribiendo en silencio",
-            midday: "un breve paseo abajo",
-            studypm: "llenando el cuaderno",
-            dusk: "mirando cómo la luz se vuelve dorada",
-            evening: "leyendo junto a la lámpara",
-            latenight: "una página más, en silencio",
-            owl: "sigue en la mesa"
-          },
-          Yuki: {
-            night: "dormida",
-            predawn: "estudiando antes del alba",
-            morning: "guardando sus apuntes",
-            studyam: "concentrada en el escritorio",
-            midday: "almorzando en la habitación",
-            studypm: "resolviendo ejemplos",
-            dusk: "una pausa breve en la ventana",
-            evening: "de vuelta al escritorio",
-            latenight: "alcanzando las últimas páginas",
-            owl: "acaba de tomar el último metro"
-          },
-          Nao: {
-            night: "dormida",
-            predawn: "despierta con la primera luz",
-            morning: "abriendo la ventana",
-            studyam: "estudiando en la habitación clara",
-            midday: "estirándose al sol",
-            studypm: "leyendo junto a la ventana",
-            dusk: "mirando cómo cambia el cielo",
-            evening: "lámpara y apuntes",
-            latenight: "cerrando el día despacio",
-            owl: "ya medio soñando"
-          },
-          Lin: {
-            night: "dormida",
-            predawn: "sigue bajo la lámpara",
-            morning: "un trago de agua, una mañana lenta",
-            studyam: "por fin en el escritorio",
-            midday: "un almuerzo tardío",
-            studypm: "poniéndose al día",
-            dusk: "enciende la luz temprano",
-            evening: "empiezan sus mejores horas",
-            latenight: "sumida en el trabajo",
-            owl: "sigue, en silencio"
-          },
-          Mio: {
-            night: "dormida",
-            predawn: "despertando despacio",
-            morning: "música puesta, preparándose",
-            studyam: "tarareando sobre sus apuntes",
-            midday: "un almuerzo de verdad",
-            studypm: "de vuelta a los libros",
-            dusk: "una canción en la ventana",
-            evening: "estudiando con música baja",
-            latenight: "dibujos en el margen",
-            owl: "quedándose dormida"
-          },
-          Coco: {
-            night: "dormida",
-            predawn: "un comienzo temprano y callado",
-            morning: "ordenando el escritorio",
-            studyam: "trabajo calmo y constante",
-            midday: "una pausa lejos del calor",
-            studypm: "leyendo en la habitación fresca",
-            dusk: "mirando las luces de la ciudad",
-            evening: "lámpara encendida, mente clara",
-            latenight: "unas páginas más",
-            owl: "baja la luz, casi dormida"
-          },
-          wx: {
-            rain: "escuchando la lluvia",
-            drizzle: "escuchando la llovizna",
-            thunder: "esperando a que pase la tormenta",
-            snow: "mirando la nieve",
-            fog: "envuelta en la niebla"
-          },
-          youWx: {
-            rain: "tú también escuchas la lluvia",
-            drizzle: "escuchando la llovizna también",
-            thunder: "esperando la tormenta con ellas",
-            snow: "tú también miras la nieve",
-            fog: "aquí en la niebla con ellas"
-          }
-        }
+        wx: { clear: 'Despejado', cloudy: 'Nublado', fog: 'Niebla', drizzle: 'Llovizna', rain: 'Lluvia', snow: 'Nieve', thunder: 'Trueno' }
       },
       fr: {
         title: 'Neuf Vies', dateLocale: 'fr-FR',
-        settings: 'Paramètres', settingsBtn: 'Paramètres', english: 'Anglais',
-        rainSound: 'Bruit de pluie', rainOn: 'Pluie activée', musicSound: 'Musique', musicOn: 'Musique activée', ambience: 'Ambiance', ambienceOn: 'Ambiance activée', comingSoon: 'Bientôt', themeAuto: 'Auto (cette semaine)', themeFixed: 'Fixe', themeTimeLinked: 'Selon l’heure',
+        settings: 'Paramètres', settingsBtn: 'Paramètres', english: 'Anglais', tempUnit: 'Température', tempC: 'Celsius', tempF: 'Fahrenheit',
+        rainSound: 'Bruit de pluie', rainOn: 'Pluie activée', musicSound: 'Musique', musicOn: 'Musique activée', ambience: 'Ambiance', ambienceOn: 'Ambiance activée', comingSoon: 'Bientôt', themeAuto: 'Thème de cette semaine (auto)', themeFixed: 'Fixe', themeTimeLinked: 'Selon l’heure', themeNowShowing: 'Affichage : {name}', themeNowShowingSoon: 'Affichage : {shown} ({upcoming} bientôt)', themeThisWeek: 'Cette semaine', themeYourPick: 'votre choix',
         close: 'Fermer', themes: 'Thèmes',
         roomsLabel: 'Neuf chambres, chacune dans une ville différente',
         inCity: '{name} à {city}', footerRights: 'Tous droits réservés.', yourCity: 'Votre ville', yourTime: 'Votre heure', ytLabel: 'SuperAlex sur YouTube', fsBtn: 'Plein écran', fsExit: 'Quitter le plein écran', fsHint: 'Touchez pour le plein écran', a2hsHint: 'Ajoutez à l’écran d’accueil pour le plein écran',
-        theme: { rainy: 'Fenêtre sous la pluie', moonlight: 'Fenêtre au clair de lune', christmas: 'Noël', snow: 'Neige', fireplace: 'Cheminée', library: 'Bibliothèque', cafe: 'Café' },
+        theme: { rainy: 'Fenêtre sous la pluie', moonlight: 'Fenêtre au clair de lune', christmas: 'Noël', snow: 'Neige', fireplace: 'Cheminée', library: 'Bibliothèque', cafe: 'Café', classroom: 'Salle de classe' },
         moods: {
           rainy: {
             day: 'La pluie tape contre la fenêtre. Une journée calme pour rester étudier.',
@@ -1759,140 +1213,16 @@
             night: 'Pluie toute la nuit. La chambre dort.'
           }
         },
-        wx: { clear: 'Clair', cloudy: 'Nuageux', fog: 'Brouillard', drizzle: 'Bruine', rain: 'Pluie', snow: 'Neige', thunder: 'Orage' },
-        activity: {
-          you: {
-            night: "repose-toi un peu",
-            predawn: "toi aussi tu es levée tôt",
-            morning: "bonjour",
-            studyam: "une belle heure pour s’installer",
-            midday: "un bon moment pour une pause",
-            studypm: "l’après-midi avec toi",
-            dusk: "le jour s’adoucit",
-            evening: "bonsoir",
-            latenight: "toi aussi tu veilles encore",
-            owl: "tu es encore là, avec elles"
-          },
-          Mia: {
-            night: "endormie",
-            predawn: "déjà assise au bureau",
-            morning: "elle prépare le café",
-            studyam: "plongée dans ses notes",
-            midday: "une bouchée au bureau",
-            studypm: "encore dans les exercices",
-            dusk: "elle s’étire à la fenêtre",
-            evening: "lampe allumée, second souffle",
-            latenight: "encore un chapitre",
-            owl: "dans le bus de nuit"
-          },
-          Sora: {
-            night: "endormie",
-            predawn: "elle prépare le premier thé",
-            morning: "elle ouvre les rideaux",
-            studyam: "elle lit au bureau",
-            midday: "thé et toast",
-            studypm: "perdue dans un livre",
-            dusk: "elle regarde la rue grise",
-            evening: "elle lit près de la fenêtre",
-            latenight: "une dernière tasse de thé",
-            owl: "elle s’endort sur son livre"
-          },
-          Hana: {
-            night: "endormie",
-            predawn: "elle étudie avant l’aube",
-            morning: "du pain chaud, un début lent",
-            studyam: "elle écrit en silence",
-            midday: "une petite descente en bas",
-            studypm: "elle remplit son cahier",
-            dusk: "elle regarde la lumière dorer",
-            evening: "elle lit près de la lampe",
-            latenight: "une page de plus, tout bas",
-            owl: "encore à sa table"
-          },
-          Yuki: {
-            night: "endormie",
-            predawn: "elle étudie avant l’aube",
-            morning: "elle range ses notes",
-            studyam: "concentrée à son bureau",
-            midday: "déjeuner dans la chambre",
-            studypm: "elle avance dans les exercices",
-            dusk: "une courte pause à la fenêtre",
-            evening: "retour au bureau",
-            latenight: "elle rattrape les dernières pages",
-            owl: "elle a eu le dernier métro"
-          },
-          Nao: {
-            night: "endormie",
-            predawn: "levée avec la première lumière",
-            morning: "elle ouvre la fenêtre",
-            studyam: "elle étudie dans la pièce claire",
-            midday: "elle s’étire au soleil",
-            studypm: "elle lit près de la fenêtre",
-            dusk: "elle regarde le ciel changer",
-            evening: "lampe et notes",
-            latenight: "elle referme doucement la journée",
-            owl: "déjà à moitié dans un rêve"
-          },
-          Lin: {
-            night: "endormie",
-            predawn: "encore sous la lampe",
-            morning: "un verre d’eau, un matin lent",
-            studyam: "enfin à son bureau",
-            midday: "un déjeuner tardif",
-            studypm: "elle rattrape l’après-midi",
-            dusk: "elle allume tôt",
-            evening: "ses meilleures heures commencent",
-            latenight: "plongée dans le travail",
-            owl: "elle continue, tout bas"
-          },
-          Mio: {
-            night: "endormie",
-            predawn: "elle se réveille doucement",
-            morning: "musique allumée, elle se prépare",
-            studyam: "elle fredonne sur ses notes",
-            midday: "un vrai déjeuner",
-            studypm: "retour aux livres",
-            dusk: "une chanson à la fenêtre",
-            evening: "elle étudie avec la musique bas",
-            latenight: "des croquis dans la marge",
-            owl: "elle s’endort peu à peu"
-          },
-          Coco: {
-            night: "endormie",
-            predawn: "un début matinal et calme",
-            morning: "elle range le bureau",
-            studyam: "un travail calme et régulier",
-            midday: "une pause à l’abri de la chaleur",
-            studypm: "elle lit dans la pièce fraîche",
-            dusk: "elle regarde les lumières de la ville",
-            evening: "lampe allumée, l’esprit clair",
-            latenight: "encore quelques pages",
-            owl: "elle baisse la lumière, presque endormie"
-          },
-          wx: {
-            rain: "elle écoute la pluie",
-            drizzle: "elle écoute la bruine",
-            thunder: "elle attend que l’orage passe",
-            snow: "elle regarde la neige",
-            fog: "enveloppée dans le brouillard"
-          },
-          youWx: {
-            rain: "toi aussi tu écoutes la pluie",
-            drizzle: "tu écoutes la bruine aussi",
-            thunder: "on attend l’orage avec elles",
-            snow: "toi aussi tu regardes la neige",
-            fog: "ici, dans le brouillard, avec elles"
-          }
-        }
+        wx: { clear: 'Clair', cloudy: 'Nuageux', fog: 'Brouillard', drizzle: 'Bruine', rain: 'Pluie', snow: 'Neige', thunder: 'Orage' }
       },
       de: {
         title: 'Neun Leben', dateLocale: 'de-DE',
-        settings: 'Einstellungen', settingsBtn: 'Einstellungen', english: 'Englisch',
-        rainSound: 'Regenklang', rainOn: 'Regen an', musicSound: 'Musik', musicOn: 'Musik an', ambience: 'Atmosphäre', ambienceOn: 'Atmosphäre an', comingSoon: 'Demnächst', themeAuto: 'Auto (diese Woche)', themeFixed: 'Fest', themeTimeLinked: 'Zeitabhängig',
+        settings: 'Einstellungen', settingsBtn: 'Einstellungen', english: 'Englisch', tempUnit: 'Temperatur', tempC: 'Celsius', tempF: 'Fahrenheit',
+        rainSound: 'Regenklang', rainOn: 'Regen an', musicSound: 'Musik', musicOn: 'Musik an', ambience: 'Atmosphäre', ambienceOn: 'Atmosphäre an', comingSoon: 'Demnächst', themeAuto: 'Thema dieser Woche (auto)', themeFixed: 'Fest', themeTimeLinked: 'Zeitabhängig', themeNowShowing: 'Gerade zu sehen: {name}', themeNowShowingSoon: 'Gerade zu sehen: {shown} ({upcoming} demnächst)', themeThisWeek: 'Diese Woche', themeYourPick: 'deine Auswahl',
         close: 'Schließen', themes: 'Themen',
         roomsLabel: 'Neun Zimmer, jedes in einer anderen Stadt',
         inCity: '{name} in {city}', footerRights: 'Alle Rechte vorbehalten.', yourCity: 'Deine Stadt', yourTime: 'Deine Zeit', ytLabel: 'SuperAlex auf YouTube', fsBtn: 'Vollbild', fsExit: 'Vollbild beenden', fsHint: 'Tippen für Vollbild', a2hsHint: 'Für Vollbild zum Home-Bildschirm hinzufügen',
-        theme: { rainy: 'Regenfenster', moonlight: 'Mondscheinfenster', christmas: 'Weihnachten', snow: 'Schnee', fireplace: 'Kamin', library: 'Bibliothek', cafe: 'Café' },
+        theme: { rainy: 'Regenfenster', moonlight: 'Mondscheinfenster', christmas: 'Weihnachten', snow: 'Schnee', fireplace: 'Kamin', library: 'Bibliothek', cafe: 'Café', classroom: 'Klassenzimmer' },
         moods: {
           rainy: {
             day: 'Regen klopft ans Fenster. Ein ruhiger Tag, um drinnen zu lernen.',
@@ -1901,140 +1231,16 @@
             night: 'Regen durch die Nacht. Das Zimmer schläft.'
           }
         },
-        wx: { clear: 'Klar', cloudy: 'Bewölkt', fog: 'Nebel', drizzle: 'Niesel', rain: 'Regen', snow: 'Schnee', thunder: 'Gewitter' },
-        activity: {
-          you: {
-            night: "ruh dich ein wenig aus",
-            predawn: "du bist auch schon wach",
-            morning: "guten Morgen",
-            studyam: "eine gute Stunde zum Ankommen",
-            midday: "zeit für eine Pause",
-            studypm: "der Nachmittag mit dir",
-            dusk: "der Tag wird weicher",
-            evening: "guten Abend",
-            latenight: "du bist auch noch wach",
-            owl: "du bist noch bei ihnen"
-          },
-          Mia: {
-            night: "schläft",
-            predawn: "schon am Schreibtisch",
-            morning: "sie kocht Kaffee",
-            studyam: "vertieft in ihre Notizen",
-            midday: "ein Happen am Schreibtisch",
-            studypm: "immer noch bei den Aufgaben",
-            dusk: "sie streckt sich am Fenster",
-            evening: "Lampe an, zweiter Atem",
-            latenight: "noch ein Kapitel",
-            owl: "im Nachtbus"
-          },
-          Sora: {
-            night: "schläft",
-            predawn: "sie macht den ersten Tee",
-            morning: "sie öffnet die Vorhänge",
-            studyam: "liest am Schreibtisch",
-            midday: "Tee und Toast",
-            studypm: "in einem Buch versunken",
-            dusk: "schaut auf die graue Straße",
-            evening: "liest am Fenster",
-            latenight: "eine letzte Tasse Tee",
-            owl: "schläft über dem Buch ein"
-          },
-          Hana: {
-            night: "schläft",
-            predawn: "lernt vor dem Morgengrauen",
-            morning: "warmes Brot, ein langsamer Start",
-            studyam: "schreibt in der Stille",
-            midday: "ein kurzer Gang nach unten",
-            studypm: "füllt das Heft",
-            dusk: "schaut zu, wie das Licht goldener wird",
-            evening: "liest an der Lampe",
-            latenight: "noch eine stille Seite",
-            owl: "immer noch am Tisch"
-          },
-          Yuki: {
-            night: "schläft",
-            predawn: "lernt vor dem Morgengrauen",
-            morning: "packt ihre Notizen",
-            studyam: "konzentriert am Schreibtisch",
-            midday: "Mittagessen im Zimmer",
-            studypm: "arbeitet Beispiele durch",
-            dusk: "eine kurze Pause am Fenster",
-            evening: "zurück an den Schreibtisch",
-            latenight: "die letzten Seiten",
-            owl: "gerade noch die letzte U-Bahn erwischt"
-          },
-          Nao: {
-            night: "schläft",
-            predawn: "wach mit dem ersten Licht",
-            morning: "öffnet das Fenster",
-            studyam: "lernt im hellen Zimmer",
-            midday: "streckt sich in der Sonne",
-            studypm: "liest am Fenster",
-            dusk: "schaut dem Himmel beim Wechseln zu",
-            evening: "Lampe und Notizen",
-            latenight: "schließt den Tag langsam",
-            owl: "schon halb im Traum"
-          },
-          Lin: {
-            night: "schläft",
-            predawn: "immer noch unter der Lampe",
-            morning: "ein Schluck Wasser, ein langsamer Morgen",
-            studyam: "endlich am Schreibtisch",
-            midday: "ein spätes Mittagessen",
-            studypm: "holt den Nachmittag auf",
-            dusk: "macht früh Licht",
-            evening: "ihre besten Stunden beginnen",
-            latenight: "tief in der Arbeit",
-            owl: "macht still weiter"
-          },
-          Mio: {
-            night: "schläft",
-            predawn: "wacht langsam auf",
-            morning: "Musik an, sie macht sich fertig",
-            studyam: "summt über ihren Notizen",
-            midday: "eine richtige Mittagspause",
-            studypm: "zurück zu den Büchern",
-            dusk: "ein Lied am Fenster",
-            evening: "lernt mit leiser Musik",
-            latenight: "Skizzen am Rand",
-            owl: "schläft ein"
-          },
-          Coco: {
-            night: "schläft",
-            predawn: "ein stiller, früher Anfang",
-            morning: "räumt den Schreibtisch",
-            studyam: "ruhige, gleichmäßige Arbeit",
-            midday: "eine Pause vor der Hitze",
-            studypm: "liest im kühlen Zimmer",
-            dusk: "schaut auf die Lichter der Stadt",
-            evening: "Lampe an, klarer Kopf",
-            latenight: "noch ein paar Seiten",
-            owl: "Licht herunter, fast eingeschlafen"
-          },
-          wx: {
-            rain: "hört dem Regen zu",
-            drizzle: "hört dem Niesel zu",
-            thunder: "wartet, bis das Gewitter vorbei ist",
-            snow: "schaut dem Schnee zu",
-            fog: "in den Nebel gehüllt"
-          },
-          youWx: {
-            rain: "du hörst dem Regen auch zu",
-            drizzle: "du hörst dem Niesel auch zu",
-            thunder: "wartest mit ihnen das Gewitter ab",
-            snow: "du schaust dem Schnee auch zu",
-            fog: "hier im Nebel, mit ihnen"
-          }
-        }
+        wx: { clear: 'Klar', cloudy: 'Bewölkt', fog: 'Nebel', drizzle: 'Niesel', rain: 'Regen', snow: 'Schnee', thunder: 'Gewitter' }
       },
       pt: {
         title: 'Nove Vidas', dateLocale: 'pt-BR',
-        settings: 'Configurações', settingsBtn: 'Configurações', english: 'Inglês',
-        rainSound: 'Som de chuva', rainOn: 'Chuva ligada', musicSound: 'Música', musicOn: 'Música ligada', ambience: 'Ambiente', ambienceOn: 'Ambiente ligado', comingSoon: 'Em breve', themeAuto: 'Automático (esta semana)', themeFixed: 'Fixo', themeTimeLinked: 'Conforme o horário',
+        settings: 'Configurações', settingsBtn: 'Configurações', english: 'Inglês', tempUnit: 'Temperatura', tempC: 'Celsius', tempF: 'Fahrenheit',
+        rainSound: 'Som de chuva', rainOn: 'Chuva ligada', musicSound: 'Música', musicOn: 'Música ligada', ambience: 'Ambiente', ambienceOn: 'Ambiente ligado', comingSoon: 'Em breve', themeAuto: 'Tema desta semana (auto)', themeFixed: 'Fixo', themeTimeLinked: 'Conforme o horário', themeNowShowing: 'Mostrando agora: {name}', themeNowShowingSoon: 'Mostrando agora: {shown} ({upcoming} em breve)', themeThisWeek: 'Esta semana', themeYourPick: 'sua escolha',
         close: 'Fechar', themes: 'Temas',
         roomsLabel: 'Nove quartos, cada um em uma cidade diferente',
         inCity: '{name} em {city}', footerRights: 'Todos os direitos reservados.', yourCity: 'Sua cidade', yourTime: 'Seu horário', ytLabel: 'SuperAlex no YouTube', fsBtn: 'Tela cheia', fsExit: 'Sair da tela cheia', fsHint: 'Toque para tela cheia', a2hsHint: 'Adicione à Tela de Início para tela cheia',
-        theme: { rainy: 'Janela na chuva', moonlight: 'Janela ao luar', christmas: 'Natal', snow: 'Neve', fireplace: 'Lareira', library: 'Biblioteca', cafe: 'Café' },
+        theme: { rainy: 'Janela na chuva', moonlight: 'Janela ao luar', christmas: 'Natal', snow: 'Neve', fireplace: 'Lareira', library: 'Biblioteca', cafe: 'Café', classroom: 'Sala de aula' },
         moods: {
           rainy: {
             day: 'A chuva bate na janela. Um dia calmo para ficar e estudar.',
@@ -2043,131 +1249,7 @@
             night: 'Chuva pela noite. O quarto dorme.'
           }
         },
-        wx: { clear: 'Limpo', cloudy: 'Nublado', fog: 'Nevoeiro', drizzle: 'Garoa', rain: 'Chuva', snow: 'Neve', thunder: 'Trovão' },
-        activity: {
-          you: {
-            night: "descansa um pouco",
-            predawn: "você também acordou cedo",
-            morning: "bom dia",
-            studyam: "uma boa hora para se acomodar",
-            midday: "uma boa hora para uma pausa",
-            studypm: "a tarde com você",
-            dusk: "o dia vai amolecendo",
-            evening: "boa noite",
-            latenight: "você também ainda está acordada",
-            owl: "ainda aqui com elas"
-          },
-          Mia: {
-            night: "adormecida",
-            predawn: "já está na mesa",
-            morning: "passando café",
-            studyam: "mergulhada nas anotações",
-            midday: "um lanche na mesa",
-            studypm: "ainda nos exercícios",
-            dusk: "se espreguiça na janela",
-            evening: "luminária acesa, segundo fôlego",
-            latenight: "mais um capítulo",
-            owl: "no ônibus da madrugada"
-          },
-          Sora: {
-            night: "adormecida",
-            predawn: "fazendo o primeiro chá",
-            morning: "abrindo as cortinas",
-            studyam: "lendo na mesa",
-            midday: "chá e torrada",
-            studypm: "perdida num livro",
-            dusk: "olhando a rua cinzenta",
-            evening: "lendo à janela",
-            latenight: "uma última xícara de chá",
-            owl: "adormecendo sobre o livro"
-          },
-          Hana: {
-            night: "adormecida",
-            predawn: "estudando antes do amanhecer",
-            morning: "pão quente, um começo lento",
-            studyam: "escrevendo em silêncio",
-            midday: "uma descida rápida",
-            studypm: "preenchendo o caderno",
-            dusk: "vendo a luz ficar dourada",
-            evening: "lendo ao lado da luminária",
-            latenight: "mais uma página, em silêncio",
-            owl: "ainda à mesa"
-          },
-          Yuki: {
-            night: "adormecida",
-            predawn: "estudando antes do amanhecer",
-            morning: "arrumando as anotações",
-            studyam: "concentrada na mesa",
-            midday: "almoçando no quarto",
-            studypm: "resolvendo os exemplos",
-            dusk: "uma pausa curta na janela",
-            evening: "de volta à mesa",
-            latenight: "alcançando as últimas páginas",
-            owl: "pegou o último metrô"
-          },
-          Nao: {
-            night: "adormecida",
-            predawn: "acordou com a primeira luz",
-            morning: "abrindo a janela",
-            studyam: "estudando no quarto claro",
-            midday: "se alongando ao sol",
-            studypm: "lendo à janela",
-            dusk: "vendo o céu mudar",
-            evening: "luminária e anotações",
-            latenight: "encerrando o dia devagar",
-            owl: "já meio sonhando"
-          },
-          Lin: {
-            night: "adormecida",
-            predawn: "ainda sob a luminária",
-            morning: "um gole de água, manhã lenta",
-            studyam: "enfim na mesa",
-            midday: "um almoço atrasado",
-            studypm: "alcançando a tarde",
-            dusk: "acende a luz cedo",
-            evening: "começam as horas dela",
-            latenight: "mergulhada no trabalho",
-            owl: "ainda seguindo, em silêncio"
-          },
-          Mio: {
-            night: "adormecida",
-            predawn: "acordando devagar",
-            morning: "música ligada, se preparando",
-            studyam: "cantando baixo sobre as anotações",
-            midday: "um almoço de verdade",
-            studypm: "de volta aos livros",
-            dusk: "uma música na janela",
-            evening: "estudando com a música baixa",
-            latenight: "desenhos na margem",
-            owl: "adormecendo"
-          },
-          Coco: {
-            night: "adormecida",
-            predawn: "um começo cedo e quieto",
-            morning: "arrumando a mesa",
-            studyam: "trabalho calmo e constante",
-            midday: "uma pausa longe do calor",
-            studypm: "lendo no quarto fresco",
-            dusk: "olhando as luzes da cidade",
-            evening: "luminária acesa, mente clara",
-            latenight: "mais algumas páginas",
-            owl: "abaixa a luz, quase dormindo"
-          },
-          wx: {
-            rain: "ouvindo a chuva",
-            drizzle: "ouvindo a garoa",
-            thunder: "esperando a tempestade passar",
-            snow: "olhando a neve",
-            fog: "envolvida no nevoeiro"
-          },
-          youWx: {
-            rain: "você também está ouvindo a chuva",
-            drizzle: "ouvindo a garoa também",
-            thunder: "esperando a tempestade com elas",
-            snow: "você também está olhando a neve",
-            fog: "aqui no nevoeiro, com elas"
-          }
-        }
+        wx: { clear: 'Limpo', cloudy: 'Nublado', fog: 'Nevoeiro', drizzle: 'Garoa', rain: 'Chuva', snow: 'Neve', thunder: 'Trovão' }
       }
     };
 
@@ -2992,7 +2074,7 @@
       if (room.cityKey && CITY_NAMES[room.cityKey]) return locName(room.cityKey);
       return room.city;
     }
-    const ACTIVITY_BLOCKS = [
+    const TIME_BLOCKS = [
       { id: 'night', start: 0, end: 5 },
       { id: 'predawn', start: 5, end: 7 },
       { id: 'morning', start: 7, end: 9 },
@@ -3004,7 +2086,7 @@
       { id: 'latenight', start: 21, end: 23 },
       { id: 'owl', start: 23, end: 24 }
     ];
-    const WX_ACTIVITY_BLOCKS = { studyam: 1, midday: 1, studypm: 1, dusk: 1, evening: 1, latenight: 1, owl: 1 };
+    const WX_SPEECH_BLOCKS = { studyam: 1, midday: 1, studypm: 1, dusk: 1, evening: 1, latenight: 1, owl: 1 };
     function hourOverride() {
       try {
         const raw = new URLSearchParams(window.location.search).get('hour');
@@ -3014,12 +2096,28 @@
       } catch (e) {}
       return null;
     }
+    function dateOverride() {
+      try {
+        const raw = new URLSearchParams(window.location.search).get('date');
+        if (!raw || !String(raw).trim()) return null;
+        const s = String(raw).trim();
+        if (/[zZ]|[+-]\d{2}:?\d{2}$/.test(s)) {
+          const d = new Date(s);
+          return isFinite(d.getTime()) ? d : null;
+        }
+        const norm = s.replace('T', ' ');
+        const stamp = /^\d{4}-\d{2}-\d{2}$/.test(norm) ? (norm + ' 00:00') : norm;
+        const ms = zonedTimeToUtcMs(stamp, THEME_SCHEDULE_TZ);
+        return isFinite(ms) ? new Date(ms) : null;
+      } catch (e) { return null; }
+    }
     function virtualNow() {
-      const raw = new Date();
+      const dated = dateOverride();
+      const raw = dated || new Date();
       const ov = hourOverride();
       if (ov == null) return raw;
       const opts = { hour: 'numeric', hourCycle: 'h23' };
-      const z = browserZone();
+      const z = dated ? THEME_SCHEDULE_TZ : browserZone();
       if (z) opts.timeZone = z;
       let curH = raw.getHours();
       try {
@@ -3027,39 +2125,13 @@
       } catch (e) {}
       return new Date(raw.getTime() + (ov - curH) * 3600000);
     }
-    function activityBlockId(hour) {
+    function timeBlockId(hour) {
       const h = ((Number(hour) % 24) + 24) % 24;
-      for (let i = 0; i < ACTIVITY_BLOCKS.length; i++) {
-        const b = ACTIVITY_BLOCKS[i];
+      for (let i = 0; i < TIME_BLOCKS.length; i++) {
+        const b = TIME_BLOCKS[i];
         if (h >= b.start && h < b.end) return b.id;
       }
       return 'night';
-    }
-    function activityLineFor(room, hour24, wx) {
-      const pack = (t().activity || I18N.en.activity || {});
-      const block = activityBlockId(hour24);
-      if (room && room.visitor) {
-        const kind = wx ? weatherKind(wx.code) : '';
-        if (WX_ACTIVITY_BLOCKS[block] && pack.youWx && pack.youWx[kind]) return pack.youWx[kind];
-        return (pack.you && pack.you[block]) || '';
-      }
-      const who = (room && room.name) || '';
-      const kind = wx ? weatherKind(wx.code) : '';
-      if (WX_ACTIVITY_BLOCKS[block] && pack.wx && pack.wx[kind]) return pack.wx[kind];
-      const row = pack[who] || pack.Mia || {};
-      return row[block] || '';
-    }
-    function setActivityText(el, text) {
-      if (!el) return;
-      if (el.dataset.line === text) return;
-      const apply = function () {
-        el.textContent = text;
-        el.dataset.line = text;
-        el.classList.remove('is-fading');
-      };
-      if (reduceMotion || !el.dataset.line) { apply(); return; }
-      el.classList.add('is-fading');
-      setTimeout(apply, 220);
     }
     function labelTile(tile) {
       const room = tile.room;
@@ -3070,9 +2142,8 @@
       tile.el.querySelector('.name').textContent = room.name;
       const tag = tile.el.querySelector('.tag');
       if (tag) tag.textContent = room.visitor ? s.yourTime : '';
-      const act = tile.activity ? (tile.activity.dataset.line || tile.activity.textContent || '') : '';
       const aria = s.inCity.replace('{name}', room.name).replace('{city}', city);
-      tile.el.setAttribute('aria-label', act ? aria + '. ' + act : aria);
+      tile.el.setAttribute('aria-label', aria);
       tile.el.classList.toggle('is-visitor', !!room.visitor);
     }
 
@@ -3129,7 +2200,6 @@
       const meta = document.createElement('div');
       meta.className = 'meta';
       meta.innerHTML =
-        '<div class="activity" aria-live="polite"></div>' +
         '<div class="meta-row"><div class="who"><div class="city"></div><span class="name"></span><span class="tag"></span></div>' +
         '<div class="clock-col"><div class="neon" aria-live="off"></div><div class="wx" hidden></div></div></div>';
       btn.appendChild(vis.wrap);
@@ -3139,7 +2209,7 @@
       bubble.setAttribute('aria-hidden', 'true');
       bubble.innerHTML = '<span class="bubble-text"></span>';
       if (!room.visitor) btn.appendChild(bubble);
-      const tile = { room: room, el: btn, img: vis.img, vid: vis.vid, fx: vis.fx, clock: meta.querySelector('.neon'), wx: meta.querySelector('.wx'), activity: meta.querySelector('.activity'), bubble: room.visitor ? null : bubble, bubbleText: room.visitor ? null : bubble.querySelector('.bubble-text') };
+      const tile = { room: room, el: btn, img: vis.img, vid: vis.vid, fx: vis.fx, clock: meta.querySelector('.neon'), wx: meta.querySelector('.wx'), bubble: room.visitor ? null : bubble, bubbleText: room.visitor ? null : bubble.querySelector('.bubble-text') };
       btn.addEventListener('click', function () { openFocus(tile.room); });
       grid.appendChild(btn);
       tiles.push(tile);
@@ -3169,12 +2239,10 @@
         const period = periodForHour(p.hour24);
         tile.clock.innerHTML = neonHTML(p);
         if (tile.el.dataset.period !== period) applyVariant(tile, period);
-        const line = activityLineFor(tile.room, p.hour24, weatherForRoom(tile.room));
-        setActivityText(tile.activity, line);
         const s = t();
         const city = displayCity(tile.room);
         const aria = s.inCity.replace('{name}', tile.room.name).replace('{city}', city);
-        tile.el.setAttribute('aria-label', line ? aria + '. ' + line : aria);
+        tile.el.setAttribute('aria-label', aria);
       });
       applyAllAtmosphere(now);
       tickBubbles(now);
@@ -3228,8 +2296,6 @@
       document.getElementById('focusMood').textContent = moods[period];
       const focusWx = document.getElementById('focusWx');
       if (focusWx) paintWxEl(focusWx, weatherForRoom(focused));
-      const focusAct = document.getElementById('focusActivity');
-      if (focusAct) setActivityText(focusAct, activityLineFor(focused, p.hour24, weatherForRoom(focused)));
     }
 
     function closeFocus() {
@@ -3250,7 +2316,7 @@
         return;
       }
       if (e.key === 'Tab' && settingsPanel && !settingsPanel.hidden) {
-        const nodes = [menuBtn, document.getElementById('englishToggle')];
+        const nodes = [menuBtn, document.getElementById('tempUnitC'), document.getElementById('tempUnitF'), document.getElementById('englishToggle')].filter(Boolean);
         const first = nodes[0], last = nodes[nodes.length - 1];
         if (e.shiftKey && document.activeElement === first) {
           e.preventDefault();
@@ -3270,45 +2336,73 @@
       const slot = document.getElementById('settingsSlot');
       if (!slot) return;
       const s = t();
-      const autoOn = !themeQuery() && !readThemeOverride();
+      const scheduledId = scheduledThemeAt(virtualNow());
+      const activeId = resolveActiveTheme();
+      const renderedId = visualThemeId(activeId);
+      const overrideId = readThemeOverride();
       const q = themeQuery();
-      const selected = (q && q !== 'auto') ? q : (readThemeOverride() || 'auto');
+      const autoOn = !q && !overrideId;
+      const selected = (q && q !== 'auto') ? q : (overrideId || 'auto');
       slot.innerHTML = '';
       const label = document.createElement('div');
       label.className = 'theme-picker-label';
       label.textContent = s.themes || 'Themes';
       slot.appendChild(label);
+      const status = document.createElement('div');
+      status.className = 'theme-now';
+      status.id = 'themeNowShowing';
+      const shownName = themeNames(renderedId).main;
+      const activeComing = !!(themeConfig(activeId) && themeConfig(activeId).status === 'coming');
+      let statusText;
+      if (overrideId) {
+        statusText = (s.themeNowShowing || 'Now showing: {name}').replace('{name}', shownName) +
+          ' (' + (s.themeYourPick || 'your pick') + ')';
+      } else if (activeComing && renderedId !== activeId) {
+        statusText = (s.themeNowShowingSoon || 'Now showing: {shown} ({upcoming} coming soon)')
+          .replace('{shown}', shownName)
+          .replace('{upcoming}', themeNames(activeId).main);
+      } else {
+        statusText = (s.themeNowShowing || 'Now showing: {name}').replace('{name}', shownName);
+      }
+      status.textContent = statusText;
+      slot.appendChild(status);
       const list = document.createElement('div');
       list.className = 'theme-picker';
-      list.setAttribute('role', 'listbox');
+      list.setAttribute('role', 'radiogroup');
       list.setAttribute('aria-label', s.themes || 'Themes');
-      function addBtn(id, title, kind, coming) {
+      function appendMeta(el, parts) {
+        if (!parts.length) return;
+        const meta = document.createElement('span');
+        meta.className = 'meta';
+        parts.forEach(function (part) { meta.appendChild(part); });
+        el.appendChild(meta);
+      }
+      function weekBadge() {
+        const b = document.createElement('span');
+        b.className = 'theme-week';
+        b.textContent = s.themeThisWeek || 'This week';
+        return b;
+      }
+      function addSelectable(id, title) {
         const b = document.createElement('button');
         b.type = 'button';
-        b.className = 'theme-pick';
-        b.setAttribute('role', 'option');
+        b.className = 'theme-pick is-radio';
+        b.setAttribute('role', 'radio');
         b.dataset.id = id;
         const isOn = (id === 'auto' && (selected === 'auto' || autoOn)) || (id !== 'auto' && selected === id);
         b.setAttribute('aria-checked', isOn ? 'true' : 'false');
-        if (isOn) b.setAttribute('aria-current', 'true');
+        b.tabIndex = isOn ? 0 : -1;
+        const dot = document.createElement('span');
+        dot.className = 'theme-radio';
+        dot.setAttribute('aria-hidden', 'true');
+        b.appendChild(dot);
         const name = document.createElement('span');
+        name.className = 'theme-pick-name';
         name.textContent = title;
         b.appendChild(name);
-        const meta = document.createElement('span');
-        meta.className = 'meta';
-        if (kind) {
-          const k = document.createElement('span');
-          k.className = 'kind';
-          k.textContent = kind;
-          meta.appendChild(k);
-        }
-        if (coming) {
-          const soon = document.createElement('span');
-          soon.className = 'soon';
-          soon.textContent = s.comingSoon || 'Coming soon';
-          meta.appendChild(soon);
-        }
-        if (meta.childNodes.length) b.appendChild(meta);
+        const parts = [];
+        if (id !== 'auto' && id === scheduledId) parts.push(weekBadge());
+        appendMeta(b, parts);
         b.addEventListener('click', function () {
           if (id === 'auto') writeThemeOverride('');
           else writeThemeOverride(id);
@@ -3317,12 +2411,44 @@
         });
         list.appendChild(b);
       }
-      const weekName = (themeNames(scheduledThemeAt(virtualNow())).main) || scheduledThemeAt(virtualNow());
-      addBtn('auto', (s.themeAuto || 'Auto (this week)') + ' · ' + weekName, '', false);
+      function addComing(id, title) {
+        const row = document.createElement('div');
+        row.className = 'theme-pick is-coming';
+        row.dataset.id = id;
+        row.setAttribute('aria-disabled', 'true');
+        const name = document.createElement('span');
+        name.className = 'theme-pick-name';
+        name.textContent = title;
+        row.appendChild(name);
+        const parts = [];
+        if (id === scheduledId) parts.push(weekBadge());
+        const soon = document.createElement('span');
+        soon.className = 'soon';
+        soon.textContent = s.comingSoon || 'Coming soon';
+        parts.push(soon);
+        appendMeta(row, parts);
+        list.appendChild(row);
+      }
+      const weekName = (themeNames(scheduledId).main) || scheduledId;
+      addSelectable('auto', (s.themeAuto || "This week's theme (auto)") + ' · ' + weekName);
       THEMES.forEach(function (themeItem) {
         const names = themeNames(themeItem.id);
-        const kind = themeItem.linkTime ? (s.themeTimeLinked || 'Time-linked') : (s.themeFixed || 'Fixed');
-        addBtn(themeItem.id, names.main, kind, themeItem.status !== 'ready');
+        if (themeItem.status === 'coming') addComing(themeItem.id, names.main);
+        else addSelectable(themeItem.id, names.main);
+      });
+      list.addEventListener('keydown', function (e) {
+        const radios = [].slice.call(list.querySelectorAll('[role="radio"]'));
+        const i = radios.indexOf(document.activeElement);
+        if (i < 0) return;
+        let next = -1;
+        if (e.key === 'ArrowDown' || e.key === 'ArrowRight') next = (i + 1) % radios.length;
+        else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') next = (i - 1 + radios.length) % radios.length;
+        else if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); radios[i].click(); return; }
+        if (next >= 0) {
+          e.preventDefault();
+          radios[next].click();
+          radios[next].focus();
+        }
       });
       slot.appendChild(list);
     }
@@ -3501,14 +2627,29 @@
     function readThemeOverride() {
       try {
         const v = localStorage.getItem(THEME_STORAGE_KEY);
-        if (v && v !== 'auto' && themeConfig(v) && themeConfig(v).id === v) return v;
+        if (!v || v === 'auto') return '';
+        const cfg = themeConfig(v);
+        if (!cfg || cfg.id !== v) return '';
+        if (cfg.status === 'coming') {
+          try { localStorage.removeItem(THEME_STORAGE_KEY); } catch (e2) {}
+          return '';
+        }
+        return v;
       } catch (e) {}
       return '';
     }
     function writeThemeOverride(id) {
       try {
-        if (!id || id === 'auto') localStorage.removeItem(THEME_STORAGE_KEY);
-        else localStorage.setItem(THEME_STORAGE_KEY, id);
+        if (!id || id === 'auto') {
+          localStorage.removeItem(THEME_STORAGE_KEY);
+          return;
+        }
+        const cfg = themeConfig(id);
+        if (!cfg || cfg.id !== id || cfg.status === 'coming') {
+          localStorage.removeItem(THEME_STORAGE_KEY);
+          return;
+        }
+        localStorage.setItem(THEME_STORAGE_KEY, id);
       } catch (e) {}
     }
     function resolveActiveTheme() {
@@ -3678,12 +2819,12 @@
     function speechLinesFor(room, hour24, wx) {
       if (!room || room.visitor) return [];
       const pack = speechPack();
-      const block = activityBlockId(hour24);
+      const block = timeBlockId(hour24);
       if (block === 'night') return [];
       let lines = (pack[block] || []).slice();
       const kind = effectiveWeatherKind(room);
       const wxKey = 'wx_' + (kind === 'thunder' ? 'thunder' : kind === 'snow' ? 'snow' : kind === 'fog' ? 'fog' : kind === 'drizzle' ? 'drizzle' : kind === 'rain' ? 'rain' : kind === 'clear' ? 'clear' : '');
-      if (WX_ACTIVITY_BLOCKS[block] && wxKey && pack[wxKey]) lines = lines.concat(pack[wxKey]);
+      if (WX_SPEECH_BLOCKS[block] && wxKey && pack[wxKey]) lines = lines.concat(pack[wxKey]);
       return lines;
     }
     function setBubbleText(tile, text) {
@@ -3820,10 +2961,44 @@
       try { return new URLSearchParams(window.location.search).get('weather') === 'off'; }
       catch (e) { return false; }
     }
+    function defaultTempUnit() {
+      return localeRegion(navLocale()) === 'US' ? 'F' : 'C';
+    }
+    function readTempUnit() {
+      try {
+        const v = localStorage.getItem(TEMP_UNIT_KEY);
+        if (v === 'C' || v === 'F') return v;
+      } catch (e) {}
+      return defaultTempUnit();
+    }
+    function writeTempUnit(unit) {
+      if (unit !== 'C' && unit !== 'F') return;
+      try { localStorage.setItem(TEMP_UNIT_KEY, unit); } catch (e) {}
+    }
     function useFahrenheit() {
-      if (visitorCountry === 'US') return true;
-      const loc = (navLocale() || '').toLowerCase();
-      return loc === 'en-us' || loc.indexOf('en-us-') === 0;
+      return readTempUnit() === 'F';
+    }
+    function syncTempUnitUi() {
+      const unit = readTempUnit();
+      const s = t();
+      const label = document.getElementById('tempUnitLabel');
+      if (label) label.textContent = s.tempUnit || 'Temperature';
+      const cBtn = document.getElementById('tempUnitC');
+      const fBtn = document.getElementById('tempUnitF');
+      if (cBtn) {
+        cBtn.setAttribute('aria-pressed', unit === 'C' ? 'true' : 'false');
+        cBtn.setAttribute('aria-label', s.tempC || 'Celsius');
+      }
+      if (fBtn) {
+        fBtn.setAttribute('aria-pressed', unit === 'F' ? 'true' : 'false');
+        fBtn.setAttribute('aria-label', s.tempF || 'Fahrenheit');
+      }
+    }
+    function setTempUnit(unit) {
+      if (unit !== 'C' && unit !== 'F') return;
+      writeTempUnit(unit);
+      syncTempUnitUi();
+      paintAllWeather();
     }
     function weatherKind(code) {
       const c = Number(code);
@@ -4489,6 +3664,7 @@
       if (yt) { yt.setAttribute('aria-label', s.ytLabel || 'SuperAlex on YouTube'); yt.setAttribute('title', s.ytLabel || 'SuperAlex on YouTube'); }
       document.getElementById('settingsHeading').textContent = s.settings;
       document.getElementById('englishLabel').textContent = s.english;
+      syncTempUnitUi();
       menuBtn.setAttribute('aria-label', s.settingsBtn);
       syncSoundLabels();
       tiles.forEach((tile) => {
@@ -4507,6 +3683,11 @@
       currentLang = resolveLang();
       applyI18n();
     });
+    const tempUnitC = document.getElementById('tempUnitC');
+    const tempUnitF = document.getElementById('tempUnitF');
+    if (tempUnitC) tempUnitC.addEventListener('click', function () { setTempUnit('C'); });
+    if (tempUnitF) tempUnitF.addEventListener('click', function () { setTempUnit('F'); });
+    syncTempUnitUi();
 
     applyI18n();
     tick();
@@ -4573,9 +3754,28 @@
       });
     }
 
+    function isIPhoneOrIPod() {
+      try { return /iPhone|iPod/i.test(navigator.userAgent || ''); }
+      catch (e) { return false; }
+    }
+    function isIPhoneSafari() {
+      if (!isIPhoneOrIPod()) return false;
+      const ua = navigator.userAgent || '';
+      if (/CriOS|FxiOS|EdgiOS|OPiOS|OPT\/|DuckDuckGo|YaBrowser/i.test(ua)) return false;
+      return /Safari/i.test(ua);
+    }
+    function fullscreenApiUsable() {
+      try {
+        const el = document.documentElement;
+        const enabled = document.fullscreenEnabled === true || document.webkitFullscreenEnabled === true;
+        const fn = el.requestFullscreen || el.webkitRequestFullscreen || el.webkitRequestFullScreen;
+        return !!(enabled && fn);
+      } catch (e) { return false; }
+    }
     function canFullscreen() {
-      const el = document.documentElement;
-      return !!(el.requestFullscreen || el.webkitRequestFullscreen || el.webkitRequestFullScreen);
+      // iPhone/iPod (any iOS browser) cannot use the Fullscreen API; hide the control.
+      if (isIPhoneOrIPod()) return false;
+      return fullscreenApiUsable();
     }
     function isStandalone() {
       return (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) || window.navigator.standalone === true;
@@ -4653,9 +3853,7 @@
         hintText.textContent = s.fsHint || 'Tap for full screen';
         if (go) { go.hidden = false; go.textContent = s.fsBtn || 'Full screen'; }
         hint.hidden = false;
-      } else {
-        const coarse = window.matchMedia && window.matchMedia('(hover: none), (pointer: coarse)').matches;
-        if (!coarse && !/iPhone|iPad|iPod/i.test(navigator.userAgent || '')) return;
+      } else if (isIPhoneSafari()) {
         let seen = '';
         try { seen = localStorage.getItem('ninelives.a2hsHintSeen') || ''; } catch (e) {}
         if (seen) return;
@@ -4711,7 +3909,7 @@
     syncFsChrome();
 
     // Expose a tiny hook so future settings can swap room art without rewriting clocks/themes.
-    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, activityBlockId, activityLineFor, hourOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, METRO_HUBS, canFullscreen, themeHasArt, visualThemeId };
+    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
   })();
   </script>
 </body>

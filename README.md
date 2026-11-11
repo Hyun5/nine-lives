@@ -109,13 +109,17 @@ These rules live in `periodForHour` in the page script. Tap a room to enlarge it
 
 ## Themes
 
-Themes are a data-driven list in `THEMES`, each with `{ id, name, status, linkWeather, linkTime }`. There is no theme name on the main screen. The ☰ settings panel holds a theme picker: **Auto (this week)** plus the seven themes, localized in all eight UI languages.
+Themes are a data-driven list in `THEMES`, each with `{ id, name, status, linkWeather, linkTime }`. There is no theme name on the main screen. The ☰ settings panel holds a theme picker, in this order — **This week's theme (auto)**, Rainy Window, Moonlight Window, Christmas, Snow, Fireplace, Library, Cafe, Classroom — localized in all eight UI languages.
+
+A status line at the top of the picker reports what is actually on screen (including the Rainy Window fallback), for example “Now showing: Rainy Window”. In a week whose scheduled theme has no art yet it reads “Now showing: Rainy Window (Moonlight Window coming soon)”. A manual pick appends “(your pick)”.
+
+Only **This week's theme (auto)** and themes with `status: 'ready'` (currently only Rainy Window) are radio options: they are keyboard-accessible (`role=radiogroup` / `role=radio`) and the current choice is checked. Coming themes are listed, dimmed, and not selectable; their row shows the name, a **This week** badge when that theme is the week’s scheduled one, and the shared **Coming soon** tag. If an older visit stored a coming theme id in `localStorage['ninelives.theme']`, it is cleared and treated as auto.
 
 - **Rainy Window** — `status: 'ready'`, `linkWeather: false`, `linkTime: false`. This is the only theme with art. The visual is fully fixed: rain on glass and the Rainy Window page background, with no weather-driven visual switching and no time-of-day tone layer.
 - **Moonlight Window** — `linkWeather: false`, `linkTime: false`, coming soon (no art yet).
-- **Christmas**, **Snow**, **Fireplace**, **Library**, **Cafe** — `linkWeather: false`, `linkTime: true`, coming soon (no art yet).
+- **Christmas**, **Snow**, **Fireplace**, **Library**, **Cafe**, **Classroom** — `linkWeather: false`, `linkTime: true`, coming soon (no art yet). Classroom is registered in the picker only; it is not in the weekly auto schedule.
 
-Themes without art are still selectable. They show a **Coming soon** tag in the picker and fall back to Rainy Window visuals. Time-of-day tone is applied only when the active theme both has art and has `linkTime: true`. Until more art ships, that means only a future time-linked theme with art will use the tone path; Rainy Window stays fully fixed.
+Themes without art are still selectable. Every theme with `status: 'coming'` shows the shared localized **Coming soon** tag (`comingSoon`: English “Coming soon”, Korean “곧 공개”, and the same key in the other six languages) in the picker. Rainy Window (`status: 'ready'`) does not show the tag. These themes fall back to Rainy Window visuals. Time-of-day tone is applied only when the active theme both has art and has `linkTime: true`. Until more art ships, that means only a future time-linked theme with art will use the tone path; Rainy Window stays fully fixed.
 
 ### Weekly auto schedule
 
@@ -130,7 +134,7 @@ If the visitor has not picked a theme, the page chooses one from `THEME_SCHEDULE
 | 2026-12-16 11:00 | snow |
 | 2026-12-23 11:00 onward | fireplace (kept) |
 
-A manual pick in the ☰ panel overrides the weekly auto and is saved in `localStorage['ninelives.theme']`. Choosing **Auto (this week)** clears that override. `?theme=` (including `?theme=auto`) is a test override for one page load and does not have to be written to storage. `setTheme(id)` is exposed on `window.NineLives` for later use.
+A manual pick in the ☰ panel (Rainy Window today) overrides the weekly auto and is saved in `localStorage['ninelives.theme']`. Choosing **This week's theme (auto)** clears that override. `?theme=` (including `?theme=auto`) is a test override for one page load and does not have to be written to storage. `?date=YYYY-MM-DDTHH:mm` is a query-only clock override, interpreted in `America/New_York` unless the value includes a timezone offset, so you can preview another week (for example `?date=2026-11-25T12:00`). `setTheme(id)` is exposed on `window.NineLives` for later use.
 
 ## How to add a theme
 
@@ -144,7 +148,7 @@ Themes are overlays and mood on top of the room art. They do not replace charact
 
 ## How to add a setting (v2 and later)
 
-A **setting** is the room/background art per character (home, later perhaps a distinct setting pack). It is independent of the **theme**. v1 only includes and shows **home**. Library and Cafe in this version are **themes**, not settings.
+A **setting** is the room/background art per character (home, later perhaps a distinct setting pack). It is independent of the **theme**. v1 only includes and shows **home**. Library, Cafe, and Classroom in this version are **themes**, not settings.
 
 The page keeps a light internal hook on `window.NineLives` (`SETTINGS`, `CURRENT_SETTING`, `THEMES`, `setTheme`, `THEME_SCHEDULE`, and the clock/weather helpers).
 
@@ -181,6 +185,6 @@ Numeric weather on the tiles is kept small: icon and temperature only. `?hour=22
 
 ## Full screen and home screen
 
-On browsers that support the Fullscreen API (Android and desktop), the header has a full-screen button, a one-time “Tap for full screen” hint, and a double-tap on the header chrome. On iPhone Safari and other browsers without that API, a one-time “Add to Home Screen for full screen” hint is shown (`localStorage['ninelives.a2hsHintSeen']`). The page ships `manifest.webmanifest` and icons (`icon-180.png`, `icon-192.png`, `icon-512.png`) so it can open standalone from the home screen.
+On browsers that can use the Fullscreen API (Android phones, tablets including iPad, and desktop), the header has a full-screen button, a one-time “Tap for full screen” hint, and a double-tap on the header chrome. iPhone and iPod (any iOS browser; all of them use WebKit) hide that button, skip the landscape hint, and ignore double-tap-to-fullscreen, because the API is not usable there. A one-time “Add to Home Screen for full screen” hint is shown only in iPhone Safari, and not when the page is already in standalone mode (`localStorage['ninelives.a2hsHintSeen']`). The page ships `manifest.webmanifest` and icons (`icon-180.png`, `icon-192.png`, `icon-512.png`) so it can open standalone from the home screen.
 
 In mobile landscape, the document is made slightly taller than the visible viewport (`100dvh + 2px`) so a first small swipe or a delayed `window.scrollTo(0, 1)` on orientation change can collapse the browser toolbar. Layout uses `100svh` / `100dvh` and `viewport-fit=cover` with safe-area padding. This does not fight the YOU-centered initial scroll on portrait.
