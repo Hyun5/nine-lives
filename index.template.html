@@ -189,9 +189,11 @@
       object-fit: cover;
       object-position: center 40%;
     }
-    .tile video { opacity: 0; transition: opacity 0.45s ease; }
+    .tile video { opacity: 0; transition: opacity 2.5s ease-in-out; }
     .tile video.on { opacity: 1; }
-    .tile img.still { opacity: 1; transition: opacity 0.45s ease; }
+    .tile img.still { opacity: 1; transition: opacity 2.5s ease-in-out; }
+    .tile.no-fade video,
+    .tile.no-fade img.still { transition: none; }
     .tile .shade {
       position: absolute;
       inset: 0;
@@ -928,9 +930,6 @@
       }
     }
 
-    @media (prefers-reduced-motion: reduce) {
-      .tile video, .tile img.still, .fx-stars span { animation: none; transition: none; }
-    }
   </style>
 </head>
 <body>
@@ -2031,6 +2030,7 @@
         tile.vid.poster = asset(room.id + '_desk.jpg');
         tile.vid.src = asset(room.id + '_idle.mp4');
         tile.el.dataset.period = '';
+        if (typeof settleStills === 'function' && tile.img) settleStills(tile, tile.img);
       }
       labelTile(tile);
     }
@@ -2084,20 +2084,104 @@
       bindTile(tile, room);
     });
 
+    const STILL_FADE_MS = 2500;
+
+    function stillImages(tile) {
+      const vis = tile.el && tile.el.querySelector('.vis');
+      return vis ? vis.querySelectorAll('img.still') : [];
+    }
+
+    function settleStills(tile, keep) {
+      if (!tile || !keep) return;
+      tile.stillFadeGen = (tile.stillFadeGen || 0) + 1;
+      if (tile.stillFadeTimer) {
+        clearTimeout(tile.stillFadeTimer);
+        tile.stillFadeTimer = null;
+      }
+      stillImages(tile).forEach(function (im) {
+        if (im !== keep) im.remove();
+      });
+      tile.img = keep;
+      keep.style.opacity = '1';
+    }
+
     function applyVariant(tile, period) {
-      const id = tile.room.id;
       const stills = { day: 'desk', evening: 'dark', late: 'off', night: 'bed' };
-      tile.img.src = asset(id + '_' + stills[period] + '.jpg');
+      const nextSrc = asset(tile.room.id + '_' + stills[period] + '.jpg');
+      const prevPeriod = tile.el.dataset.period;
+      const shouldFade = !!(prevPeriod && prevPeriod !== period);
       tile.el.dataset.period = period;
       const useVideo = period === 'day'; // desk loops are gentle: play even with reduced motion
-      if (useVideo) {
-        tile.vid.classList.add('on');
-        const play = tile.vid.play();
-        if (play && play.catch) play.catch(function () {});
-      } else {
-        tile.vid.classList.remove('on');
-        tile.vid.pause();
+
+      function setVideo(fade) {
+        if (!fade) tile.el.classList.add('no-fade');
+        if (useVideo) {
+          tile.vid.classList.add('on');
+          const play = tile.vid.play();
+          if (play && play.catch) play.catch(function () {});
+          if (tile.vidFadeTimer) { clearTimeout(tile.vidFadeTimer); tile.vidFadeTimer = null; }
+        } else {
+          tile.vid.classList.remove('on');
+          if (tile.vidFadeTimer) clearTimeout(tile.vidFadeTimer);
+          if (fade) {
+            tile.vidFadeTimer = setTimeout(function () {
+              tile.vid.pause();
+              tile.vidFadeTimer = null;
+            }, STILL_FADE_MS);
+          } else {
+            tile.vid.pause();
+          }
+        }
+        if (!fade) {
+          void tile.el.offsetWidth;
+          tile.el.classList.remove('no-fade');
+        }
       }
+
+      if (!shouldFade) {
+        settleStills(tile, tile.img);
+        if (tile.img.getAttribute('src') !== nextSrc) tile.img.src = nextSrc;
+        setVideo(false);
+        return;
+      }
+
+      // Snap any in-flight fade to the topmost still, then crossfade to the new one.
+      const existing = stillImages(tile);
+      let oldImg = tile.img;
+      existing.forEach(function (im) { oldImg = im; });
+      settleStills(tile, oldImg);
+
+      const wrap = oldImg.parentElement;
+      const incoming = document.createElement('img');
+      incoming.className = 'still';
+      incoming.alt = '';
+      incoming.draggable = false;
+      wrap.insertBefore(incoming, oldImg);
+      tile.img = incoming;
+      const gen = (tile.stillFadeGen = (tile.stillFadeGen || 0) + 1);
+
+      let started = false;
+      function beginFade() {
+        if (started || tile.stillFadeGen !== gen) return;
+        started = true;
+        oldImg.style.opacity = '0';
+        tile.stillFadeTimer = setTimeout(function () {
+          if (tile.stillFadeGen !== gen) return;
+          if (oldImg.parentElement) oldImg.remove();
+          tile.stillFadeTimer = null;
+        }, STILL_FADE_MS + 80);
+      }
+
+      incoming.addEventListener('load', beginFade);
+      incoming.addEventListener('error', function () {
+        if (tile.stillFadeGen !== gen) return;
+        if (incoming.parentElement) incoming.remove();
+        tile.img = oldImg;
+        oldImg.style.opacity = '1';
+      });
+      incoming.src = nextSrc;
+      if (incoming.complete && incoming.naturalWidth) beginFade();
+      setVideo(true);
     }
 
     function tick() {
