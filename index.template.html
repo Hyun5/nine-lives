@@ -787,7 +787,7 @@
       pointer-events: none;
       overflow: hidden;
     }
-    .fx-tod, .fx-rain, .fx-wet, .fx-snow, .fx-fog, .fx-sun, .fx-stars, .fx-overcast, .fx-flash {
+    .fx-tod, .fx-rain, .fx-wet, .fx-snow, .fx-fog, .fx-sun, .fx-stars, .fx-overcast, .fx-flash, .fx-moon, .fx-citylights {
       position: absolute;
       inset: 0;
       opacity: 0;
@@ -876,6 +876,48 @@
       50% { opacity: 0.9; }
     }
 
+    /* Moonlight Window: CSS overlays only. Day stays a clear sunny city
+       (base rooms art, no rain). Night adds moonlight through the window
+       and soft city lights outside. Window position varies by room, so
+       the wash comes from both upper sides and fades into the interior. */
+    html[data-visual-theme="moonlight"] .vis[data-tod="night"] .fx-moon {
+      opacity: 1;
+      background:
+        radial-gradient(ellipse 55% 70% at 12% 10%, rgba(210, 225, 255, 0.46), rgba(160, 190, 255, 0.14) 42%, transparent 72%),
+        radial-gradient(ellipse 55% 70% at 88% 10%, rgba(210, 225, 255, 0.46), rgba(160, 190, 255, 0.14) 42%, transparent 72%),
+        linear-gradient(180deg, rgba(170, 195, 255, 0.16), rgba(180, 200, 255, 0.05) 40%, transparent 70%);
+      mix-blend-mode: screen;
+    }
+    html[data-visual-theme="moonlight"] .vis[data-tod="night"] .fx-citylights {
+      opacity: 1;
+      background:
+        radial-gradient(circle at 16% 42%, rgba(255, 200, 120, 0.26), transparent 18%),
+        radial-gradient(circle at 84% 42%, rgba(255, 190, 110, 0.24), transparent 18%),
+        radial-gradient(circle at 22% 62%, rgba(255, 170, 90, 0.14), transparent 16%),
+        radial-gradient(circle at 78% 64%, rgba(255, 210, 150, 0.14), transparent 16%),
+        radial-gradient(circle at 50% 58%, rgba(140, 180, 255, 0.06), transparent 28%);
+      mix-blend-mode: screen;
+    }
+    html[data-visual-theme="moonlight"] .vis[data-tod="night"] .fx-tod {
+      background: linear-gradient(180deg, rgba(8, 16, 48, 0.26), rgba(4, 8, 28, 0.14) 45%, rgba(4, 6, 20, 0.1));
+    }
+    html[data-visual-theme="moonlight"] .vis[data-wx="clear"][data-tod="day"] .fx-sun {
+      background:
+        radial-gradient(circle at 78% 4%, rgba(255, 230, 150, 0.4), transparent 38%),
+        linear-gradient(180deg, rgba(255, 244, 210, 0.16), transparent 50%);
+    }
+    html[data-visual-theme="moonlight"] .page-sky[data-tod="night"] .sky-wash {
+      background:
+        radial-gradient(1000px 620px at 72% -8%, rgba(90, 110, 190, 0.55), transparent 58%),
+        radial-gradient(560px 380px at 78% 8%, rgba(200, 215, 255, 0.22), transparent 52%),
+        #04040c;
+    }
+    html[data-visual-theme="moonlight"] .page-sky[data-wx="clear"][data-tod="day"] .sky-wx,
+    html[data-visual-theme="moonlight"] .page-sky[data-wx="clear"][data-tod="morning"] .sky-wx {
+      opacity: 1;
+      background: radial-gradient(800px 500px at 80% 0%, rgba(255, 220, 140, 0.22), transparent 50%);
+    }
+
     .bubble {
       position: absolute;
       top: 10px;
@@ -924,7 +966,7 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .fx-stars span, .fx-flash, .bubble, .fx-tod, .fx-wet, .fx-fog, .fx-sun, .fx-overcast, .page-sky, .page-sky .sky-wash, .page-sky .sky-wx, .tile {
+      .fx-stars span, .fx-flash, .bubble, .fx-tod, .fx-wet, .fx-fog, .fx-sun, .fx-overcast, .fx-moon, .fx-citylights, .page-sky, .page-sky .sky-wash, .page-sky .sky-wx, .tile {
         animation: none !important;
         transition: none !important;
       }
@@ -1005,7 +1047,7 @@
 
     const THEMES = [
       { id: 'rainy',      name: 'Rainy Window',      nameKo: '비 오는 창가', status: 'ready',  linkWeather: false, linkTime: false },
-      { id: 'moonlight',  name: 'Moonlight Window',  nameKo: '달빛 창가',   status: 'coming', linkWeather: false, linkTime: false },
+      { id: 'moonlight',  name: 'Moonlight Window',  nameKo: '달빛 창가',   status: 'ready',  linkWeather: false, linkTime: false },
       { id: 'christmas',  name: 'Christmas',         nameKo: '크리스마스',  status: 'coming', linkWeather: false, linkTime: true },
       { id: 'snow',       name: 'Snow',              nameKo: '눈',         status: 'coming', linkWeather: false, linkTime: true },
       { id: 'fireplace',  name: 'Fireplace',         nameKo: '화롯불',     status: 'coming', linkWeather: false, linkTime: true },
@@ -1916,8 +1958,10 @@
       const sun = document.createElement('div'); sun.className = 'fx-sun';
       const stars = document.createElement('div'); stars.className = 'fx-stars';
       fillParticles(stars, reduceMotion ? 0 : 8, 'star');
+      const moon = document.createElement('div'); moon.className = 'fx-moon';
+      const citylights = document.createElement('div'); citylights.className = 'fx-citylights';
       const flash = document.createElement('div'); flash.className = 'fx-flash';
-      [tod, rain, wet, snow, fog, overcast, sun, stars, flash].forEach(function (el) { fx.appendChild(el); });
+      [tod, rain, wet, snow, fog, overcast, sun, stars, moon, citylights, flash].forEach(function (el) { fx.appendChild(el); });
       return fx;
     }
 
@@ -2639,27 +2683,42 @@
     function applyResolvedTheme() {
       return setTheme(resolveActiveTheme());
     }
-    function applyAtmosphereToVis(vis, room, now) {
-      if (!vis) return;
-      // Only rainy has art today; other themes fall back to Rainy Window visuals.
-      // Time-of-day tone applies only when the active theme has art and linkTime.
+    function atmosphereFor(room, now) {
+      // Moonlight Window keeps linkWeather/linkTime false (not live weather,
+      // not the generic time-linked path). It still uses time of day so
+      // daytime stays a clear sunny city and night gets the moonlight overlay.
+      // Rainy Window and coming themes are unchanged: no art falls back to
+      // Rainy Window visuals, and weather-unlinked themes stay fixed rain.
+      if (visualThemeId(currentTheme) === 'moonlight') {
+        if (!room) return { wx: 'clear', tod: '' };
+        // Use the same local-hour periods as the room art (periodForHour),
+        // not live sunrise/sunset, so a daytime desk scene never gets the
+        // night moonlight overlay.
+        const period = periodForHour(cityParts(roomZone(room), now || virtualNow()).hour24);
+        let tod = 'day';
+        if (period === 'night' || period === 'late') tod = 'night';
+        else if (period === 'evening') tod = 'evening';
+        return { wx: 'clear', tod: tod };
+      }
       const useWx = themeLinksWeather() && themeHasArt(currentTheme);
       const useTod = themeLinksTime() && themeHasArt(currentTheme);
-      const wx = useWx ? effectiveWeatherKind(room) : 'rain';
-      const tod = useTod ? todForRoom(room, now) : '';
-      if (vis.dataset.wx !== wx) vis.dataset.wx = wx;
-      if (vis.dataset.tod !== tod) vis.dataset.tod = tod;
+      const wx = useWx && room ? effectiveWeatherKind(room) : 'rain';
+      const tod = useTod && room ? todForRoom(room, now) : '';
+      return { wx: wx, tod: tod };
+    }
+    function applyAtmosphereToVis(vis, room, now) {
+      if (!vis) return;
+      const atm = atmosphereFor(room, now);
+      if (vis.dataset.wx !== atm.wx) vis.dataset.wx = atm.wx;
+      if (vis.dataset.tod !== atm.tod) vis.dataset.tod = atm.tod;
     }
     function applyPageSky(now) {
       const sky = document.getElementById('pageSky');
       if (!sky) return;
       const you = (currentLayout && currentLayout[CENTER_SLOT]) || (tiles[CENTER_SLOT] && tiles[CENTER_SLOT].room);
-      const useWx = themeLinksWeather() && themeHasArt(currentTheme);
-      const useTod = themeLinksTime() && themeHasArt(currentTheme);
-      const wx = useWx && you ? effectiveWeatherKind(you) : 'rain';
-      const tod = useTod && you ? todForRoom(you, now) : '';
-      sky.dataset.wx = wx;
-      sky.dataset.tod = tod;
+      const atm = atmosphereFor(you, now);
+      sky.dataset.wx = atm.wx;
+      sky.dataset.tod = atm.tod;
     }
     function applyAllAtmosphere(now) {
       const tnow = now || virtualNow();
