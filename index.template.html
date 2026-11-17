@@ -971,8 +971,6 @@
     /* Chrome does not sample the room art for backdrop-filter (window
        desaturation) through the z-indexed .fx stacking context, so under the
        winter overlay themes .fx drops its z-index and .fx-theme carries it. */
-    html[data-visual-theme="christmas"] .fx, html[data-visual-theme="snow"] .fx,
-    html[data-visual-theme="fireplace"] .fx, html[data-visual-theme="sunlight"] .fx { z-index: auto; }
     .fx-art {
       position: absolute; left: 50%; top: 40%;
       width: 100%; height: 100%;
@@ -996,8 +994,6 @@
       to { transform: translate3d(0, 100%, 0); }
     }
     /* Snow: white outside, snowfield on rooftops/street, frosted corners. */
-    html[data-visual-theme="snow"] .win { backdrop-filter: saturate(0.1) brightness(1.16) contrast(0.82); -webkit-backdrop-filter: saturate(0.1) brightness(1.16) contrast(0.82); }
-    html[data-visual-theme="snow"] .vis[data-tod="night"] .win { backdrop-filter: saturate(0.4) brightness(1.05); -webkit-backdrop-filter: saturate(0.4) brightness(1.05); }
     .th-snowsky { background: linear-gradient(180deg, rgba(225, 233, 246, 0.42), rgba(230, 236, 246, 0.18) 50%, rgba(235, 240, 250, 0.1)); }
     .th-snowfield { background: linear-gradient(180deg, transparent 52%, rgba(238, 244, 252, 0.24) 80%, rgba(250, 252, 255, 0.14)); }
     .th-frost {
@@ -1048,7 +1044,6 @@
       mix-blend-mode: screen;
     }
     .vis[data-tod="day"] .th-xmasglow { opacity: 0.55; }
-    html[data-visual-theme="christmas"] .win { backdrop-filter: saturate(0.6) brightness(1.06); -webkit-backdrop-filter: saturate(0.6) brightness(1.06); }
     html[data-visual-theme="christmas"] .vis[data-tod="day"] .fx-tod {
       background: linear-gradient(180deg, rgba(255, 236, 210, 0.08), transparent 45%, rgba(120, 30, 20, 0.05));
     }
@@ -1153,6 +1148,101 @@
         radial-gradient(circle at 84% 42%, rgba(255, 200, 130, 0.2), transparent 18%);
       mix-blend-mode: screen;
     }
+    /* ---- Window glass masks, winter views, hearth, tree (assets/winter) ----
+       .wglass is masked to each room's real glass per scene (m_<room>_<scene>),
+       traced from the art with people and foreground objects cut out, so frost
+       and snowflakes never render on walls or people. .wdeco is masked to
+       "everything except people" (f_<room>_<scene>) for string lights, glow,
+       beams and the tree. .wview is a per-room outside view (snowy, or the
+       palm-free Midwest street for the center room) whose alpha is the glass. */
+    .fx-art .wglass, .fx-art .wdeco {
+      position: absolute; inset: 0;
+      -webkit-mask-size: 100% 100%; mask-size: 100% 100%;
+      -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    }
+    .fx-art .wglass > div { position: absolute; inset: 0; }
+    .fx-art .wview { position: absolute; display: block; pointer-events: none; }
+    .wglass .th-snowsky { background: linear-gradient(180deg, rgba(235, 240, 250, 0.16), rgba(235, 240, 250, 0.05) 60%, transparent); }
+    .wglass .th-frost {
+      background:
+        radial-gradient(ellipse 22% 30% at 0% 100%, rgba(240, 248, 255, 0.4), transparent 70%),
+        radial-gradient(ellipse 22% 30% at 100% 100%, rgba(240, 248, 255, 0.4), transparent 70%),
+        radial-gradient(ellipse 18% 16% at 0% 0%, rgba(240, 248, 255, 0.22), transparent 70%),
+        radial-gradient(ellipse 18% 16% at 100% 0%, rgba(240, 248, 255, 0.22), transparent 70%);
+    }
+    .vis[data-tod="night"] .wglass .th-frost { opacity: 0.6; }
+    .wglass .th-flakes span { width: 8px; margin-left: -4px; }
+    .th-lights.full { height: 22%; }
+    .xtree { position: absolute; pointer-events: none; }
+    .xtree img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .xtree i { position: absolute; width: 7%; height: 4%; margin: -2% -3.5%; border-radius: 50%; background: radial-gradient(circle, rgba(255, 240, 180, 0.95), rgba(255, 200, 90, 0.4) 45%, transparent 70%); animation: thtwinkle ease-in-out infinite; mix-blend-mode: screen; }
+    .fx-theme[data-scene="off"] .xtree img, .fx-theme[data-scene="bed"] .xtree img { filter: brightness(0.62); }
+    .fx-theme[data-scene="dark"] .xtree img { filter: brightness(0.85); }
+    /* Hearth with burning logs: in every room under every theme (female and
+       male art). Flames and embers animate even with prefers-reduced-motion. */
+    .hearth { position: absolute; pointer-events: none; }
+    .hearth img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+    .fx-theme[data-scene="dark"] .hearth img { filter: brightness(0.82); }
+    .fx-theme[data-scene="off"] .hearth img, .fx-theme[data-scene="bed"] .hearth img { filter: brightness(0.6); }
+    .hearth .hf {
+      position: absolute; left: 24.4%; width: 43.9%; top: 26.4%; height: 52.4%;
+      border-radius: 45% 45% 8% 8%;
+      background:
+        radial-gradient(ellipse 34% 52% at 50% 92%, rgba(255, 236, 160, 0.95), rgba(255, 170, 60, 0.6) 45%, transparent 75%),
+        radial-gradient(ellipse 22% 62% at 38% 90%, rgba(255, 150, 50, 0.75), transparent 72%),
+        radial-gradient(ellipse 22% 58% at 64% 90%, rgba(255, 120, 40, 0.7), transparent 72%);
+      mix-blend-mode: screen;
+      transform-origin: 50% 100%;
+      animation: hflame 1.25s ease-in-out infinite;
+    }
+    .hearth .hf.b { animation-duration: 0.9s; animation-delay: -0.4s; opacity: 0.7; }
+    @keyframes hflame {
+      0%, 100% { transform: scale(1, 1); opacity: 0.85; }
+      25% { transform: scale(0.96, 1.08); opacity: 1; }
+      50% { transform: scale(1.03, 0.94); opacity: 0.78; }
+      75% { transform: scale(0.98, 1.05); opacity: 0.95; }
+    }
+    .hearth .he { position: absolute; left: 30%; width: 34%; top: 0; height: 100%; }
+    .hearth .he span {
+      position: absolute; bottom: 30%;
+      width: clamp(2px, 0.4cqw, 4px); height: clamp(2px, 0.4cqw, 4px);
+      border-radius: 50%;
+      background: rgba(255, 200, 100, 0.95);
+      box-shadow: 0 0 5px 2px rgba(255, 120, 40, 0.7);
+      opacity: 0;
+      animation: hember ease-out infinite;
+    }
+    @keyframes hember {
+      0% { transform: translate3d(0, 0, 0); opacity: 0; }
+      15% { opacity: 1; }
+      100% { transform: translate3d(var(--dx, 6px), -18cqh, 0); opacity: 0; }
+    }
+    .hglow {
+      position: absolute; inset: 0; pointer-events: none;
+      background: radial-gradient(ellipse 48% 62% at var(--hx, 10%) 92%, rgba(255, 140, 50, 0.32), rgba(255, 110, 40, 0.1) 50%, transparent 78%);
+      mix-blend-mode: screen; opacity: 0.35;
+      animation: hglow 2.3s ease-in-out infinite;
+    }
+    .fx-theme[data-scene="dark"] .hglow { opacity: 0.6; }
+    .fx-theme[data-scene="off"] .hglow, .fx-theme[data-scene="bed"] .hglow { opacity: 0.85; }
+    html[data-visual-theme="fireplace"] .hglow { background: radial-gradient(ellipse 70% 85% at var(--hx, 10%) 96%, rgba(255, 140, 50, 0.45), rgba(255, 110, 40, 0.16) 50%, transparent 80%); }
+    html[data-visual-theme="fireplace"] .fx-theme .hglow { opacity: 0.7; }
+    html[data-visual-theme="fireplace"] .fx-theme[data-scene="off"] .hglow, html[data-visual-theme="fireplace"] .fx-theme[data-scene="bed"] .hglow { opacity: 1; }
+    @keyframes hglow {
+      0%, 100% { filter: brightness(1); }
+      30% { filter: brightness(1.18); }
+      55% { filter: brightness(0.9); }
+      80% { filter: brightness(1.1); }
+    }
+    html[data-visual-theme="fireplace"] .vis[data-tod="evening"] .fx-tod { background: linear-gradient(180deg, rgba(60, 20, 10, 0.1), rgba(255, 120, 40, 0.14) 60%, rgba(255, 90, 30, 0.18)); }
+    html[data-visual-theme="fireplace"] .vis[data-tod="night"] .fx-tod { background: linear-gradient(180deg, rgba(10, 10, 30, 0.28), rgba(60, 20, 10, 0.14) 55%, rgba(255, 100, 30, 0.12)); }
+    /* Richer winter sunbeams. */
+    html[data-visual-theme="sunlight"] .vis[data-tod="day"] .th-beam { opacity: 1; filter: brightness(1.25); }
+    .th-beam2 { position: absolute; height: 92%; transform-origin: top left; background: linear-gradient(180deg, rgba(255, 236, 190, 0.24), rgba(255, 220, 160, 0.08) 60%, transparent); mix-blend-mode: screen; filter: blur(2px); animation: hbeam 9s ease-in-out infinite; }
+    .vis[data-tod="night"] .th-beam2 { opacity: 0; }
+    .vis[data-tod="evening"] .th-beam2 { background: linear-gradient(180deg, rgba(255, 170, 100, 0.26), rgba(255, 130, 70, 0.08) 60%, transparent); }
+    @keyframes hbeam { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
+    body.wx-paused .hearth .he span, body.wx-paused .xtree i { animation-play-state: paused; }
     /* Page sky behind the grid, per winter theme. */
     html[data-visual-theme="snow"] .page-sky .sky-wx { opacity: 1; background: linear-gradient(180deg, rgba(190, 205, 230, 0.16), rgba(20, 24, 40, 0.25)); }
     html[data-visual-theme="snow"] .page-sky[data-tod="night"] .sky-wash { background: radial-gradient(1000px 620px at 50% -10%, rgba(80, 100, 160, 0.4), transparent 60%), #05070f; }
@@ -3027,54 +3117,134 @@
       }
       return h + '</div>';
     }
+    // ---- Winter window art (assets/winter) ----
+    // m_<room>_<scene>: glass mask traced from that scene's art, with people and
+    // foreground objects cut out. f_<room>_<scene>: everything except people.
+    // v_/vb_<room>_<scene>: outside view (snowy / palm-free bare Midwest) whose
+    // alpha is the glass mask, covering VIEW_BOX px [x0, y0, x1, y1] of 640x360.
+    const VIEW_BOX = { r01: [32, 0, 268, 273], r02: [329, 0, 624, 183], r03: [217, 0, 433, 203], r04: [467, 0, 640, 198], r05: [230, 0, 496, 180] };
+    const BARE_VIEW = { r05: true };
+    // Hearth [left %, bottom %, width %] per art set and room; Christmas tree per room.
+    const HEARTH_POS = {
+      rooms: { r01: [1, 91, 16], r02: [83, 91, 15], r03: [84, 92, 15], r04: [0.5, 91, 14], r05: [0.5, 89, 12], r06: [84, 92, 15], r07: [0.5, 91, 14], r08: [85, 91, 14], r09: [0.5, 91, 14] },
+      rooms_male: { r01: [0.5, 91, 12], r02: [0.5, 91, 12], r03: [0.5, 91, 12], r04: [0.5, 91, 12], r05: [28, 93, 11], r06: [0.5, 91, 12], r07: [0.5, 91, 12], r08: [0.5, 91, 12], r09: [0.5, 91, 12] }
+    };
+    HEARTH_POS.rooms_rainy = HEARTH_POS.rooms;
+    const TREE_POS = { r01: [10, 70, 6], r02: [2, 53, 8], r03: [74.5, 82, 8], r04: [1, 60, 7.5], r05: [2, 44, 7], r06: [48, 96, 8], r07: [64, 84, 7], r08: [88, 64, 7], r09: [0.5, 72, 6] };
+    const HEARTH_AR = 249 / 260, TREE_AR = 352 / 200, ART_AR = 640 / 360;
+    // Cold rule (per room, also the center YOU cell): snowy when live weather
+    // reports snow, or the live temperature is <= 4.5 °C (40 °F). Without live
+    // weather: |lat| >= 35° during that hemisphere's winter (Nov–Mar north,
+    // May–Sep south). ?wx=snow forces every room cold; any other ?wx forces warm.
+    const COLD_MAX_C = 4.5;
+    function winterAsset(file) { return new URL('./assets/winter/' + file, document.baseURI).href; }
+    function roomScene(room, now) {
+      return sceneKey(periodForHour(cityParts(roomZone(room), now || virtualNow()).hour24));
+    }
+    function roomIsCold(room, now) {
+      const ov = wxOverride();
+      if (ov) return ov === 'snow';
+      const wx = weatherForRoom(room);
+      if (wx && wx.code != null && weatherKind(wx.code) === 'snow') return true;
+      if (wx && typeof wx.tempC === 'number' && isFinite(wx.tempC)) return wx.tempC <= COLD_MAX_C;
+      const c = coordsForRoom(room);
+      if (!c || !isFinite(c.lat)) return false;
+      const m = (now || virtualNow()).getUTCMonth() + 1;
+      if (c.lat >= 35) return m >= 11 || m <= 3;
+      if (c.lat <= -35) return m >= 5 && m <= 9;
+      return false;
+    }
+    function boxStyle(b) {
+      return 'left:' + (b[0] / 6.4).toFixed(3) + '%;top:' + (b[1] / 3.6).toFixed(3) + '%;width:' + ((b[2] - b[0]) / 6.4).toFixed(3) + '%;height:' + ((b[3] - b[1]) / 3.6).toFixed(3) + '%';
+    }
+    function maskStyle(file) {
+      const u = 'url(&quot;' + winterAsset(file) + '&quot;)';
+      return '-webkit-mask-image:' + u + ';mask-image:' + u;
+    }
+    function spriteBox(p, ar) {
+      const h = p[2] * ar * ART_AR;
+      return 'left:' + p[0] + '%;top:' + (p[1] - h).toFixed(2) + '%;width:' + p[2] + '%;height:' + h.toFixed(2) + '%';
+    }
+    function hearthHTML(set, roomId) {
+      const p = (HEARTH_POS[set] || {})[roomId];
+      if (!p) return '';
+      let em = '<div class="he">';
+      for (let i = 0; i < 6; i++) {
+        em += '<span style="left:' + rr(10, 90).toFixed(1) + '%;--dx:' + rr(-10, 10).toFixed(0) + 'px;animation-duration:' + rr(2.2, 4.2).toFixed(2) + 's;animation-delay:' + (-rr(0, 4)).toFixed(2) + 's"></span>';
+      }
+      em += '</div>';
+      const hx = (p[0] + p[2] * 0.46).toFixed(1);
+      return '<div class="hglow" style="--hx:' + hx + '%"></div>' +
+        '<div class="hearth" style="' + spriteBox(p, HEARTH_AR) + '"><img alt="" src="' + winterAsset('fireplace.webp') + '"><div class="hf"></div><div class="hf b"></div>' + em + '</div>';
+    }
+    function treeHTML(roomId) {
+      const p = TREE_POS[roomId];
+      if (!p) return '';
+      let tw = '';
+      [[40, 30], [58, 38], [34, 50], [62, 55], [45, 64], [30, 68], [68, 70], [52, 46], [50, 20]].forEach(function (sp) {
+        tw += '<i style="left:' + sp[0] + '%;top:' + sp[1] + '%;animation-duration:' + rr(1.4, 2.8).toFixed(2) + 's;animation-delay:' + (-rr(0, 3)).toFixed(2) + 's"></i>';
+      });
+      return '<div class="xtree" style="' + spriteBox(p, TREE_AR) + '"><img alt="" src="' + winterAsset('xmastree.webp') + '">' + tw + '</div>';
+    }
+    function viewHTML(roomId, scene, cold) {
+      const b = VIEW_BOX[roomId];
+      if (!b) return '';
+      let file = '';
+      if (cold) file = 'v_' + roomId + '_' + scene + '.webp';
+      else if (BARE_VIEW[roomId]) file = 'vb_' + roomId + '_' + scene + '.webp';
+      if (!file) return '';
+      return '<img class="wview" alt="" src="' + winterAsset(file) + '" style="' + boxStyle(b) + '">';
+    }
+    function lightsHTML(w, n, cls) {
+      const colors = [['#ff5a4e', 'rgba(255,80,60,0.35)'], ['#ffd36a', 'rgba(255,200,90,0.35)'], ['#5fe08a', 'rgba(80,220,120,0.3)'], ['#7fb6ff', 'rgba(110,170,255,0.3)']];
+      let bulbs = '<b></b>';
+      for (let i = 0; i < n; i++) {
+        const tpos = (i + 0.5) / n;
+        const c = colors[i % colors.length];
+        const sag = Math.sin(Math.PI * ((tpos * 2) % 1));
+        bulbs += '<i style="left:' + (tpos * 100).toFixed(1) + '%;top:' + (8 + sag * 78).toFixed(1) + '%;--c:' + c[0] + ';--g:' + c[1] +
+          ';animation-duration:' + rr(1.6, 3.2).toFixed(2) + 's;animation-delay:' + (-rr(0, 3)).toFixed(2) + 's"></i>';
+      }
+      return '<div class="th-lights ' + (cls || '') + '" style="left:' + w[0] + '%;width:' + (w[2] - w[0]) + '%;top:' + (w[1] + 0.5) + '%;height:' + ((w[3] - w[1]) * 0.2).toFixed(1) + '%">' + bulbs + '</div>';
+    }
+    // Theme layer builders: (window rect, { room, scene, cold, set }).
     const THEME_FX = {
-      snow: function (w) {
-        return '<div class="fx-art"><div class="win' + (w[4] ? ' round' : '') + '" style="' + winBox(w) + '">' +
-          '<div class="th-snowsky"></div><div class="th-snowfield"></div><div class="th-streetglow"></div>' +
-          flakesHTML(24, true) + '<div class="th-frost"></div></div></div>';
+      snow: function (w, ctx) {
+        if (!ctx.cold) return '';
+        return viewHTML(ctx.room, ctx.scene, true) +
+          '<div class="wglass" style="' + maskStyle('m_' + ctx.room + '_' + ctx.scene + '.webp') + '"><div class="th-snowsky"></div>' +
+          flakesHTML(30, true) + '<div class="th-frost"></div></div>';
       },
-      christmas: function (w) {
-        const colors = [['#ff5a4e', 'rgba(255,80,60,0.35)'], ['#ffd36a', 'rgba(255,200,90,0.35)'], ['#5fe08a', 'rgba(80,220,120,0.3)'], ['#7fb6ff', 'rgba(110,170,255,0.3)']];
-        const n = 14;
-        let bulbs = '<b></b>';
-        for (let i = 0; i < n; i++) {
-          const tpos = (i + 0.5) / n;
-          const c = colors[i % colors.length];
-          const sag = Math.sin(Math.PI * ((tpos * 2) % 1));
-          bulbs += '<i style="left:' + (tpos * 100).toFixed(1) + '%;top:' + (8 + sag * 78).toFixed(1) + '%;--c:' + c[0] + ';--g:' + c[1] +
-            ';animation-duration:' + rr(1.6, 3.2).toFixed(2) + 's;animation-delay:' + (-rr(0, 3)).toFixed(2) + 's"></i>';
-        }
+      christmas: function (w, ctx) {
         const cx = (w[0] + w[2]) / 2;
         const gx = cx < 50 ? 82 : 16;
-        return '<div class="fx-art"><div class="win' + (w[4] ? ' round' : '') + '" style="' + winBox(w) + '">' + flakesHTML(7, false) + '</div>' +
-          '<div class="th-lights" style="left:' + w[0] + '%;width:' + (w[2] - w[0]) + '%;top:' + (w[1] + 0.5) + '%;height:' + ((w[3] - w[1]) * 0.18).toFixed(1) + '%">' + bulbs + '</div>' +
-          '<div class="th-xmasglow" style="--gx:' + gx + '%"></div></div>';
+        return viewHTML(ctx.room, ctx.scene, ctx.cold) +
+          (ctx.cold ? '<div class="wglass" style="' + maskStyle('m_' + ctx.room + '_' + ctx.scene + '.webp') + '">' + flakesHTML(12, false) + '</div>' : '') +
+          '<div class="wdeco" style="' + maskStyle('f_' + ctx.room + '_' + ctx.scene + '.webp') + '">' + lightsHTML(w, 18, 'full') +
+          lightsHTML([w[0], Math.min(w[3] - 2, 88), w[2], Math.min(w[3] + 14, 100)], 14, '') +
+          '<div class="th-xmasglow" style="--gx:' + gx + '%"></div>' + treeHTML(ctx.room) + '</div>';
       },
-      fireplace: function (w) {
-        const cx = (w[0] + w[2]) / 2;
-        const fx = cx < 50 ? 92 : 8;
-        let embers = '<div class="th-embers">';
-        for (let i = 0; i < 8; i++) {
-          embers += '<span style="left:' + (fx + rr(-9, 9)).toFixed(1) + '%;--dx:' + rr(-30, 30).toFixed(0) + 'px;animation-duration:' + rr(3.5, 7).toFixed(2) +
-            's;animation-delay:' + (-rr(0, 7)).toFixed(2) + 's"></span>';
-        }
-        embers += '</div>';
-        return '<div class="fx-art"><div class="win' + (w[4] ? ' round' : '') + '" style="' + winBox(w) + '"><div class="th-coolwin"></div></div>' +
-          '<div class="th-fire" style="--fx:' + fx + '%"></div><div class="th-fire2" style="--fx:' + fx + '%"></div>' + embers + '</div>';
+      fireplace: function (w, ctx) {
+        return viewHTML(ctx.room, ctx.scene, ctx.cold) +
+          '<div class="wglass" style="' + maskStyle('m_' + ctx.room + '_' + ctx.scene + '.webp') + '"><div class="th-coolwin"></div></div>';
       },
-      sunlight: function (w) {
+      sunlight: function (w, ctx) {
         const cx = (w[0] + w[2]) / 2;
         const skew = cx < 40 ? 34 : (cx > 60 ? -34 : 22);
         const bw = w[2] - w[0];
-        let motes = '<div class="th-motes" style="position:absolute;left:' + w[0] + '%;top:' + w[3] * 0.6 + '%;width:' + bw + '%;height:' + (100 - w[3] * 0.6) * 0.7 + '%">';
-        for (let i = 0; i < 9; i++) {
+        // Dust motes stay in the light on the glass (never on desks, fans or people).
+        let motes = '<div class="th-motes" style="position:absolute;left:' + w[0] + '%;top:' + (w[1] + (w[3] - w[1]) * 0.15).toFixed(1) + '%;width:' + bw + '%;height:' + ((w[3] - w[1]) * 0.8).toFixed(1) + '%">';
+        for (let i = 0; i < 14; i++) {
           motes += '<span style="left:' + rr(5, 95).toFixed(1) + '%;top:' + rr(5, 90).toFixed(1) + '%;--dx:' + rr(-16, 16).toFixed(0) + 'px;--dy:' + rr(-20, 20).toFixed(0) +
             'px;animation-duration:' + rr(5, 10).toFixed(2) + 's;animation-delay:' + (-rr(0, 10)).toFixed(2) + 's"></span>';
         }
         motes += '</div>';
-        return '<div class="fx-art"><div class="win' + (w[4] ? ' round' : '') + '" style="' + winBox(w) + '"><div class="th-sunwin"></div></div>' +
+        return viewHTML(ctx.room, ctx.scene, ctx.cold) +
+          '<div class="wglass" style="' + maskStyle('m_' + ctx.room + '_' + ctx.scene + '.webp') + '"><div class="th-sunwin"></div>' + motes + '</div>' +
+          '<div class="wdeco" style="' + maskStyle('f_' + ctx.room + '_' + ctx.scene + '.webp') + '">' +
           '<div class="th-beam" style="left:' + w[0] + '%;top:' + (w[1] + (w[3] - w[1]) * 0.2).toFixed(1) + '%;width:' + bw + '%;transform:skewX(' + skew + 'deg)"></div>' +
-          motes + '</div>';
+          '<div class="th-beam2" style="left:' + (w[0] + bw * 0.15).toFixed(1) + '%;top:' + (w[1] + (w[3] - w[1]) * 0.1).toFixed(1) + '%;width:' + (bw * 0.45).toFixed(1) + '%;transform:skewX(' + skew + 'deg)"></div>' +
+          '</div>';
       }
     };
     function syncThemeFx(vis, room) {
@@ -3085,7 +3255,12 @@
       const theme = visualThemeId(currentTheme);
       const build = THEME_FX[theme];
       const roomId = room && room.id ? room.id : '';
-      const key = build && roomId ? theme + '|' + roomId : '';
+      const set = artFolder();
+      const now = virtualNow();
+      const scene = roomId ? roomScene(room, now) : 'desk';
+      const cold = roomId ? roomIsCold(room, now) : false;
+      const hasHearth = !!(roomId && HEARTH_POS[set] && HEARTH_POS[set][roomId]);
+      const key = roomId && (build || hasHearth) ? [theme, set, roomId, scene, cold ? 'c' : 'w'].join('|') : '';
       if ((layer ? layer.dataset.key || '' : '') === key) return;
       if (!key) { if (layer) layer.remove(); return; }
       if (!layer) {
@@ -3095,7 +3270,11 @@
         fx.insertBefore(layer, flash || null);
       }
       layer.dataset.key = key;
-      layer.innerHTML = build(WINDOW_RECTS[roomId] || [30, 0, 70, 50]);
+      layer.dataset.scene = scene;
+      layer.dataset.cold = cold ? '1' : '0';
+      const w = WINDOW_RECTS[roomId] || [30, 0, 70, 50];
+      const ctx = { w: w, room: roomId, scene: scene, cold: cold, set: set };
+      layer.innerHTML = '<div class="fx-art">' + (build && set === 'rooms' ? build(w, ctx) : '') + (hasHearth ? hearthHTML(set, roomId) : '') + '</div>';
     }
 
     const grid = document.getElementById('grid');
@@ -4006,6 +4185,7 @@
       if (rainSpeechLines(pack).indexOf(line) !== -1) return true;
       return /rain|drizzle|storm|thunder|\b비가\b|\b비 와|이슬비|빗소리|雨|regnet|llueve|lluvia|pleut|pluie|chovendo|chuva|garoa/i.test(String(line));
     }
+    const SNOW_WORD = /snow|눈 |눈이|눈오|雪|niev|neig|schnee|neve|white outside|everything's white|하얗|하얘/i;
     function speechLinesFor(room, hour24, wx) {
       if (!room || room.visitor) return [];
       const pack = speechPack();
@@ -4019,9 +4199,20 @@
         // Overlay winter themes: no rain talk, no other theme's talk; only
         // that theme's own lines in the weather-speech blocks.
         lines = lines.filter(function (line) { return !isRainSpeechLine(line, pack); });
-        const tp = thSpeech[currentLang] || thSpeech.en;
         const evening = (block === 'dusk' || block === 'evening' || block === 'latenight' || block === 'owl');
-        if (WX_SPEECH_BLOCKS[block]) lines = lines.concat(block === 'dusk' && tp.dusk ? tp.dusk : (evening ? tp.night : tp.day));
+        const pick = function (src) {
+          const tp = src[currentLang] || src.en;
+          return block === 'dusk' && tp.dusk ? tp.dusk : (evening ? tp.night : tp.day);
+        };
+        // Warm cities never talk about snow; the Snow theme there uses cozy
+        // fire lines. Every winter theme mixes in a couple of hearth lines.
+        const cold = roomIsCold(room);
+        if (WX_SPEECH_BLOCKS[block]) {
+          let themed = (vtheme === 'snow' && !cold && THEME_SPEECH.fireplace) ? pick(THEME_SPEECH.fireplace) : pick(thSpeech);
+          lines = lines.concat(themed);
+          if (vtheme !== 'fireplace' && THEME_SPEECH.fireplace) lines = lines.concat(pick(THEME_SPEECH.fireplace).slice(0, 2));
+        }
+        if (!cold) lines = lines.filter(function (line) { return !SNOW_WORD.test(line); });
         return lines;
       }
       if (moonlight) {
@@ -5126,7 +5317,7 @@
     syncFsChrome();
 
     // Expose a tiny hook so future settings can swap room art without rewriting clocks/themes.
-    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, CHAR_NAMES, locChar, displayName, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, scheduledReadyThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, metroHubByName, coordsForCityKey, coordsForRoom, speechLinesFor, THEME_SPEECH, THEME_FX, THEME_OVERLAY_WX, WINDOW_RECTS, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, artFolder, sceneKey, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
+    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, CHAR_NAMES, locChar, displayName, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, scheduledReadyThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, metroHubByName, coordsForCityKey, coordsForRoom, speechLinesFor, THEME_SPEECH, THEME_FX, THEME_OVERLAY_WX, WINDOW_RECTS, VIEW_BOX, HEARTH_POS, TREE_POS, roomIsCold, roomScene, COLD_MAX_C, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, artFolder, sceneKey, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
   })();
   </script>
 </body>
