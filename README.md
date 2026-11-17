@@ -90,7 +90,7 @@ Matching is case-, accent-, and alias-insensitive (`Los Angeles` = `LA`, `New Yo
 - **Case A-LA — the visitor is in Los Angeles.** The center shows YOU · Los Angeles. The eight outer cells are unchanged. Vancouver is not shown.
 - **Case B — any other city, including a backup such as Tokyo or Toronto.** The center shows YOU · that city. The eight outer cells stay as their primary cities. Example: `?city=Tokyo` leaves Seoul in place and labels the center **YOU · Tokyo**.
 
-The displayed visitor city is snapped to a major metro when possible. If the IP region is Michigan, US (`region_code` `MI` or region `Michigan`), the YOU cell shows **Detroit** (localized in all eight languages). Otherwise, if the visitor coordinates fall within about 60 km of a city in a compact world-metro list, that metro name is used (so a Toronto suburb matches Toronto, and Brooklyn matches New York). The raw suburb name is kept when nothing is nearby. Snapping changes only the displayed name and the match against the nine primary/backup cities. The YOU clock still uses the browser time zone, and weather still uses the visitor's own coordinates. `?city=` of a known primary or backup city still wins exactly. For tests, `?city=Northville&lat=42.4314&lon=-83.4833&region=Michigan&region_code=MI&country=US` snaps to Detroit.
+The displayed visitor city is snapped to a major metro when possible. If the IP region is Michigan, US (`region_code` `MI` or region `Michigan`), the YOU cell shows **Detroit** (localized in all eight languages). Otherwise, if the visitor coordinates fall within about 60 km of a city in a compact world-metro list, that metro name is used (so a Toronto suburb matches Toronto, and Brooklyn matches New York). The raw suburb name is kept when nothing is nearby. Snapping changes the displayed name, the match against the nine primary/backup cities, and the YOU cell's weather coordinates: if the visitor is snapped to a hub (or the displayed city is a hub such as Detroit), weather is fetched at that hub's coordinates (`coordsForCityKey` / `METRO_HUBS`), not the raw IP-geo lat/lon, which can be hundreds of km off on mobile 5G. The YOU clock still uses the browser time zone. `?lat=` / `?lon=` still supply the visitor coordinates when the displayed city is not a known hub. `?city=` of a known primary or backup city still wins exactly. For tests, `?city=Northville&lat=25.7617&lon=-80.1918&region=Michigan&region_code=MI&country=US` snaps the name to Detroit and also fetches Detroit weather, not Miami's.
 
 The page title is the single localized heading only; there is no subtitle. On a scrollable layout (for example a 390×844 portrait phone), the YOU cell is vertically centered in the viewport once on load, and again after an orientation change only if the visitor has not scrolled. `history.scrollRestoration = 'manual'`. Reordering tiles does not re-center.
 
@@ -115,7 +115,7 @@ These rules live in `periodForHour` in the page script. Tap a room to enlarge it
 
 Themes are a data-driven list in `THEMES`, each with `{ id, name, status, linkWeather, linkTime }`. There is no theme name on the main screen. The ☰ settings panel holds a theme picker, in this order — **This week's theme (auto)**, Rainy Window, Moonlight Window, Christmas, Snow, Fireplace, Library, Cafe, Classroom — localized in all eight UI languages.
 
-A status line at the top of the picker reports what is actually on screen (including the Rainy Window fallback), for example “Now showing: Rainy Window”. In a week whose scheduled theme has no art yet it reads “Now showing: Rainy Window (Christmas coming soon)”. A manual pick appends “(your pick)”.
+A status line at the top of the picker reports what is actually on screen (including the Rainy Window fallback), for example “Now showing: Rainy Window”. If someone forces a coming theme with `?theme=`, it reads “Now showing: Rainy Window (Christmas coming soon)”. Auto itself stays on the last ready theme (Moonlight Window, once that week has started) until the scheduled coming theme is marked ready. A manual pick appends “(your pick)”.
 
 Only **This week's theme (auto)** and themes with `status: 'ready'` (currently Rainy Window and Moonlight Window) are radio options: they are keyboard-accessible (`role=radiogroup` / `role=radio`) and the current choice is checked. Coming themes are listed, dimmed, and not selectable; their row shows the name, a **This week** badge when that theme is the week’s scheduled one, and the shared **Coming soon** tag. If an older visit stored a coming theme id in `localStorage['ninelives.theme']`, it is cleared and treated as auto.
 
@@ -127,18 +127,18 @@ Every theme with `status: 'coming'` shows the shared localized **Coming soon** t
 
 ### Weekly auto schedule
 
-If the visitor has not picked a theme, the page chooses one from `THEME_SCHEDULE`. Switches happen at **Wednesday 11:00 America/New_York**. The array is the editable source of truth; each entry is an inclusive start, and the last matching start wins. Before the first entry the default is Rainy Window. The schedule is computed on each visit and re-checked every minute.
+If the visitor has not picked a theme, the page chooses one from `THEME_SCHEDULE`. Switches happen at **Sunday 10:00 America/New_York**, the Sunday before that theme's Wednesday YouTube release. The array is the editable source of truth; each entry is an inclusive start, and the last matching start wins. Before the first entry the default is Rainy Window. Auto only applies a scheduled start once that theme is `ready`; coming entries stay in the table (and can show a **This week** badge) but do not go live or become selectable, so Moonlight continues through the Dec 2 rest week and until Christmas is ready. The schedule is computed on each visit and re-checked every minute.
 
 | From (America/New_York) | Theme |
 |---|---|
-| (before 2026-11-25 11:00) | rainy |
-| 2026-11-25 11:00 | moonlight |
-| 2026-12-02 11:00 | moonlight (rest week, no new entry) |
-| 2026-12-09 11:00 | christmas |
-| 2026-12-16 11:00 | snow |
-| 2026-12-23 11:00 onward | fireplace (kept) |
+| (before 2026-11-22 10:00) | rainy |
+| 2026-11-22 10:00 | moonlight |
+| 2026-12-02 10:00 | moonlight (rest week, no new entry) |
+| 2026-12-06 10:00 | christmas (in the table; stays moonlight until Christmas is ready) |
+| 2026-12-13 10:00 | snow (in the table; same rule) |
+| 2026-12-20 10:00 onward | fireplace (in the table; same rule) |
 
-A manual pick in the ☰ panel (Rainy Window or Moonlight Window today) overrides the weekly auto and is saved in `localStorage['ninelives.theme']`. Choosing **This week's theme (auto)** clears that override. `?theme=` (including `?theme=auto`) is a test override for one page load and does not have to be written to storage. `?date=YYYY-MM-DDTHH:mm` is a query-only clock override, interpreted in `America/New_York` unless the value includes a timezone offset, so you can preview another week (for example `?date=2026-11-25T12:00`). `setTheme(id)` is exposed on `window.NineLives` for later use.
+A manual pick in the ☰ panel (Rainy Window or Moonlight Window today) overrides the weekly auto and is saved in `localStorage['ninelives.theme']`. Choosing **This week's theme (auto)** clears that override. `?theme=` (including `?theme=auto`) is a test override for one page load and does not have to be written to storage. `?date=YYYY-MM-DDTHH:mm` is a query-only clock override, interpreted in `America/New_York` unless the value includes a timezone offset, so you can preview another week (for example `?date=2026-11-22T10:00`). `setTheme(id)` is exposed on `window.NineLives` for later use.
 
 ## How to add a theme
 
@@ -183,7 +183,7 @@ Background visuals stay on the Rainy Window look regardless of this feed. Sunris
 
 ## Daily activity and speech
 
-Each cell shows a short line of what is happening there right now, and that line is the visual focus of the tile. Outer cells use the woman who lives in that room and her city's local hour. There are ten blocks across the day (night, before dawn, morning, late morning, midday, afternoon, dusk, evening, late evening, after 11). Each character has a slightly different routine. Live weather can nudge an awake line (rain → "listening to the rain"; also drizzle, thunder, snow, and fog). The center YOU line is a quiet aside to the visitor ("good morning", "you're up late too"). Character cells also rotate a short first-person speech bubble every 8–12 seconds (staggered; hidden while that character is in the night/asleep block). On a compact portrait phone, only two or three bubbles are shown at a time, or the one on a hovered/focused tile. All of this is localized in the eight UI languages and follows the English switch. The activity line updates when the hour block or the weather nudge changes, with a short fade (skipped if motion is reduced).
+Each cell shows a short line of what is happening there right now, and that line is the visual focus of the tile. Outer cells use the woman who lives in that room and her city's local hour. There are ten blocks across the day (night, before dawn, morning, late morning, midday, afternoon, dusk, evening, late evening, after 11). Each character has a slightly different routine. Live weather can nudge an awake line (rain → "listening to the rain"; also drizzle, thunder, snow, and fog). Under Moonlight Window, rain, drizzle, and thunder lines are omitted — bubbles use clear-sky and moonlight lines instead, and stay silent in the night/asleep block. The center YOU line is a quiet aside to the visitor ("good morning", "you're up late too"). Character cells also rotate a short first-person speech bubble every 8–12 seconds (staggered; hidden while that character is in the night/asleep block). On a compact portrait phone, only two or three bubbles are shown at a time, or the one on a hovered/focused tile. All of this is localized in the eight UI languages and follows the English switch. The activity line updates when the hour block or the weather nudge changes, with a short fade (skipped if motion is reduced).
 
 Numeric weather on the tiles is kept small: icon and temperature only. `?hour=22` (optionally with `?city=`) is the way to preview a given hour. `?tod=` still exists for the time-of-day code path and applies only when the active theme has art and `linkTime: true`.
 

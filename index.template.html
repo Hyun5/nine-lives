@@ -1055,15 +1055,19 @@
       { id: 'cafe',       name: 'Cafe',              nameKo: '카페',       status: 'coming', linkWeather: false, linkTime: true },
       { id: 'classroom',  name: 'Classroom',         nameKo: '교실',       status: 'coming', linkWeather: false, linkTime: true }
     ];
-    // Weekly auto theme. Switches at Wednesday 11:00 America/New_York.
-    // Entries are inclusive start times; the last matching start wins. Default before the first entry is rainy.
+    // Weekly auto theme. Switches at Sunday 10:00 America/New_York, the Sunday
+    // before that theme's Wednesday YouTube release. Entries are inclusive start
+    // times; the last matching start wins. Default before the first entry is rainy.
+    // Coming themes stay in the table for later, but auto only applies a start
+    // once the theme is ready, so Moonlight continues through the Dec 2 rest week
+    // and until Christmas (etc.) is marked ready. Coming themes are not selectable.
     const THEME_SCHEDULE_TZ = 'America/New_York';
     const THEME_SCHEDULE_DEFAULT = 'rainy';
     const THEME_SCHEDULE = [
-      { at: '2026-11-25 11:00', theme: 'moonlight' },
-      { at: '2026-12-09 11:00', theme: 'christmas' },
-      { at: '2026-12-16 11:00', theme: 'snow' },
-      { at: '2026-12-23 11:00', theme: 'fireplace' }
+      { at: '2026-11-22 10:00', theme: 'moonlight' },
+      { at: '2026-12-06 10:00', theme: 'christmas' },
+      { at: '2026-12-13 10:00', theme: 'snow' },
+      { at: '2026-12-20 10:00', theme: 'fireplace' }
     ];
     const THEME_STORAGE_KEY = 'ninelives.theme';
     let currentTheme = 'rainy';
@@ -1171,7 +1175,8 @@
         wx_thunder: [ "that was loud", "waiting it out", "it's okay, just a storm", "the lights flickered?" ],
         wx_snow: [ "it's snowing", "look at that", "so quiet outside", "pretty..." ],
         wx_fog: [ "I can barely see out", "everything's soft", "the street disappeared" ],
-        wx_clear: [ "what a clear sky", "it's bright today", "nice light on the desk" ]
+        wx_clear: [ "what a clear sky", "it's bright today", "nice light on the desk" ],
+        wx_moon: [ "the moon looks close", "city lights are pretty", "what a clear night", "moonlight on the desk" ]
       },
       ko: {
         predawn: [ "벌써…?", "조금만 더", "너무 이르다", "한 장만 더…", "집이 참 조용하다", "이제 멈추지 말자" ],
@@ -1188,7 +1193,8 @@
         wx_thunder: [ "방금 컸다", "지나가길 기다리자", "괜찮아, 소나기일 뿐이야", "불이 깜빡였나?" ],
         wx_snow: [ "눈이다", "저것 봐", "밖이 참 조용하다", "예쁘다…" ],
         wx_fog: [ "밖이 잘 안 보여", "모든 게 흐릿해", "거리가 사라졌어" ],
-        wx_clear: [ "하늘이 맑다", "오늘은 밝네", "책상 위 빛이 좋다" ]
+        wx_clear: [ "하늘이 맑다", "오늘은 밝네", "책상 위 빛이 좋다" ],
+        wx_moon: [ "달이 가까워 보여", "도시 불빛이 예쁘다", "참 맑은 밤이다", "책상 위 달빛" ]
       },
       ja: {
         predawn: [ "もう…？", "もう少しだけ", "早すぎる", "もう1ページ…", "家が静か", "止まらないで" ],
@@ -1205,7 +1211,8 @@
         wx_thunder: [ "今の、大きかった", "過ぎるのを待とう", "大丈夫、ただの嵐", "電気、一瞬落ちた？" ],
         wx_snow: [ "雪だ", "見て", "外がすごく静か", "きれい…" ],
         wx_fog: [ "外がよく見えない", "全部やわらかい", "通りが見えない" ],
-        wx_clear: [ "空がきれい", "今日は明るい", "机の光がいい" ]
+        wx_clear: [ "空がきれい", "今日は明るい", "机の光がいい" ],
+        wx_moon: [ "月が近く見える", "街の明かりがきれい", "澄んだ夜だね", "机の上の月明かり" ]
       },
       "zh-Hans": {
         predawn: [ "已经……？", "再一点点", "好早", "再一页……", "家里好安静", "别停下来" ],
@@ -1222,7 +1229,8 @@
         wx_thunder: [ "刚才好大声", "等它过去吧", "没事，只是场雨", "灯是不是闪了一下？" ],
         wx_snow: [ "下雪了", "快看", "外面好安静", "真好看……" ],
         wx_fog: [ "外面看不清", "什么都软软的", "街不见了" ],
-        wx_clear: [ "天空好干净", "今天好亮", "桌上的光线真好" ]
+        wx_clear: [ "天空好干净", "今天好亮", "桌上的光线真好" ],
+        wx_moon: [ "月亮好像很近", "城市的灯光真美", "好清澈的夜", "桌上的月光" ]
       },
       es: {
         predawn: [ "¿ya...?", "un poquito más", "es muy temprano", "una página más...", "la casa está en silencio", "no pares ahora" ],
@@ -1239,7 +1247,8 @@
         wx_thunder: [ "eso ha sido fuerte", "espero a que pase", "tranquila, solo es una tormenta", "¿parpadeó la luz?" ],
         wx_snow: [ "está nevando", "mira eso", "qué silencio fuera", "qué bonito..." ],
         wx_fog: [ "casi no se ve", "todo está suave", "la calle desapareció" ],
-        wx_clear: [ "qué cielo tan claro", "hoy está luminoso", "qué rica la luz en la mesa" ]
+        wx_clear: [ "qué cielo tan claro", "hoy está luminoso", "qué rica la luz en la mesa" ],
+        wx_moon: [ "la luna se ve cerca", "qué bonitas las luces de la ciudad", "qué noche tan clara", "luz de luna en la mesa" ]
       },
       fr: {
         predawn: [ "déjà… ?", "encore un peu", "c'est trop tôt", "encore une page…", "la maison est silencieuse", "ne t'arrête pas" ],
@@ -1256,7 +1265,8 @@
         wx_thunder: [ "c'était fort", "j'attends que ça passe", "ça va, ce n'est qu'un orage", "la lumière a clignoté ?" ],
         wx_snow: [ "il neige", "regarde", "quel silence dehors", "que c'est joli…" ],
         wx_fog: [ "on ne voit presque plus", "tout est flou", "la rue a disparu" ],
-        wx_clear: [ "quel ciel clair", "il fait lumineux", "belle lumière sur le bureau" ]
+        wx_clear: [ "quel ciel clair", "il fait lumineux", "belle lumière sur le bureau" ],
+        wx_moon: [ "la lune semble toute proche", "les lumières de la ville sont jolies", "quelle nuit claire", "le clair de lune sur le bureau" ]
       },
       de: {
         predawn: [ "schon…?", "noch ein bisschen", "so früh", "noch eine Seite…", "das Haus ist still", "jetzt nicht aufhören" ],
@@ -1273,7 +1283,8 @@
         wx_thunder: [ "das war laut", "ich warte, bis es vorbei ist", "ist schon gut, nur ein Gewitter", "hat das Licht geflackert?" ],
         wx_snow: [ "es schneit", "schau mal", "so still draußen", "wie schön…" ],
         wx_fog: [ "man sieht kaum hinaus", "alles ist weich", "die Straße ist weg" ],
-        wx_clear: [ "so ein klarer Himmel", "heute ist es hell", "schönes Licht auf dem Tisch" ]
+        wx_clear: [ "so ein klarer Himmel", "heute ist es hell", "schönes Licht auf dem Tisch" ],
+        wx_moon: [ "der Mond wirkt ganz nah", "die Stadtlichter sind schön", "so eine klare Nacht", "Mondlicht auf dem Tisch" ]
       },
       pt: {
         predawn: [ "já…?", "só mais um pouco", "é tão cedo", "mais uma página…", "a casa está quieta", "não para agora" ],
@@ -1290,7 +1301,8 @@
         wx_thunder: [ "isso foi alto", "vou esperar passar", "tranquila, é só uma tempestade", "a luz piscou?" ],
         wx_snow: [ "está nevando", "olha só", "que silêncio lá fora", "que lindo…" ],
         wx_fog: [ "quase não dá para ver", "está tudo macio", "a rua sumiu" ],
-        wx_clear: [ "que céu limpo", "hoje está claro", "que luz boa na mesa" ]
+        wx_clear: [ "que céu limpo", "hoje está claro", "que luz boa na mesa" ],
+        wx_moon: [ "a lua parece perto", "as luzes da cidade estão lindas", "que noite clara", "luar na mesa" ]
       }
     };
 
@@ -1696,6 +1708,14 @@
       return null;
     }
     function matchGridRoom(cityName) { return findPrimary(cityName); }
+    function metroHubByName(name) {
+      const want = canonicalCity(name);
+      if (!want) return null;
+      for (let i = 0; i < METRO_HUBS.length; i++) {
+        if (canonicalCity(METRO_HUBS[i].name) === want) return METRO_HUBS[i];
+      }
+      return null;
+    }
     function coordsForCityKey(key) {
       if (!key) return null;
       const want = canonicalCity(key);
@@ -1708,6 +1728,8 @@
           return { lat: c.backupLat, lon: c.backupLon };
         }
       }
+      const hub = metroHubByName(key);
+      if (hub && isFinite(hub.lat) && isFinite(hub.lon)) return { lat: hub.lat, lon: hub.lon };
       return null;
     }
     function roomZone(room) {
@@ -1763,6 +1785,11 @@
       }
       if (found && found.role === 'backup') {
         return buildLayout(locName(found.key), null, { cityKey: found.key });
+      }
+      const hub = metroHubByName(cityName);
+      if (hub) {
+        const label = (CITY_NAMES[hub.name] ? locName(hub.name) : hub.name);
+        return buildLayout(label, null, { cityKey: hub.name });
       }
       const label = prettyCity(cityName) || t().yourCity;
       return buildLayout(label, null, { cityIsFallback: !cityName });
@@ -2617,6 +2644,18 @@
       }
       return theme;
     }
+    // Auto only advances to a scheduled theme once it is ready. Coming entries
+    // stay in THEME_SCHEDULE for badges, but the last ready start remains active.
+    function scheduledReadyThemeAt(date) {
+      const when = date || new Date();
+      let theme = THEME_SCHEDULE_DEFAULT;
+      for (let i = 0; i < THEME_SCHEDULE.length; i++) {
+        const at = zonedTimeToUtcMs(THEME_SCHEDULE[i].at, THEME_SCHEDULE_TZ);
+        const id = THEME_SCHEDULE[i].theme;
+        if (isFinite(at) && when.getTime() >= at && themeHasArt(id)) theme = id;
+      }
+      return theme;
+    }
     function themeQuery() {
       try {
         const raw = new URLSearchParams(window.location.search).get('theme');
@@ -2655,10 +2694,10 @@
     function resolveActiveTheme() {
       const q = themeQuery();
       if (q && q !== 'auto' && themeConfig(q) && themeConfig(q).id === q) return q;
-      if (q === 'auto') return scheduledThemeAt(virtualNow());
+      if (q === 'auto') return scheduledReadyThemeAt(virtualNow());
       const ov = readThemeOverride();
       if (ov) return ov;
-      return scheduledThemeAt(virtualNow());
+      return scheduledReadyThemeAt(virtualNow());
     }
     function setTheme(id) {
       const cfg = (id && themeConfig(id) && themeConfig(id).id === id) ? themeConfig(id) : themeConfig(THEME_SCHEDULE_DEFAULT);
@@ -2836,12 +2875,29 @@
     }
 
     function speechPack() { return SPEECH[currentLang] || SPEECH.en; }
+    function rainSpeechLines(pack) {
+      return [].concat(pack.wx_rain || [], pack.wx_drizzle || [], pack.wx_thunder || []);
+    }
+    function isRainSpeechLine(line, pack) {
+      if (!line) return false;
+      if (rainSpeechLines(pack).indexOf(line) !== -1) return true;
+      return /rain|drizzle|storm|thunder|\b비가\b|\b비 와|이슬비|빗소리|雨|regnet|llueve|lluvia|pleut|pluie|chovendo|chuva|garoa/i.test(String(line));
+    }
     function speechLinesFor(room, hour24, wx) {
       if (!room || room.visitor) return [];
       const pack = speechPack();
       const block = timeBlockId(hour24);
       if (block === 'night' || block === 'predawn' || Number(hour24) < 7) return [];
       let lines = (pack[block] || []).slice();
+      const moonlight = visualThemeId(currentTheme) === 'moonlight';
+      if (moonlight) {
+        lines = lines.filter(function (line) { return !isRainSpeechLine(line, pack); });
+        if (WX_SPEECH_BLOCKS[block] && pack.wx_clear) lines = lines.concat(pack.wx_clear);
+        if ((block === 'dusk' || block === 'evening' || block === 'latenight' || block === 'owl') && pack.wx_moon) {
+          lines = lines.concat(pack.wx_moon);
+        }
+        return lines;
+      }
       const kind = effectiveWeatherKind(room);
       const wxKey = 'wx_' + (kind === 'thunder' ? 'thunder' : kind === 'snow' ? 'snow' : kind === 'fog' ? 'fog' : kind === 'drizzle' ? 'drizzle' : kind === 'rain' ? 'rain' : kind === 'clear' ? 'clear' : '');
       if (WX_SPEECH_BLOCKS[block] && wxKey && pack[wxKey]) lines = lines.concat(pack[wxKey]);
@@ -3038,10 +3094,18 @@
     function coordsForRoom(room) {
       if (!room) return null;
       if (room.visitor) {
+        // When the YOU cell was snapped to a metro hub (Michigan→Detroit,
+        // nearestMetro, or a hub name), fetch weather at the hub coordinates,
+        // not the raw IP-geo lat/lon, which can be hundreds of km off on 5G.
+        // ?lat/?lon still apply when the displayed city is not a known hub.
+        const cityId = room.cityKey || room.city;
+        const hub = metroHubByName(cityId);
+        if (hub && isFinite(hub.lat) && isFinite(hub.lon)) return { lat: hub.lat, lon: hub.lon };
+        const named = cityId ? coordsForCityKey(cityId) : null;
+        if (named) return named;
         if (visitorGeo && isFinite(visitorGeo.lat) && isFinite(visitorGeo.lon)) {
           return { lat: visitorGeo.lat, lon: visitorGeo.lon };
         }
-        if (room.cityKey) return coordsForCityKey(room.cityKey);
         return null;
       }
       if (room.cityKey) return coordsForCityKey(room.cityKey);
@@ -3925,7 +3989,7 @@
     syncFsChrome();
 
     // Expose a tiny hook so future settings can swap room art without rewriting clocks/themes.
-    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, CHAR_NAMES, locChar, displayName, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, artFolder, sceneKey, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
+    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, CHAR_NAMES, locChar, displayName, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, scheduledReadyThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, metroHubByName, coordsForCityKey, coordsForRoom, speechLinesFor, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, artFolder, sceneKey, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
   })();
   </script>
 </body>
