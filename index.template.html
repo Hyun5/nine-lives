@@ -3828,11 +3828,12 @@
         if (id !== 'auto' && id === scheduledId) parts.push(weekBadge());
         if (id === STUDY_THEME_ID) { const k = document.createElement('span'); k.className = 'theme-cast'; k.textContent = 'Boy'; parts.push(k); }
         appendMeta(b, parts);
-        b.addEventListener('click', function () {
+        b.addEventListener('click', function (e) {
+          if (e && e.stopPropagation) e.stopPropagation();
           if (id === 'auto') writeThemeOverride('');
           else writeThemeOverride(id);
+          syncThemeQuery(id);
           applyResolvedTheme();
-          renderThemePicker();
         });
         list.appendChild(b);
       }
@@ -3919,9 +3920,14 @@
     }
     document.addEventListener('click', (e) => {
       if (themeBtn && themeBtn.parentElement && !themeBtn.parentElement.contains(e.target)) closeThemeMenu();
-      if (settingsPanel && !settingsPanel.hidden &&
-          !settingsPanel.contains(e.target) && !menuBtn.contains(e.target)) {
-        closeSettings(false);
+      if (settingsPanel && !settingsPanel.hidden) {
+        // Use the original event path: renderThemePicker rebuilds the radios
+        // during the click, which detaches e.target, so contains() would
+        // wrongly treat a theme pick as an outside click and close the menu.
+        const path = (typeof e.composedPath === 'function') ? e.composedPath() : [];
+        const inside = path.indexOf(settingsPanel) !== -1 || path.indexOf(menuBtn) !== -1 ||
+          settingsPanel.contains(e.target) || menuBtn.contains(e.target);
+        if (!inside) closeSettings(false);
       }
     });
     renderThemeMenu();
@@ -4087,6 +4093,28 @@
           return;
         }
         localStorage.setItem(THEME_STORAGE_KEY, id);
+      } catch (e) {}
+    }
+    // A ?theme= URL param wins over localStorage in resolveActiveTheme. When
+    // the user picks from the menu, keep that param in sync (or drop it on
+    // auto) so the pick is not immediately overridden. Uses replaceState so
+    // the page is not reloaded except for a studyroom cast swap.
+    function syncThemeQuery(id) {
+      try {
+        const u = new URL(window.location.href);
+        if (!id || id === 'auto') {
+          if (!u.searchParams.has('theme')) return;
+          u.searchParams.delete('theme');
+        } else if (u.searchParams.has('theme')) {
+          if (u.searchParams.get('theme') === id) return;
+          u.searchParams.set('theme', id);
+        } else {
+          return;
+        }
+        const next = u.pathname + u.search + u.hash;
+        if (next !== window.location.pathname + window.location.search + window.location.hash) {
+          history.replaceState({}, '', next);
+        }
       } catch (e) {}
     }
     function resolveActiveTheme() {
