@@ -918,6 +918,47 @@
       background: radial-gradient(800px 500px at 80% 0%, rgba(255, 220, 140, 0.22), transparent 50%);
     }
 
+    /* Late Night Study Room: same window light as Moonlight Window (sunny day,
+       sunset tint from the base evening .fx-tod, moonlight + city lights at night). */
+    html[data-visual-theme="studyroom"] .vis[data-tod="night"] .fx-moon {
+      opacity: 1;
+      background:
+        radial-gradient(ellipse 55% 70% at 12% 10%, rgba(210, 225, 255, 0.46), rgba(160, 190, 255, 0.14) 42%, transparent 72%),
+        radial-gradient(ellipse 55% 70% at 88% 10%, rgba(210, 225, 255, 0.46), rgba(160, 190, 255, 0.14) 42%, transparent 72%),
+        linear-gradient(180deg, rgba(170, 195, 255, 0.16), rgba(180, 200, 255, 0.05) 40%, transparent 70%);
+      mix-blend-mode: screen;
+    }
+    html[data-visual-theme="studyroom"] .vis[data-tod="night"] .fx-citylights {
+      opacity: 1;
+      background:
+        radial-gradient(circle at 16% 42%, rgba(255, 200, 120, 0.26), transparent 18%),
+        radial-gradient(circle at 84% 42%, rgba(255, 190, 110, 0.24), transparent 18%),
+        radial-gradient(circle at 22% 62%, rgba(255, 170, 90, 0.14), transparent 16%),
+        radial-gradient(circle at 78% 64%, rgba(255, 210, 150, 0.14), transparent 16%),
+        radial-gradient(circle at 50% 58%, rgba(140, 180, 255, 0.06), transparent 28%);
+      mix-blend-mode: screen;
+    }
+    html[data-visual-theme="studyroom"] .vis[data-tod="night"] .fx-tod {
+      background: linear-gradient(180deg, rgba(8, 16, 48, 0.26), rgba(4, 8, 28, 0.14) 45%, rgba(4, 6, 20, 0.1));
+    }
+    html[data-visual-theme="studyroom"] .vis[data-wx="clear"][data-tod="day"] .fx-sun {
+      background:
+        radial-gradient(circle at 78% 4%, rgba(255, 230, 150, 0.4), transparent 38%),
+        linear-gradient(180deg, rgba(255, 244, 210, 0.16), transparent 50%);
+    }
+    html[data-visual-theme="studyroom"] .page-sky[data-tod="night"] .sky-wash {
+      background:
+        radial-gradient(1000px 620px at 72% -8%, rgba(90, 110, 190, 0.55), transparent 58%),
+        radial-gradient(560px 380px at 78% 8%, rgba(200, 215, 255, 0.22), transparent 52%),
+        #04040c;
+    }
+    html[data-visual-theme="studyroom"] .page-sky[data-wx="clear"][data-tod="day"] .sky-wx,
+    html[data-visual-theme="studyroom"] .page-sky[data-wx="clear"][data-tod="morning"] .sky-wx {
+      opacity: 1;
+      background: radial-gradient(800px 500px at 80% 0%, rgba(255, 220, 140, 0.22), transparent 50%);
+    }
+
+
     /* ---- Winter themes: Christmas, Snow, Fireplace, Winter Sunlight Window ----
        Art-agnostic overlays only (window, sky and light layers on top of the
        room art; nothing is baked into character images, so a different art set
@@ -1258,6 +1299,9 @@
       { id: 'snow',       name: 'Snow',              nameKo: '눈',         status: 'ready',  linkWeather: false, linkTime: false },
       { id: 'fireplace',  name: 'Fireplace',         nameKo: '화롯불',     status: 'ready',  linkWeather: false, linkTime: false },
       { id: 'sunlight',   name: 'Winter Sunlight Window', nameKo: '겨울 햇살 창가', status: 'ready', linkWeather: false, linkTime: false },
+      // Late Night Study Room: separate male cast (CITY_TABLE swapped at load, see STUDY_CAST),
+      // own art set assets/rooms_male. Selectable only; not in THEME_SCHEDULE (no auto date).
+      { id: 'studyroom',  name: 'Late Night Study Room', nameKo: '深夜 스터디 룸', status: 'ready', linkWeather: false, linkTime: false },
       { id: 'library',    name: 'Library',           nameKo: '도서관',     status: 'coming', linkWeather: false, linkTime: true },
       { id: 'cafe',       name: 'Cafe',              nameKo: '카페',       status: 'coming', linkWeather: false, linkTime: true },
       { id: 'classroom',  name: 'Classroom',         nameKo: '교실',       status: 'coming', linkWeather: false, linkTime: true }
@@ -1292,7 +1336,7 @@
         themes: 'Themes',
         roomsLabel: 'Nine rooms, each in a different city',
         inCity: '{name} in {city}', footerRights: 'All rights reserved.', yourCity: 'Your City', yourTime: 'Your time', ytLabel: 'SuperAlex on YouTube', fsBtn: 'Full screen', fsExit: 'Exit full screen', fsHint: 'Tap for full screen', a2hsHint: 'Add to Home Screen for full screen',
-        theme: { rainy: 'Rainy Window', moonlight: 'Moonlight Window', christmas: 'Christmas', snow: 'Snow', fireplace: 'Fireplace', sunlight: 'Winter Sunlight Window', library: 'Library', cafe: 'Cafe', classroom: 'Classroom' },
+        theme: { rainy: 'Rainy Window', moonlight: 'Moonlight Window', studyroom: 'Late Night Study Room', christmas: 'Christmas', snow: 'Snow', fireplace: 'Fireplace', sunlight: 'Winter Sunlight Window', library: 'Library', cafe: 'Cafe', classroom: 'Classroom' },
         wx: { clear: 'Clear', cloudy: 'Cloudy', fog: 'Fog', drizzle: 'Drizzle', rain: 'Rain', snow: 'Snow', thunder: 'Thunder' }
       },
       ko: {
@@ -1302,7 +1346,7 @@
         themes: '테마',
         roomsLabel: '서로 다른 도시에 있는 아홉 개의 방',
         inCity: '{city}의 {name}', footerRights: '모든 권리 보유.', yourCity: '당신의 도시', yourTime: '당신의 시간', ytLabel: 'YouTube의 SuperAlex', fsBtn: '전체 화면', fsExit: '전체 화면 종료', fsHint: '탭하면 전체 화면', a2hsHint: '전체 화면은 홈 화면에 추가하세요',
-        theme: { rainy: '비 오는 창가', moonlight: '달빛 창가', christmas: '크리스마스', snow: '눈', fireplace: '화롯불', sunlight: '겨울 햇살 창가', library: '도서관', cafe: '카페', classroom: '교실' },
+        theme: { rainy: '비 오는 창가', moonlight: '달빛 창가', studyroom: '深夜 스터디 룸', christmas: '크리스마스', snow: '눈', fireplace: '화롯불', sunlight: '겨울 햇살 창가', library: '도서관', cafe: '카페', classroom: '교실' },
         wx: { clear: '맑음', cloudy: '흐림', fog: '안개', drizzle: '이슬비', rain: '비', snow: '눈', thunder: '천둥' }
       },
       ja: {
@@ -1312,7 +1356,7 @@
         themes: 'テーマ',
         roomsLabel: 'それぞれ違う街にある、9つの部屋',
         inCity: '{city}の{name}', footerRights: '全著作権所有.', yourCity: 'あなたの街', yourTime: 'あなたの時間', ytLabel: 'YouTubeのSuperAlex', fsBtn: '全画面', fsExit: '全画面を終了', fsHint: 'タップで全画面', a2hsHint: '全画面表示はホーム画面に追加してください',
-        theme: { rainy: '雨の窓', moonlight: '月明かりの窓', christmas: 'クリスマス', snow: '雪', fireplace: '暖炉', sunlight: '冬の陽だまりの窓', library: '図書館', cafe: 'カフェ', classroom: '教室' },
+        theme: { rainy: '雨の窓', moonlight: '月明かりの窓', studyroom: '深夜のスタディルーム', christmas: 'クリスマス', snow: '雪', fireplace: '暖炉', sunlight: '冬の陽だまりの窓', library: '図書館', cafe: 'カフェ', classroom: '教室' },
         wx: { clear: '晴れ', cloudy: '曇り', fog: '霧', drizzle: '霧雨', rain: '雨', snow: '雪', thunder: '雷' }
       },
       'zh-Hans': {
@@ -1322,7 +1366,7 @@
         themes: '主题',
         roomsLabel: '九个房间，各自在一座不同的城市',
         inCity: '{city}的{name}', footerRights: '版权所有。', yourCity: '你的城市', yourTime: '你的时间', ytLabel: 'YouTube 上的 SuperAlex', fsBtn: '全屏', fsExit: '退出全屏', fsHint: '点按即可全屏', a2hsHint: '添加到主屏幕即可全屏显示',
-        theme: { rainy: '雨窗', moonlight: '月光窗', christmas: '圣诞节', snow: '雪', fireplace: '壁炉', sunlight: '冬日暖阳窗', library: '图书馆', cafe: '咖啡馆', classroom: '教室' },
+        theme: { rainy: '雨窗', moonlight: '月光窗', studyroom: '深夜自习室', christmas: '圣诞节', snow: '雪', fireplace: '壁炉', sunlight: '冬日暖阳窗', library: '图书馆', cafe: '咖啡馆', classroom: '教室' },
         wx: { clear: '晴', cloudy: '多云', fog: '雾', drizzle: '毛毛雨', rain: '雨', snow: '雪', thunder: '雷' }
       },
       es: {
@@ -1332,7 +1376,7 @@
         themes: 'Temas',
         roomsLabel: 'Nueve habitaciones, cada una en una ciudad distinta',
         inCity: '{name} en {city}', footerRights: 'Todos los derechos reservados.', yourCity: 'Tu ciudad', yourTime: 'Tu hora', ytLabel: 'SuperAlex en YouTube', fsBtn: 'Pantalla completa', fsExit: 'Salir de pantalla completa', fsHint: 'Toca para pantalla completa', a2hsHint: 'Añade a la pantalla de inicio para ver a pantalla completa',
-        theme: { rainy: 'Ventana lluviosa', moonlight: 'Ventana de luna', christmas: 'Navidad', snow: 'Nieve', fireplace: 'Chimenea', sunlight: 'Ventana de sol invernal', library: 'Biblioteca', cafe: 'Café', classroom: 'Aula' },
+        theme: { rainy: 'Ventana lluviosa', moonlight: 'Ventana de luna', studyroom: 'Sala de estudio nocturna', christmas: 'Navidad', snow: 'Nieve', fireplace: 'Chimenea', sunlight: 'Ventana de sol invernal', library: 'Biblioteca', cafe: 'Café', classroom: 'Aula' },
         wx: { clear: 'Despejado', cloudy: 'Nublado', fog: 'Niebla', drizzle: 'Llovizna', rain: 'Lluvia', snow: 'Nieve', thunder: 'Trueno' }
       },
       fr: {
@@ -1342,7 +1386,7 @@
         themes: 'Thèmes',
         roomsLabel: 'Neuf chambres, chacune dans une ville différente',
         inCity: '{name} à {city}', footerRights: 'Tous droits réservés.', yourCity: 'Votre ville', yourTime: 'Votre heure', ytLabel: 'SuperAlex sur YouTube', fsBtn: 'Plein écran', fsExit: 'Quitter le plein écran', fsHint: 'Touchez pour le plein écran', a2hsHint: 'Ajoutez à l’écran d’accueil pour le plein écran',
-        theme: { rainy: 'Fenêtre sous la pluie', moonlight: 'Fenêtre au clair de lune', christmas: 'Noël', snow: 'Neige', fireplace: 'Cheminée', sunlight: 'Fenêtre au soleil d’hiver', library: 'Bibliothèque', cafe: 'Café', classroom: 'Salle de classe' },
+        theme: { rainy: 'Fenêtre sous la pluie', moonlight: 'Fenêtre au clair de lune', studyroom: 'Salle d’étude de nuit', christmas: 'Noël', snow: 'Neige', fireplace: 'Cheminée', sunlight: 'Fenêtre au soleil d’hiver', library: 'Bibliothèque', cafe: 'Café', classroom: 'Salle de classe' },
         wx: { clear: 'Clair', cloudy: 'Nuageux', fog: 'Brouillard', drizzle: 'Bruine', rain: 'Pluie', snow: 'Neige', thunder: 'Orage' }
       },
       de: {
@@ -1352,7 +1396,7 @@
         themes: 'Themen',
         roomsLabel: 'Neun Zimmer, jedes in einer anderen Stadt',
         inCity: '{name} in {city}', footerRights: 'Alle Rechte vorbehalten.', yourCity: 'Deine Stadt', yourTime: 'Deine Zeit', ytLabel: 'SuperAlex auf YouTube', fsBtn: 'Vollbild', fsExit: 'Vollbild beenden', fsHint: 'Tippen für Vollbild', a2hsHint: 'Für Vollbild zum Home-Bildschirm hinzufügen',
-        theme: { rainy: 'Regenfenster', moonlight: 'Mondscheinfenster', christmas: 'Weihnachten', snow: 'Schnee', fireplace: 'Kamin', sunlight: 'Wintersonnenfenster', library: 'Bibliothek', cafe: 'Café', classroom: 'Klassenzimmer' },
+        theme: { rainy: 'Regenfenster', moonlight: 'Mondscheinfenster', studyroom: 'Nächtliches Lernzimmer', christmas: 'Weihnachten', snow: 'Schnee', fireplace: 'Kamin', sunlight: 'Wintersonnenfenster', library: 'Bibliothek', cafe: 'Café', classroom: 'Klassenzimmer' },
         wx: { clear: 'Klar', cloudy: 'Bewölkt', fog: 'Nebel', drizzle: 'Niesel', rain: 'Regen', snow: 'Schnee', thunder: 'Gewitter' }
       },
       pt: {
@@ -1362,7 +1406,7 @@
         themes: 'Temas',
         roomsLabel: 'Nove quartos, cada um em uma cidade diferente',
         inCity: '{name} em {city}', footerRights: 'Todos os direitos reservados.', yourCity: 'Sua cidade', yourTime: 'Seu horário', ytLabel: 'SuperAlex no YouTube', fsBtn: 'Tela cheia', fsExit: 'Sair da tela cheia', fsHint: 'Toque para tela cheia', a2hsHint: 'Adicione à Tela de Início para tela cheia',
-        theme: { rainy: 'Janela na chuva', moonlight: 'Janela ao luar', christmas: 'Natal', snow: 'Neve', fireplace: 'Lareira', sunlight: 'Janela de sol de inverno', library: 'Biblioteca', cafe: 'Café', classroom: 'Sala de aula' },
+        theme: { rainy: 'Janela na chuva', moonlight: 'Janela ao luar', studyroom: 'Sala de estudo noturna', christmas: 'Natal', snow: 'Neve', fireplace: 'Lareira', sunlight: 'Janela de sol de inverno', library: 'Biblioteca', cafe: 'Café', classroom: 'Sala de aula' },
         wx: { clear: 'Limpo', cloudy: 'Nublado', fog: 'Nevoeiro', drizzle: 'Garoa', rain: 'Chuva', snow: 'Neve', thunder: 'Trovão' }
       }
     };
@@ -1567,6 +1611,176 @@
     // optional dusk overrides night for 17:00–18:59.
     // Lines are gender-neutral so the character art can change without rewriting them.
     const THEME_SPEECH = {
+      "studyroom": {
+        "en": {
+          "day": [
+            "focus mode on",
+            "coffee refill time",
+            "two more chapters",
+            "notes are coming together",
+            "quick stretch, then back"
+          ],
+          "dusk": [
+            "the sky is turning orange",
+            "lamp on, second shift",
+            "sunset break"
+          ],
+          "night": [
+            "late night study club",
+            "the moon is keeping me company",
+            "city lights outside",
+            "one more problem set",
+            "quiet hours are the best"
+          ]
+        },
+        "ko": {
+          "day": [
+            "집중 모드 켜짐",
+            "커피 한 잔 더",
+            "두 챕터만 더",
+            "노트가 정리돼 간다",
+            "스트레칭하고 다시"
+          ],
+          "dusk": [
+            "하늘이 주황빛이야",
+            "스탠드 켜고 2교시",
+            "노을 보며 쉬는 시간"
+          ],
+          "night": [
+            "심야 스터디 중",
+            "달이 같이 공부해 주네",
+            "창밖 도시 불빛",
+            "문제 하나만 더",
+            "조용한 시간이 제일 좋아"
+          ]
+        },
+        "ja": {
+          "day": [
+            "集中モードオン",
+            "コーヒーおかわり",
+            "あと2章",
+            "ノートがまとまってきた",
+            "ちょっと伸びしてから再開"
+          ],
+          "dusk": [
+            "空がオレンジ色",
+            "ライトをつけて第2ラウンド",
+            "夕焼け休憩"
+          ],
+          "night": [
+            "深夜の勉強会",
+            "月がつき合ってくれてる",
+            "窓の外に街の明かり",
+            "あと1問だけ",
+            "静かな時間がいちばん"
+          ]
+        },
+        "zh-Hans": {
+          "day": [
+            "专注模式开启",
+            "再续一杯咖啡",
+            "再看两章",
+            "笔记慢慢理清了",
+            "伸个懒腰再继续"
+          ],
+          "dusk": [
+            "天空变成橘色了",
+            "开灯，第二轮",
+            "看着晚霞休息一下"
+          ],
+          "night": [
+            "深夜自习中",
+            "月亮在陪我学习",
+            "窗外的城市灯光",
+            "再做一道题",
+            "安静的时候最好"
+          ]
+        },
+        "es": {
+          "day": [
+            "modo concentración",
+            "otro café",
+            "dos capítulos más",
+            "los apuntes van tomando forma",
+            "estiro y sigo"
+          ],
+          "dusk": [
+            "el cielo se pone naranja",
+            "lámpara encendida, segundo turno",
+            "pausa del atardecer"
+          ],
+          "night": [
+            "club de estudio nocturno",
+            "la luna me hace compañía",
+            "luces de la ciudad afuera",
+            "un ejercicio más",
+            "las horas tranquilas son las mejores"
+          ]
+        },
+        "fr": {
+          "day": [
+            "mode concentration",
+            "encore un café",
+            "encore deux chapitres",
+            "mes notes prennent forme",
+            "je m’étire et je reprends"
+          ],
+          "dusk": [
+            "le ciel devient orange",
+            "lampe allumée, deuxième round",
+            "pause coucher de soleil"
+          ],
+          "night": [
+            "club d’étude de nuit",
+            "la lune me tient compagnie",
+            "les lumières de la ville dehors",
+            "encore un exercice",
+            "les heures calmes sont les meilleures"
+          ]
+        },
+        "de": {
+          "day": [
+            "Fokusmodus an",
+            "noch ein Kaffee",
+            "noch zwei Kapitel",
+            "die Notizen werden klarer",
+            "kurz strecken, dann weiter"
+          ],
+          "dusk": [
+            "der Himmel wird orange",
+            "Lampe an, zweite Runde",
+            "Pause zum Sonnenuntergang"
+          ],
+          "night": [
+            "Nachtlernclub",
+            "der Mond leistet mir Gesellschaft",
+            "Stadtlichter draußen",
+            "noch eine Aufgabe",
+            "stille Stunden sind die besten"
+          ]
+        },
+        "pt": {
+          "day": [
+            "modo foco ligado",
+            "mais um café",
+            "mais dois capítulos",
+            "as anotações estão se encaixando",
+            "alongo e volto"
+          ],
+          "dusk": [
+            "o céu está ficando laranja",
+            "luminária acesa, segundo turno",
+            "pausa do pôr do sol"
+          ],
+          "night": [
+            "clube de estudo noturno",
+            "a lua está me fazendo companhia",
+            "luzes da cidade lá fora",
+            "só mais um exercício",
+            "as horas quietas são as melhores"
+          ]
+        }
+      },
       "christmas": {
         "en": {
           "day": [
@@ -2126,6 +2340,24 @@
       'Muscat':       { en: 'Muscat',       ko: '무스카트',       ja: 'マスカット',             'zh-Hans': '马斯喀特',     es: 'Mascate',        fr: 'Mascate',      de: 'Maskat',       pt: 'Mascate' },
       'Los Angeles':  { en: 'Los Angeles',  ko: '로스앤젤레스',   ja: 'ロサンゼルス',           'zh-Hans': '洛杉矶',       es: 'Los Ángeles',    fr: 'Los Angeles',  de: 'Los Angeles',  pt: 'Los Angeles' },
       'Vancouver':    { en: 'Vancouver',    ko: '밴쿠버',         ja: 'バンクーバー',           'zh-Hans': '温哥华',       es: 'Vancouver',      fr: 'Vancouver',    de: 'Vancouver',    pt: 'Vancouver' },
+      'Boston':       { en: 'Boston',       ko: '보스턴',         ja: 'ボストン',               'zh-Hans': '波士顿',       es: 'Boston',         fr: 'Boston',       de: 'Boston',       pt: 'Boston' },
+      'Philadelphia': { en: 'Philadelphia', ko: '필라델피아',     ja: 'フィラデルフィア',       'zh-Hans': '费城',         es: 'Filadelfia',     fr: 'Philadelphie', de: 'Philadelphia', pt: 'Filadélfia' },
+      'Edinburgh':    { en: 'Edinburgh',    ko: '에든버러',       ja: 'エディンバラ',           'zh-Hans': '爱丁堡',       es: 'Edimburgo',      fr: 'Édimbourg',    de: 'Edinburgh',    pt: 'Edimburgo' },
+      'Glasgow':      { en: 'Glasgow',      ko: '글래스고',       ja: 'グラスゴー',             'zh-Hans': '格拉斯哥',     es: 'Glasgow',        fr: 'Glasgow',      de: 'Glasgow',      pt: 'Glasgow' },
+      'Istanbul':     { en: 'Istanbul',     ko: '이스탄불',       ja: 'イスタンブール',         'zh-Hans': '伊斯坦布尔',   es: 'Estambul',       fr: 'Istanbul',     de: 'Istanbul',     pt: 'Istambul' },
+      'Athens':       { en: 'Athens',       ko: '아테네',         ja: 'アテネ',                 'zh-Hans': '雅典',         es: 'Atenas',         fr: 'Athènes',      de: 'Athen',        pt: 'Atenas' },
+      'Busan':        { en: 'Busan',        ko: '부산',           ja: '釜山',                   'zh-Hans': '釜山',         es: 'Busan',          fr: 'Busan',        de: 'Busan',        pt: 'Busan' },
+      'Osaka':        { en: 'Osaka',        ko: '오사카',         ja: '大阪',                   'zh-Hans': '大阪',         es: 'Osaka',          fr: 'Osaka',        de: 'Osaka',        pt: 'Osaka' },
+      'Seattle':      { en: 'Seattle',      ko: '시애틀',         ja: 'シアトル',               'zh-Hans': '西雅图',       es: 'Seattle',        fr: 'Seattle',      de: 'Seattle',      pt: 'Seattle' },
+      'Portland':     { en: 'Portland',     ko: '포틀랜드',       ja: 'ポートランド',           'zh-Hans': '波特兰',       es: 'Portland',       fr: 'Portland',     de: 'Portland',     pt: 'Portland' },
+      'Auckland':     { en: 'Auckland',     ko: '오클랜드',       ja: 'オークランド',           'zh-Hans': '奥克兰',       es: 'Auckland',       fr: 'Auckland',     de: 'Auckland',     pt: 'Auckland' },
+      'Wellington':   { en: 'Wellington',   ko: '웰링턴',         ja: 'ウェリントン',           'zh-Hans': '惠灵顿',       es: 'Wellington',     fr: 'Wellington',   de: 'Wellington',   pt: 'Wellington' },
+      'Mumbai':       { en: 'Mumbai',       ko: '뭄바이',         ja: 'ムンバイ',               'zh-Hans': '孟买',         es: 'Bombay',         fr: 'Bombay',       de: 'Mumbai',       pt: 'Mumbai' },
+      'Bengaluru':    { en: 'Bengaluru',    ko: '벵갈루루',       ja: 'ベンガルール',           'zh-Hans': '班加罗尔',     es: 'Bangalore',      fr: 'Bangalore',    de: 'Bengaluru',    pt: 'Bangalore' },
+      'Mexico City':  { en: 'Mexico City',  ko: '멕시코시티',     ja: 'メキシコシティ',         'zh-Hans': '墨西哥城',     es: 'Ciudad de México', fr: 'Mexico',     de: 'Mexiko-Stadt', pt: 'Cidade do México' },
+      'Bogotá':       { en: 'Bogotá',       ko: '보고타',         ja: 'ボゴタ',                 'zh-Hans': '波哥大',       es: 'Bogotá',         fr: 'Bogota',       de: 'Bogotá',       pt: 'Bogotá' },
+      'Lagos':        { en: 'Lagos',        ko: '라고스',         ja: 'ラゴス',                 'zh-Hans': '拉各斯',       es: 'Lagos',          fr: 'Lagos',        de: 'Lagos',        pt: 'Lagos' },
+      'Accra':        { en: 'Accra',        ko: '아크라',         ja: 'アクラ',                 'zh-Hans': '阿克拉',       es: 'Acra',           fr: 'Accra',        de: 'Accra',        pt: 'Acra' },
       'Detroit':      { en: 'Detroit',      ko: '디트로이트',     ja: 'デトロイト',             'zh-Hans': '底特律',       es: 'Detroit',        fr: 'Détroit',      de: 'Detroit',      pt: 'Detroit' }
     };
 
@@ -2138,7 +2370,17 @@
       Nao:  { en: 'Nao',  ko: 'Nao',  ja: 'Nao',  'zh-Hans': 'Nao',  es: 'Nao',  fr: 'Nao',  de: 'Nao',  pt: 'Nao' },
       Lin:  { en: 'Lin',  ko: 'Lin',  ja: 'Lin',  'zh-Hans': 'Lin',  es: 'Lin',  fr: 'Lin',  de: 'Lin',  pt: 'Lin' },
       Mio:  { en: 'Mio',  ko: 'Mio',  ja: 'Mio',  'zh-Hans': 'Mio',  es: 'Mio',  fr: 'Mio',  de: 'Mio',  pt: 'Mio' },
-      Coco: { en: 'Coco', ko: 'Coco', ja: 'Coco', 'zh-Hans': 'Coco', es: 'Coco', fr: 'Coco', de: 'Coco', pt: 'Coco' }
+      Coco: { en: 'Coco', ko: 'Coco', ja: 'Coco', 'zh-Hans': 'Coco', es: 'Coco', fr: 'Coco', de: 'Coco', pt: 'Coco' },
+      // Late Night Study Room cast
+      Julian: { en: 'Julian', ko: '줄리언', ja: 'ジュリアン', 'zh-Hans': '朱利安', es: 'Julian', fr: 'Julian', de: 'Julian', pt: 'Julian' },
+      Callum: { en: 'Callum', ko: '캘럼', ja: 'カラム', 'zh-Hans': '卡勒姆', es: 'Callum', fr: 'Callum', de: 'Callum', pt: 'Callum' },
+      Emre:   { en: 'Emre',   ko: '엠레', ja: 'エムレ', 'zh-Hans': '埃姆雷', es: 'Emre', fr: 'Emre', de: 'Emre', pt: 'Emre' },
+      Jiho:   { en: 'Jiho',   ko: '지호', ja: 'ジホ', 'zh-Hans': '智浩', es: 'Jiho', fr: 'Jiho', de: 'Jiho', pt: 'Jiho' },
+      Kai:    { en: 'Kai',    ko: '카이', ja: 'カイ', 'zh-Hans': '凯', es: 'Kai', fr: 'Kai', de: 'Kai', pt: 'Kai' },
+      Tane:   { en: 'Tane',   ko: '타네', ja: 'タネ', 'zh-Hans': '塔内', es: 'Tane', fr: 'Tane', de: 'Tane', pt: 'Tane' },
+      Arjun:  { en: 'Arjun',  ko: '아르준', ja: 'アルジュン', 'zh-Hans': '阿尔琼', es: 'Arjun', fr: 'Arjun', de: 'Arjun', pt: 'Arjun' },
+      Mateo:  { en: 'Mateo',  ko: '마테오', ja: 'マテオ', 'zh-Hans': '马特奥', es: 'Mateo', fr: 'Mateo', de: 'Mateo', pt: 'Mateo' },
+      Tobi:   { en: 'Tobi',   ko: '토비', ja: 'トビ', 'zh-Hans': '托比', es: 'Tobi', fr: 'Tobi', de: 'Tobi', pt: 'Tobi' }
     };
 
 
@@ -2154,6 +2396,35 @@
       { city: 'São Paulo',    backup: 'Buenos Aires', tz: 'America/Sao_Paulo',                backupTz: 'America/Argentina/Buenos_Aires',   lat: -23.55,lon: -46.63,  backupLat: -34.60,backupLon: -58.38, id: 'r08', character: 'Mio',  region: 'Brazil',    slot: 7 },
       { city: 'Dubai',        backup: 'Muscat',       tz: 'Asia/Dubai',                       backupTz: 'Asia/Muscat',                      lat: 25.20, lon: 55.27,   backupLat: 23.59, backupLon: 58.38,  id: 'r09', character: 'Coco', region: 'UAE',       slot: 8 }
     ];
+    // Late Night Study Room (深夜 스터디 룸): a separate cast in its own cities. The
+    // cast is chosen once at load (?theme= or the saved theme); switching to or
+    // from this theme reloads the page (see setTheme) so layout, weather and
+    // clocks all rebuild from the right CITY_TABLE. Same ids/slots/art framing.
+    const STUDY_THEME_ID = 'studyroom';
+    const STUDY_CAST = [
+      { city: 'Boston',      backup: 'Philadelphia', tz: 'America/New_York',    backupTz: 'America/New_York',    lat: 42.36, lon: -71.06,  backupLat: 39.95, backupLon: -75.17, character: 'Julian', region: 'USA' },
+      { city: 'Edinburgh',   backup: 'Glasgow',      tz: 'Europe/London',       backupTz: 'Europe/London',       lat: 55.95, lon: -3.19,   backupLat: 55.86, backupLon: -4.25,  character: 'Callum', region: 'UK' },
+      { city: 'Istanbul',    backup: 'Athens',       tz: 'Europe/Istanbul',     backupTz: 'Europe/Athens',       lat: 41.01, lon: 28.98,   backupLat: 37.98, backupLon: 23.73,  character: 'Emre',   region: 'Türkiye' },
+      { city: 'Busan',       backup: 'Osaka',        tz: 'Asia/Seoul',          backupTz: 'Asia/Tokyo',          lat: 35.18, lon: 129.08,  backupLat: 34.69, backupLon: 135.50, character: 'Jiho',   region: 'South Korea' },
+      { city: 'Seattle',     backup: 'Portland',     tz: 'America/Los_Angeles', backupTz: 'America/Los_Angeles', lat: 47.61, lon: -122.33, backupLat: 45.52, backupLon: -122.68,character: 'Kai',    region: 'USA' },
+      { city: 'Auckland',    backup: 'Wellington',   tz: 'Pacific/Auckland',    backupTz: 'Pacific/Auckland',    lat: -36.85,lon: 174.76,  backupLat: -41.29,backupLon: 174.78, character: 'Tane',   region: 'New Zealand' },
+      { city: 'Mumbai',      backup: 'Bengaluru',    tz: 'Asia/Kolkata',        backupTz: 'Asia/Kolkata',        lat: 19.08, lon: 72.88,   backupLat: 12.97, backupLon: 77.59,  character: 'Arjun',  region: 'India' },
+      { city: 'Mexico City', backup: 'Bogotá',       tz: 'America/Mexico_City', backupTz: 'America/Bogota',      lat: 19.43, lon: -99.13,  backupLat: 4.71,  backupLon: -74.07, character: 'Mateo',  region: 'Mexico' },
+      { city: 'Lagos',       backup: 'Accra',        tz: 'Africa/Lagos',        backupTz: 'Africa/Accra',        lat: 6.52,  lon: 3.38,    backupLat: 5.60,  backupLon: -0.19,  character: 'Tobi',   region: 'Nigeria' }
+    ];
+    function castForTheme(id) { return id === STUDY_THEME_ID ? 'study' : 'base'; }
+    const ACTIVE_CAST = (function () {
+      try {
+        const q = new URLSearchParams(window.location.search).get('theme');
+        if (q && q.trim()) return castForTheme(q.trim());
+      } catch (e) {}
+      try { return castForTheme(localStorage.getItem(THEME_STORAGE_KEY) || ''); } catch (e) {}
+      return 'base';
+    })();
+    if (ACTIVE_CAST === 'study') {
+      CITY_TABLE.forEach(function (c, i) { Object.assign(c, STUDY_CAST[i]); });
+    }
+    let castReloadArmed = false;
     const ROOMS = CITY_TABLE.map(function (c) {
       return { id: c.id, name: c.character, city: c.city, region: c.region, tz: c.tz, slot: c.slot, isLA: !!c.isLA };
     });
@@ -2167,6 +2438,7 @@
       // Rainy Window uses the dedicated rainy stills and loops.
       // Every other theme uses the base (dry) set, including themes
       // that do not yet have their own art.
+      if (currentTheme === 'studyroom') return 'rooms_male';
       return currentTheme === 'rainy' ? 'rooms_rainy' : 'rooms';
     }
     function sceneKey(period) {
@@ -3535,6 +3807,16 @@
     }
     function setTheme(id) {
       const cfg = (id && themeConfig(id) && themeConfig(id).id === id) ? themeConfig(id) : themeConfig(THEME_SCHEDULE_DEFAULT);
+      if (castReloadArmed && castForTheme(cfg.id) !== ACTIVE_CAST) {
+        // Cast change (Late Night Study Room <-> the original nine): reload so
+        // the grid rebuilds from the other CITY_TABLE. Keep ?theme in sync.
+        try {
+          const u = new URL(window.location.href);
+          if (u.searchParams.has('theme')) u.searchParams.set('theme', cfg.id);
+          window.location.replace(u.href);
+          return currentTheme;
+        } catch (e) {}
+      }
       const prevArt = artFolder();
       currentTheme = cfg.id;
       const nextArt = artFolder();
@@ -3560,7 +3842,7 @@
     // following the room art's local-hour periods (day / evening / night), with
     // a fixed visual weather token (not live weather; the tile weather readout
     // still shows live Open-Meteo data). New overlay themes just add a row.
-    const THEME_OVERLAY_WX = { moonlight: 'clear', christmas: 'xmas', snow: 'snowy', fireplace: 'fire', sunlight: 'clear' };
+    const THEME_OVERLAY_WX = { moonlight: 'clear', studyroom: 'clear', christmas: 'xmas', snow: 'snowy', fireplace: 'fire', sunlight: 'clear' };
     function atmosphereFor(room, now) {
       // Moonlight Window keeps linkWeather/linkTime false (not live weather,
       // not the generic time-linked path). It still uses time of day so
@@ -4827,6 +5109,7 @@
     })();
 
     try { applyResolvedTheme(); } catch (e) { setTheme('rainy'); }
+    castReloadArmed = true;
 
     startVisitorDetect();
     scheduleWeatherTimer();
