@@ -918,6 +918,208 @@
       background: radial-gradient(800px 500px at 80% 0%, rgba(255, 220, 140, 0.22), transparent 50%);
     }
 
+    /* ---- Winter themes: Christmas, Snow, Fireplace, Winter Sunlight Window ----
+       Art-agnostic overlays only (window, sky and light layers on top of the
+       room art; nothing is baked into character images, so a different art set
+       with the same room framing can be swapped in). Theme layers are built
+       only for the active theme (see THEME_FX in the script). .fx-art mirrors
+       the stills' object-fit: cover / object-position: center 40% so window
+       rects (WINDOW_RECTS, image-space %) line up at any tile aspect. */
+    .fx { container-type: size; }
+    .fx-theme { position: absolute; inset: 0; z-index: 2; pointer-events: none; }
+    /* Chrome does not sample the room art for backdrop-filter (window
+       desaturation) through the z-indexed .fx stacking context, so under the
+       winter overlay themes .fx drops its z-index and .fx-theme carries it. */
+    html[data-visual-theme="christmas"] .fx, html[data-visual-theme="snow"] .fx,
+    html[data-visual-theme="fireplace"] .fx, html[data-visual-theme="sunlight"] .fx { z-index: auto; }
+    .fx-art {
+      position: absolute; left: 50%; top: 40%;
+      width: 100%; height: 100%;
+      transform: translate(-50%, -40%);
+    }
+    @supports (width: 1cqw) {
+      .fx-art { width: max(100cqw, 177.778cqh); height: max(56.25cqw, 100cqh); }
+    }
+    .fx-art .win { position: absolute; overflow: hidden; }
+    .fx-art .win.round { border-radius: 50%; }
+    .fx-art .win > div { position: absolute; inset: 0; }
+    .th-flakes span {
+      position: absolute; top: 0; height: 100%;
+      width: 6px; margin-left: -3px;
+      background: radial-gradient(circle at 50% 3px, rgba(255,255,255,0.95) 0, rgba(255,255,255,0.95) var(--r, 1.3px), transparent calc(var(--r, 1.3px) + 1px)) no-repeat;
+      animation: thflake linear infinite;
+    }
+    @keyframes thflake {
+      from { transform: translate3d(0, -100%, 0); }
+      50% { transform: translate3d(var(--dx, 6px), 0, 0); }
+      to { transform: translate3d(0, 100%, 0); }
+    }
+    /* Snow: white outside, snowfield on rooftops/street, frosted corners. */
+    html[data-visual-theme="snow"] .win { backdrop-filter: saturate(0.1) brightness(1.16) contrast(0.82); -webkit-backdrop-filter: saturate(0.1) brightness(1.16) contrast(0.82); }
+    html[data-visual-theme="snow"] .vis[data-tod="night"] .win { backdrop-filter: saturate(0.4) brightness(1.05); -webkit-backdrop-filter: saturate(0.4) brightness(1.05); }
+    .th-snowsky { background: linear-gradient(180deg, rgba(225, 233, 246, 0.42), rgba(230, 236, 246, 0.18) 50%, rgba(235, 240, 250, 0.1)); }
+    .th-snowfield { background: linear-gradient(180deg, transparent 52%, rgba(238, 244, 252, 0.24) 80%, rgba(250, 252, 255, 0.14)); }
+    .th-frost {
+      background:
+        radial-gradient(ellipse 30% 26% at 0% 100%, rgba(240, 248, 255, 0.32), transparent 70%),
+        radial-gradient(ellipse 30% 26% at 100% 100%, rgba(240, 248, 255, 0.32), transparent 70%);
+    }
+    .vis[data-tod="night"] .th-snowsky { background: linear-gradient(180deg, rgba(60, 80, 130, 0.25), transparent 70%); }
+    .vis[data-tod="night"] .th-snowfield { background: linear-gradient(180deg, transparent 55%, rgba(170, 190, 235, 0.14) 76%, rgba(200, 215, 250, 0.24)); }
+    .vis[data-tod="night"] .th-frost { opacity: 0.55; }
+    .th-streetglow { background: radial-gradient(ellipse 60% 40% at 50% 100%, rgba(255, 196, 120, 0.3), transparent 70%); mix-blend-mode: screen; opacity: 0; }
+    .vis[data-tod="night"] .th-streetglow, .vis[data-tod="evening"] .th-streetglow { opacity: 1; }
+    html[data-visual-theme="snow"] .vis[data-tod="day"] .fx-tod {
+      background: linear-gradient(180deg, rgba(225, 235, 250, 0.16), rgba(200, 214, 235, 0.08) 50%, rgba(160, 180, 210, 0.06));
+    }
+    html[data-visual-theme="snow"] .vis[data-tod="evening"] .fx-tod {
+      background: linear-gradient(180deg, rgba(120, 140, 200, 0.16), rgba(255, 170, 110, 0.08) 55%, rgba(30, 20, 40, 0.12));
+    }
+    html[data-visual-theme="snow"] .vis[data-tod="night"] .fx-tod {
+      background: linear-gradient(180deg, rgba(20, 34, 80, 0.3), rgba(10, 18, 44, 0.18) 45%, rgba(6, 10, 26, 0.14));
+    }
+    /* Christmas: string lights on the window frame, warm room glow, light snow outside. */
+    .th-lights { position: absolute; height: 16%; }
+    .th-lights i {
+      position: absolute;
+      width: clamp(3px, 0.9cqw, 7px); height: clamp(3px, 0.9cqw, 7px);
+      margin: calc(clamp(3px, 0.9cqw, 7px) / -2);
+      border-radius: 50%;
+      background: var(--c);
+      box-shadow: 0 0 6px 2px var(--c), 0 0 14px 4px var(--g);
+      animation: thtwinkle ease-in-out infinite;
+    }
+    .th-lights b {
+      position: absolute; left: 0; right: 0; top: 0; height: 100%;
+      border-bottom: 1px solid rgba(30, 50, 30, 0.55);
+      border-radius: 0 0 50% 50% / 0 0 100% 100%;
+    }
+    @keyframes thtwinkle {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
+    .th-xmasglow {
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 45% 55% at var(--gx, 85%) 92%, rgba(255, 170, 80, 0.26), transparent 70%),
+        radial-gradient(ellipse 30% 40% at var(--gx, 85%) 70%, rgba(255, 90, 70, 0.08), transparent 70%),
+        radial-gradient(ellipse 30% 40% at calc(var(--gx, 85%) - 8%) 75%, rgba(80, 220, 120, 0.06), transparent 70%);
+      mix-blend-mode: screen;
+    }
+    .vis[data-tod="day"] .th-xmasglow { opacity: 0.55; }
+    html[data-visual-theme="christmas"] .win { backdrop-filter: saturate(0.6) brightness(1.06); -webkit-backdrop-filter: saturate(0.6) brightness(1.06); }
+    html[data-visual-theme="christmas"] .vis[data-tod="day"] .fx-tod {
+      background: linear-gradient(180deg, rgba(255, 236, 210, 0.08), transparent 45%, rgba(120, 30, 20, 0.05));
+    }
+    html[data-visual-theme="christmas"] .vis[data-tod="evening"] .fx-tod {
+      background: linear-gradient(180deg, rgba(60, 40, 90, 0.16), rgba(255, 140, 70, 0.1) 55%, rgba(40, 10, 8, 0.12));
+    }
+    html[data-visual-theme="christmas"] .vis[data-tod="night"] .fx-tod {
+      background: linear-gradient(180deg, rgba(10, 16, 48, 0.3), rgba(20, 10, 20, 0.16) 50%, rgba(30, 10, 6, 0.12));
+    }
+    /* Fireplace: warm flickering firelight from a low corner, rising embers. */
+    .th-fire, .th-fire2 {
+      position: absolute; inset: 0;
+      mix-blend-mode: screen;
+      animation: thflicker 2.6s ease-in-out infinite;
+      transform-origin: var(--fx, 10%) 100%;
+    }
+    .th-fire {
+      background:
+        radial-gradient(ellipse 60% 75% at var(--fx, 10%) 104%, rgba(255, 140, 50, 0.55), rgba(255, 110, 40, 0.2) 45%, transparent 75%),
+        radial-gradient(ellipse 22% 28% at var(--fx, 10%) 100%, rgba(255, 210, 120, 0.4), transparent 75%);
+    }
+    .th-fire2 {
+      background: radial-gradient(ellipse 85% 90% at var(--fx, 10%) 110%, rgba(255, 120, 40, 0.18), transparent 70%);
+      animation-duration: 1.7s; animation-delay: -0.6s;
+    }
+    @keyframes thflicker {
+      0%, 100% { opacity: 0.85; transform: scale(1); }
+      18% { opacity: 1; transform: scale(1.02); }
+      33% { opacity: 0.72; transform: scale(0.99); }
+      52% { opacity: 0.95; transform: scale(1.015); }
+      70% { opacity: 0.78; }
+      86% { opacity: 1; }
+    }
+    .vis[data-tod="day"] .th-fire, .vis[data-tod="day"] .th-fire2 { filter: opacity(0.55); }
+    .th-embers span {
+      position: absolute; bottom: 0;
+      width: clamp(2px, 0.45cqw, 4px); height: clamp(2px, 0.45cqw, 4px);
+      border-radius: 50%;
+      background: rgba(255, 190, 90, 0.95);
+      box-shadow: 0 0 6px 2px rgba(255, 120, 40, 0.7);
+      opacity: 0;
+      animation: thember ease-out infinite;
+    }
+    @keyframes thember {
+      0% { transform: translate3d(0, 0, 0); opacity: 0; }
+      12% { opacity: 0.95; }
+      100% { transform: translate3d(var(--dx, 10px), -42cqh, 0); opacity: 0; }
+    }
+    .th-coolwin { background: linear-gradient(180deg, rgba(40, 70, 140, 0.22), rgba(20, 40, 90, 0.12)); opacity: 0; }
+    .vis[data-tod="night"] .th-coolwin, .vis[data-tod="evening"] .th-coolwin { opacity: 1; }
+    html[data-visual-theme="fireplace"] .vis[data-tod="day"] .fx-tod {
+      background: linear-gradient(180deg, rgba(255, 230, 200, 0.06), transparent 40%, rgba(120, 50, 10, 0.08));
+    }
+    html[data-visual-theme="fireplace"] .vis[data-tod="evening"] .fx-tod,
+    html[data-visual-theme="fireplace"] .vis[data-tod="night"] .fx-tod {
+      background: linear-gradient(180deg, rgba(14, 10, 30, 0.3), rgba(40, 16, 6, 0.18) 50%, rgba(60, 22, 6, 0.12));
+    }
+    /* Winter Sunlight Window: low-angle warm beams from the window, dust motes,
+       crisp clear daytime outside; evening turns gold; night is a clear cold city. */
+    html[data-visual-theme="sunlight"] .win { backdrop-filter: saturate(0.7) brightness(1.08) contrast(1.04); -webkit-backdrop-filter: saturate(0.7) brightness(1.08) contrast(1.04); }
+    .th-sunwin { background: linear-gradient(180deg, rgba(255, 246, 225, 0.3), rgba(255, 226, 170, 0.12) 60%, rgba(255, 240, 220, 0.2)); mix-blend-mode: screen; }
+    .th-beam {
+      position: absolute;
+      height: 150%;
+      transform-origin: 50% 0;
+      background: repeating-linear-gradient(90deg,
+        rgba(255, 214, 150, 0) 0%, rgba(255, 214, 150, 0.26) 7%, rgba(255, 220, 160, 0.08) 13%,
+        rgba(255, 214, 150, 0) 18%, rgba(255, 226, 170, 0.2) 25%, rgba(255, 214, 150, 0) 33%);
+      -webkit-mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.5) 40%, transparent 78%);
+      mask-image: linear-gradient(180deg, rgba(0,0,0,0.9), rgba(0,0,0,0.5) 40%, transparent 78%);
+      mix-blend-mode: screen;
+      animation: thbeam 9s ease-in-out infinite;
+    }
+    @keyframes thbeam { 0%, 100% { opacity: 0.85; } 50% { opacity: 1; } }
+    .th-motes span {
+      position: absolute;
+      width: clamp(1.5px, 0.35cqw, 3px); height: clamp(1.5px, 0.35cqw, 3px);
+      border-radius: 50%;
+      background: rgba(255, 240, 200, 0.9);
+      box-shadow: 0 0 4px rgba(255, 220, 150, 0.8);
+      animation: thmote ease-in-out infinite alternate;
+    }
+    @keyframes thmote {
+      from { transform: translate3d(0, 0, 0); }
+      to { transform: translate3d(var(--dx, 12px), var(--dy, 18px), 0); }
+    }
+    .vis[data-tod="night"] .th-beam, .vis[data-tod="night"] .th-motes, .vis[data-tod="night"] .th-sunwin,
+    .vis[data-tod="evening"] .th-beam, .vis[data-tod="evening"] .th-motes { display: none; }
+    .vis[data-tod="evening"] .th-sunwin { background: linear-gradient(180deg, rgba(255, 190, 120, 0.3), rgba(255, 140, 80, 0.16)); }
+    html[data-visual-theme="sunlight"] .vis[data-tod="day"] .fx-tod {
+      background: linear-gradient(180deg, rgba(255, 240, 210, 0.1), rgba(255, 220, 170, 0.05) 45%, transparent 75%);
+    }
+    html[data-visual-theme="sunlight"] .vis[data-tod="evening"] .fx-tod {
+      background: linear-gradient(180deg, rgba(255, 160, 80, 0.16), rgba(200, 80, 40, 0.1) 50%, rgba(40, 10, 8, 0.12));
+    }
+    html[data-visual-theme="sunlight"] .vis[data-tod="night"] .fx-tod {
+      background: linear-gradient(180deg, rgba(10, 20, 54, 0.3), rgba(4, 8, 28, 0.16) 45%, rgba(4, 6, 20, 0.1));
+    }
+    html[data-visual-theme="sunlight"] .vis[data-tod="night"] .fx-citylights { opacity: 0.8;
+      background:
+        radial-gradient(circle at 16% 42%, rgba(255, 210, 140, 0.2), transparent 18%),
+        radial-gradient(circle at 84% 42%, rgba(255, 200, 130, 0.2), transparent 18%);
+      mix-blend-mode: screen;
+    }
+    /* Page sky behind the grid, per winter theme. */
+    html[data-visual-theme="snow"] .page-sky .sky-wx { opacity: 1; background: linear-gradient(180deg, rgba(190, 205, 230, 0.16), rgba(20, 24, 40, 0.25)); }
+    html[data-visual-theme="snow"] .page-sky[data-tod="night"] .sky-wash { background: radial-gradient(1000px 620px at 50% -10%, rgba(80, 100, 160, 0.4), transparent 60%), #05070f; }
+    html[data-visual-theme="christmas"] .page-sky .sky-wx { opacity: 1; background: radial-gradient(900px 520px at 15% 0%, rgba(255, 80, 70, 0.12), transparent 55%), radial-gradient(900px 520px at 85% 0%, rgba(60, 200, 110, 0.1), transparent 55%); }
+    html[data-visual-theme="fireplace"] .page-sky .sky-wx { opacity: 1; background: radial-gradient(1000px 600px at 50% 110%, rgba(255, 120, 40, 0.18), transparent 60%); }
+    html[data-visual-theme="sunlight"] .page-sky[data-tod="day"] .sky-wx,
+    html[data-visual-theme="sunlight"] .page-sky[data-tod="evening"] .sky-wx { opacity: 1; background: radial-gradient(900px 560px at 15% 0%, rgba(255, 210, 140, 0.24), transparent 55%); }
+
     .bubble {
       position: absolute;
       top: 10px;
@@ -961,12 +1163,16 @@
     body.wx-paused .fx-rain span,
     body.wx-paused .fx-snow span,
     body.wx-paused .fx-stars span,
-    body.wx-paused .rain-layer span {
+    body.wx-paused .rain-layer span,
+    body.wx-paused .th-flakes span,
+    body.wx-paused .th-embers span,
+    body.wx-paused .th-motes span,
+    body.wx-paused .th-lights i {
       animation-play-state: paused;
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .fx-stars span, .fx-flash, .bubble, .fx-tod, .fx-wet, .fx-fog, .fx-sun, .fx-overcast, .fx-moon, .fx-citylights, .page-sky, .page-sky .sky-wash, .page-sky .sky-wx, .tile {
+      .fx-stars span, .fx-flash, .bubble, .fx-tod, .fx-wet, .fx-fog, .fx-sun, .fx-overcast, .fx-moon, .fx-citylights, .th-lights i, .page-sky, .page-sky .sky-wash, .page-sky .sky-wx, .tile {
         animation: none !important;
         transition: none !important;
       }
@@ -1048,9 +1254,10 @@
     const THEMES = [
       { id: 'rainy',      name: 'Rainy Window',      nameKo: '비 오는 창가', status: 'ready',  linkWeather: false, linkTime: false },
       { id: 'moonlight',  name: 'Moonlight Window',  nameKo: '달빛 창가',   status: 'ready',  linkWeather: false, linkTime: false },
-      { id: 'christmas',  name: 'Christmas',         nameKo: '크리스마스',  status: 'coming', linkWeather: false, linkTime: true },
-      { id: 'snow',       name: 'Snow',              nameKo: '눈',         status: 'coming', linkWeather: false, linkTime: true },
-      { id: 'fireplace',  name: 'Fireplace',         nameKo: '화롯불',     status: 'coming', linkWeather: false, linkTime: true },
+      { id: 'christmas',  name: 'Christmas',         nameKo: '크리스마스',  status: 'ready',  linkWeather: false, linkTime: false },
+      { id: 'snow',       name: 'Snow',              nameKo: '눈',         status: 'ready',  linkWeather: false, linkTime: false },
+      { id: 'fireplace',  name: 'Fireplace',         nameKo: '화롯불',     status: 'ready',  linkWeather: false, linkTime: false },
+      { id: 'sunlight',   name: 'Winter Sunlight Window', nameKo: '겨울 햇살 창가', status: 'ready', linkWeather: false, linkTime: false },
       { id: 'library',    name: 'Library',           nameKo: '도서관',     status: 'coming', linkWeather: false, linkTime: true },
       { id: 'cafe',       name: 'Cafe',              nameKo: '카페',       status: 'coming', linkWeather: false, linkTime: true },
       { id: 'classroom',  name: 'Classroom',         nameKo: '교실',       status: 'coming', linkWeather: false, linkTime: true }
@@ -1067,7 +1274,8 @@
       { at: '2026-11-22 10:00', theme: 'moonlight' },
       { at: '2026-12-06 10:00', theme: 'christmas' },
       { at: '2026-12-13 10:00', theme: 'snow' },
-      { at: '2026-12-20 10:00', theme: 'fireplace' }
+      { at: '2026-12-20 10:00', theme: 'fireplace' },
+      { at: '2026-12-27 10:00', theme: 'sunlight' }
     ];
     const THEME_STORAGE_KEY = 'ninelives.theme';
     let currentTheme = 'rainy';
@@ -1084,7 +1292,7 @@
         themes: 'Themes',
         roomsLabel: 'Nine rooms, each in a different city',
         inCity: '{name} in {city}', footerRights: 'All rights reserved.', yourCity: 'Your City', yourTime: 'Your time', ytLabel: 'SuperAlex on YouTube', fsBtn: 'Full screen', fsExit: 'Exit full screen', fsHint: 'Tap for full screen', a2hsHint: 'Add to Home Screen for full screen',
-        theme: { rainy: 'Rainy Window', moonlight: 'Moonlight Window', christmas: 'Christmas', snow: 'Snow', fireplace: 'Fireplace', library: 'Library', cafe: 'Cafe', classroom: 'Classroom' },
+        theme: { rainy: 'Rainy Window', moonlight: 'Moonlight Window', christmas: 'Christmas', snow: 'Snow', fireplace: 'Fireplace', sunlight: 'Winter Sunlight Window', library: 'Library', cafe: 'Cafe', classroom: 'Classroom' },
         wx: { clear: 'Clear', cloudy: 'Cloudy', fog: 'Fog', drizzle: 'Drizzle', rain: 'Rain', snow: 'Snow', thunder: 'Thunder' }
       },
       ko: {
@@ -1094,7 +1302,7 @@
         themes: '테마',
         roomsLabel: '서로 다른 도시에 있는 아홉 개의 방',
         inCity: '{city}의 {name}', footerRights: '모든 권리 보유.', yourCity: '당신의 도시', yourTime: '당신의 시간', ytLabel: 'YouTube의 SuperAlex', fsBtn: '전체 화면', fsExit: '전체 화면 종료', fsHint: '탭하면 전체 화면', a2hsHint: '전체 화면은 홈 화면에 추가하세요',
-        theme: { rainy: '비 오는 창가', moonlight: '달빛 창가', christmas: '크리스마스', snow: '눈', fireplace: '화롯불', library: '도서관', cafe: '카페', classroom: '교실' },
+        theme: { rainy: '비 오는 창가', moonlight: '달빛 창가', christmas: '크리스마스', snow: '눈', fireplace: '화롯불', sunlight: '겨울 햇살 창가', library: '도서관', cafe: '카페', classroom: '교실' },
         wx: { clear: '맑음', cloudy: '흐림', fog: '안개', drizzle: '이슬비', rain: '비', snow: '눈', thunder: '천둥' }
       },
       ja: {
@@ -1104,7 +1312,7 @@
         themes: 'テーマ',
         roomsLabel: 'それぞれ違う街にある、9つの部屋',
         inCity: '{city}の{name}', footerRights: '全著作権所有.', yourCity: 'あなたの街', yourTime: 'あなたの時間', ytLabel: 'YouTubeのSuperAlex', fsBtn: '全画面', fsExit: '全画面を終了', fsHint: 'タップで全画面', a2hsHint: '全画面表示はホーム画面に追加してください',
-        theme: { rainy: '雨の窓', moonlight: '月明かりの窓', christmas: 'クリスマス', snow: '雪', fireplace: '暖炉', library: '図書館', cafe: 'カフェ', classroom: '教室' },
+        theme: { rainy: '雨の窓', moonlight: '月明かりの窓', christmas: 'クリスマス', snow: '雪', fireplace: '暖炉', sunlight: '冬の陽だまりの窓', library: '図書館', cafe: 'カフェ', classroom: '教室' },
         wx: { clear: '晴れ', cloudy: '曇り', fog: '霧', drizzle: '霧雨', rain: '雨', snow: '雪', thunder: '雷' }
       },
       'zh-Hans': {
@@ -1114,7 +1322,7 @@
         themes: '主题',
         roomsLabel: '九个房间，各自在一座不同的城市',
         inCity: '{city}的{name}', footerRights: '版权所有。', yourCity: '你的城市', yourTime: '你的时间', ytLabel: 'YouTube 上的 SuperAlex', fsBtn: '全屏', fsExit: '退出全屏', fsHint: '点按即可全屏', a2hsHint: '添加到主屏幕即可全屏显示',
-        theme: { rainy: '雨窗', moonlight: '月光窗', christmas: '圣诞节', snow: '雪', fireplace: '壁炉', library: '图书馆', cafe: '咖啡馆', classroom: '教室' },
+        theme: { rainy: '雨窗', moonlight: '月光窗', christmas: '圣诞节', snow: '雪', fireplace: '壁炉', sunlight: '冬日暖阳窗', library: '图书馆', cafe: '咖啡馆', classroom: '教室' },
         wx: { clear: '晴', cloudy: '多云', fog: '雾', drizzle: '毛毛雨', rain: '雨', snow: '雪', thunder: '雷' }
       },
       es: {
@@ -1124,7 +1332,7 @@
         themes: 'Temas',
         roomsLabel: 'Nueve habitaciones, cada una en una ciudad distinta',
         inCity: '{name} en {city}', footerRights: 'Todos los derechos reservados.', yourCity: 'Tu ciudad', yourTime: 'Tu hora', ytLabel: 'SuperAlex en YouTube', fsBtn: 'Pantalla completa', fsExit: 'Salir de pantalla completa', fsHint: 'Toca para pantalla completa', a2hsHint: 'Añade a la pantalla de inicio para ver a pantalla completa',
-        theme: { rainy: 'Ventana lluviosa', moonlight: 'Ventana de luna', christmas: 'Navidad', snow: 'Nieve', fireplace: 'Chimenea', library: 'Biblioteca', cafe: 'Café', classroom: 'Aula' },
+        theme: { rainy: 'Ventana lluviosa', moonlight: 'Ventana de luna', christmas: 'Navidad', snow: 'Nieve', fireplace: 'Chimenea', sunlight: 'Ventana de sol invernal', library: 'Biblioteca', cafe: 'Café', classroom: 'Aula' },
         wx: { clear: 'Despejado', cloudy: 'Nublado', fog: 'Niebla', drizzle: 'Llovizna', rain: 'Lluvia', snow: 'Nieve', thunder: 'Trueno' }
       },
       fr: {
@@ -1134,7 +1342,7 @@
         themes: 'Thèmes',
         roomsLabel: 'Neuf chambres, chacune dans une ville différente',
         inCity: '{name} à {city}', footerRights: 'Tous droits réservés.', yourCity: 'Votre ville', yourTime: 'Votre heure', ytLabel: 'SuperAlex sur YouTube', fsBtn: 'Plein écran', fsExit: 'Quitter le plein écran', fsHint: 'Touchez pour le plein écran', a2hsHint: 'Ajoutez à l’écran d’accueil pour le plein écran',
-        theme: { rainy: 'Fenêtre sous la pluie', moonlight: 'Fenêtre au clair de lune', christmas: 'Noël', snow: 'Neige', fireplace: 'Cheminée', library: 'Bibliothèque', cafe: 'Café', classroom: 'Salle de classe' },
+        theme: { rainy: 'Fenêtre sous la pluie', moonlight: 'Fenêtre au clair de lune', christmas: 'Noël', snow: 'Neige', fireplace: 'Cheminée', sunlight: 'Fenêtre au soleil d’hiver', library: 'Bibliothèque', cafe: 'Café', classroom: 'Salle de classe' },
         wx: { clear: 'Clair', cloudy: 'Nuageux', fog: 'Brouillard', drizzle: 'Bruine', rain: 'Pluie', snow: 'Neige', thunder: 'Orage' }
       },
       de: {
@@ -1144,7 +1352,7 @@
         themes: 'Themen',
         roomsLabel: 'Neun Zimmer, jedes in einer anderen Stadt',
         inCity: '{name} in {city}', footerRights: 'Alle Rechte vorbehalten.', yourCity: 'Deine Stadt', yourTime: 'Deine Zeit', ytLabel: 'SuperAlex auf YouTube', fsBtn: 'Vollbild', fsExit: 'Vollbild beenden', fsHint: 'Tippen für Vollbild', a2hsHint: 'Für Vollbild zum Home-Bildschirm hinzufügen',
-        theme: { rainy: 'Regenfenster', moonlight: 'Mondscheinfenster', christmas: 'Weihnachten', snow: 'Schnee', fireplace: 'Kamin', library: 'Bibliothek', cafe: 'Café', classroom: 'Klassenzimmer' },
+        theme: { rainy: 'Regenfenster', moonlight: 'Mondscheinfenster', christmas: 'Weihnachten', snow: 'Schnee', fireplace: 'Kamin', sunlight: 'Wintersonnenfenster', library: 'Bibliothek', cafe: 'Café', classroom: 'Klassenzimmer' },
         wx: { clear: 'Klar', cloudy: 'Bewölkt', fog: 'Nebel', drizzle: 'Niesel', rain: 'Regen', snow: 'Schnee', thunder: 'Gewitter' }
       },
       pt: {
@@ -1154,7 +1362,7 @@
         themes: 'Temas',
         roomsLabel: 'Nove quartos, cada um em uma cidade diferente',
         inCity: '{name} em {city}', footerRights: 'Todos os direitos reservados.', yourCity: 'Sua cidade', yourTime: 'Seu horário', ytLabel: 'SuperAlex no YouTube', fsBtn: 'Tela cheia', fsExit: 'Sair da tela cheia', fsHint: 'Toque para tela cheia', a2hsHint: 'Adicione à Tela de Início para tela cheia',
-        theme: { rainy: 'Janela na chuva', moonlight: 'Janela ao luar', christmas: 'Natal', snow: 'Neve', fireplace: 'Lareira', library: 'Biblioteca', cafe: 'Café', classroom: 'Sala de aula' },
+        theme: { rainy: 'Janela na chuva', moonlight: 'Janela ao luar', christmas: 'Natal', snow: 'Neve', fireplace: 'Lareira', sunlight: 'Janela de sol de inverno', library: 'Biblioteca', cafe: 'Café', classroom: 'Sala de aula' },
         wx: { clear: 'Limpo', cloudy: 'Nublado', fog: 'Nevoeiro', drizzle: 'Garoa', rain: 'Chuva', snow: 'Neve', thunder: 'Trovão' }
       }
     };
@@ -1244,7 +1452,7 @@
         owl: [ "¿me duermo...?", "una línea más", "mañana puede esperar", "sigo aquí", "un poquito más", "buenas noches... ahora" ],
         wx_rain: [ "¿también llueve ahí?", "me gusta este sonido", "qué bien la lluvia", "no quiero salir", "solo escucho" ],
         wx_drizzle: [ "una lluvia suave", "solo llovizna", "qué acogedor", "la ventana está punteada" ],
-        wx_thunder: [ "eso ha sido fuerte", "espero a que pase", "tranquila, solo es una tormenta", "¿parpadeó la luz?" ],
+        wx_thunder: [ "eso ha sido fuerte", "espero a que pase", "tranqui, solo es una tormenta", "¿parpadeó la luz?" ],
         wx_snow: [ "está nevando", "mira eso", "qué silencio fuera", "qué bonito..." ],
         wx_fog: [ "casi no se ve", "todo está suave", "la calle desapareció" ],
         wx_clear: [ "qué cielo tan claro", "hoy está luminoso", "qué rica la luz en la mesa" ],
@@ -1253,7 +1461,7 @@
       fr: {
         predawn: [ "déjà… ?", "encore un peu", "c'est trop tôt", "encore une page…", "la maison est silencieuse", "ne t'arrête pas" ],
         morning: [ "bonjour", "allez, on commence", "le thé… plus tard", "une nouvelle page", "la fenêtre est claire", "c'est parti" ],
-        studyam: [ "encore une page…", "ce chapitre est beau", "ne regarde pas l'heure", "juste cette partie", "j'y suis presque", "les notes d'abord", "reste concentrée" ],
+        studyam: [ "encore une page…", "ce chapitre est beau", "ne regarde pas l'heure", "juste cette partie", "j'y suis presque", "les notes d'abord", "on reste concentré" ],
         midday: [ "une petite pause ?", "j'ai un peu faim", "encore cinq minutes", "ce n'était pas si dur", "je reviens", "un peu d'étirement" ],
         studypm: [ "j'y suis encore", "encore une page…", "je crois que je saisis", "ne t'endors pas", "finir juste ça", "on continue", "tout doucement" ],
         dusk: [ "la lumière change", "déjà si tard ?", "c'est joli dehors", "la lampe bientôt", "encore une page…", "une heure calme" ],
@@ -1298,7 +1506,7 @@
         owl: [ "será que eu durmo…?", "mais uma linha", "o amanhã espera", "ainda estou aqui", "só mais um pouco", "boa noite… já já" ],
         wx_rain: [ "está chovendo aí também?", "gosto desse som", "a chuva é boa", "não quero sair", "só escutando" ],
         wx_drizzle: [ "uma chuva macia", "só uma garoa", "bem aconchegante", "a janela está pintadinha" ],
-        wx_thunder: [ "isso foi alto", "vou esperar passar", "tranquila, é só uma tempestade", "a luz piscou?" ],
+        wx_thunder: [ "isso foi alto", "vou esperar passar", "calma, é só uma tempestade", "a luz piscou?" ],
         wx_snow: [ "está nevando", "olha só", "que silêncio lá fora", "que lindo…" ],
         wx_fog: [ "quase não dá para ver", "está tudo macio", "a rua sumiu" ],
         wx_clear: [ "que céu limpo", "hoje está claro", "que luz boa na mesa" ],
@@ -1354,6 +1562,541 @@
 
     let currentLang = resolveLang();
     function t() { return I18N[currentLang] || I18N[DEFAULT_LANG]; }
+    // Per-theme bubble lines (modular: add a theme id here, no other speech code needed).
+    // day = study blocks (09:00–16:59); night = dusk through owl (17:00–23:59);
+    // optional dusk overrides night for 17:00–18:59.
+    // Lines are gender-neutral so the character art can change without rewriting them.
+    const THEME_SPEECH = {
+      "christmas": {
+        "en": {
+          "day": [
+            "the lights are up",
+            "only a few days left",
+            "wrapping gifts later",
+            "the street looks festive",
+            "hot cocoa after this"
+          ],
+          "night": [
+            "the lights look so warm",
+            "a quiet Christmas night",
+            "the window lights twinkle",
+            "carols on low"
+          ]
+        },
+        "ko": {
+          "day": [
+            "전구 장식 달았어",
+            "며칠 안 남았네",
+            "선물 포장은 이따가",
+            "거리가 반짝반짝해",
+            "이거 끝나면 핫초코"
+          ],
+          "night": [
+            "불빛이 참 따뜻해",
+            "조용한 크리스마스 밤",
+            "창가 전구가 반짝여",
+            "캐럴은 작게"
+          ]
+        },
+        "ja": {
+          "day": [
+            "電飾を飾った",
+            "あと数日だね",
+            "プレゼントの包装はあとで",
+            "街がきらきら",
+            "終わったらココア"
+          ],
+          "night": [
+            "灯りがあったかい",
+            "静かなクリスマスの夜",
+            "窓の電飾がきらきら",
+            "キャロルは小さめで"
+          ]
+        },
+        "zh-Hans": {
+          "day": [
+            "彩灯挂好了",
+            "没几天了",
+            "礼物等会儿再包",
+            "街上好热闹",
+            "写完喝热可可"
+          ],
+          "night": [
+            "灯光好温暖",
+            "安静的圣诞夜",
+            "窗边的彩灯一闪一闪",
+            "圣诞歌开小声点"
+          ]
+        },
+        "es": {
+          "day": [
+            "ya están puestas las luces",
+            "faltan pocos días",
+            "envuelvo los regalos luego",
+            "la calle está de fiesta",
+            "chocolate caliente después"
+          ],
+          "night": [
+            "qué cálidas las lucecitas",
+            "una noche de Navidad tranquila",
+            "las luces de la ventana parpadean",
+            "villancicos bajito"
+          ]
+        },
+        "fr": {
+          "day": [
+            "les guirlandes sont posées",
+            "plus que quelques jours",
+            "les cadeaux, plus tard",
+            "la rue est en fête",
+            "un chocolat chaud après"
+          ],
+          "night": [
+            "les guirlandes sont si chaleureuses",
+            "une nuit de Noël paisible",
+            "les guirlandes scintillent à la fenêtre",
+            "des chants de Noël tout bas"
+          ]
+        },
+        "de": {
+          "day": [
+            "die Lichterkette hängt",
+            "nur noch ein paar Tage",
+            "Geschenke packe ich später",
+            "die Straße ist festlich",
+            "danach heiße Schokolade"
+          ],
+          "night": [
+            "die Lichter sind so warm",
+            "eine stille Weihnachtsnacht",
+            "die Fensterlichter funkeln",
+            "leise Weihnachtslieder"
+          ]
+        },
+        "pt": {
+          "day": [
+            "as luzinhas estão penduradas",
+            "faltam poucos dias",
+            "embrulho os presentes depois",
+            "a rua está em festa",
+            "chocolate quente depois"
+          ],
+          "night": [
+            "as luzinhas são tão quentes",
+            "uma noite de Natal tranquila",
+            "as luzes da janela piscam",
+            "músicas de Natal baixinho"
+          ]
+        }
+      },
+      "snow": {
+        "en": {
+          "day": [
+            "it's snowing",
+            "everything's white",
+            "the roofs are covered",
+            "so quiet outside",
+            "snow day study"
+          ],
+          "night": [
+            "snow under the streetlights",
+            "still snowing...",
+            "the city went quiet",
+            "footprints out there"
+          ]
+        },
+        "ko": {
+          "day": [
+            "눈 온다",
+            "온통 하얘",
+            "지붕이 다 덮였어",
+            "밖이 참 조용해",
+            "눈 오는 날 공부"
+          ],
+          "night": [
+            "가로등 아래 눈",
+            "아직도 내리네…",
+            "도시가 조용해졌어",
+            "밖에 발자국"
+          ]
+        },
+        "ja": {
+          "day": [
+            "雪だ",
+            "一面まっしろ",
+            "屋根が雪でいっぱい",
+            "外がすごく静か",
+            "雪の日の勉強"
+          ],
+          "night": [
+            "街灯の下の雪",
+            "まだ降ってる…",
+            "街が静かになった",
+            "外に足あと"
+          ]
+        },
+        "zh-Hans": {
+          "day": [
+            "下雪了",
+            "到处都白了",
+            "屋顶都盖满了",
+            "外面好安静",
+            "下雪天学习"
+          ],
+          "night": [
+            "路灯下的雪",
+            "还在下……",
+            "城市安静下来了",
+            "外面有脚印"
+          ]
+        },
+        "es": {
+          "day": [
+            "está nevando",
+            "todo está blanco",
+            "los tejados están cubiertos",
+            "qué silencio fuera",
+            "estudiar con nieve"
+          ],
+          "night": [
+            "nieve bajo las farolas",
+            "sigue nevando...",
+            "la ciudad se calló",
+            "huellas ahí fuera"
+          ]
+        },
+        "fr": {
+          "day": [
+            "il neige",
+            "tout est blanc",
+            "les toits sont couverts",
+            "quel silence dehors",
+            "réviser sous la neige"
+          ],
+          "night": [
+            "la neige sous les lampadaires",
+            "il neige encore…",
+            "la ville s'est tue",
+            "des traces de pas dehors"
+          ]
+        },
+        "de": {
+          "day": [
+            "es schneit",
+            "alles ist weiß",
+            "die Dächer sind bedeckt",
+            "so still draußen",
+            "Lernen im Schnee"
+          ],
+          "night": [
+            "Schnee unter den Laternen",
+            "es schneit immer noch…",
+            "die Stadt ist still geworden",
+            "Fußspuren da draußen"
+          ]
+        },
+        "pt": {
+          "day": [
+            "está nevando",
+            "está tudo branco",
+            "os telhados estão cobertos",
+            "que silêncio lá fora",
+            "estudar com neve"
+          ],
+          "night": [
+            "neve sob os postes",
+            "ainda nevando…",
+            "a cidade ficou quieta",
+            "pegadas lá fora"
+          ]
+        }
+      },
+      "fireplace": {
+        "en": {
+          "day": [
+            "the fire's crackling",
+            "warm hands, warm tea",
+            "nice and toasty",
+            "one more log later"
+          ],
+          "night": [
+            "just the fire and me",
+            "the embers are glowing",
+            "so cozy tonight",
+            "the fire is enough"
+          ]
+        },
+        "ko": {
+          "day": [
+            "장작 타는 소리",
+            "손도 따뜻, 차도 따뜻",
+            "포근하다",
+            "장작 하나 더 넣어야지"
+          ],
+          "night": [
+            "불이랑 나만",
+            "불씨가 빛나",
+            "오늘 밤 참 아늑해",
+            "불빛이면 충분해"
+          ]
+        },
+        "ja": {
+          "day": [
+            "薪がぱちぱち",
+            "手もお茶もあったか",
+            "ぬくぬく",
+            "あとで薪をもう一本"
+          ],
+          "night": [
+            "火と自分だけ",
+            "残り火が光ってる",
+            "今夜はほんとに心地いい",
+            "火の明かりで十分"
+          ]
+        },
+        "zh-Hans": {
+          "day": [
+            "柴火噼啪响",
+            "手暖暖，茶也暖暖",
+            "好暖和",
+            "等会儿再添根柴"
+          ],
+          "night": [
+            "只有炉火和我",
+            "余烬在发光",
+            "今晚好舒服",
+            "有炉火就够了"
+          ]
+        },
+        "es": {
+          "day": [
+            "la leña cruje",
+            "manos calientes, té caliente",
+            "qué calorcito",
+            "luego otro tronco"
+          ],
+          "night": [
+            "solo el fuego y yo",
+            "las brasas brillan",
+            "qué noche tan acogedora",
+            "con el fuego basta"
+          ]
+        },
+        "fr": {
+          "day": [
+            "le feu crépite",
+            "mains au chaud, thé au chaud",
+            "on est bien au chaud",
+            "une bûche de plus tout à l'heure"
+          ],
+          "night": [
+            "juste le feu et moi",
+            "les braises rougeoient",
+            "quelle soirée douillette",
+            "le feu suffit"
+          ]
+        },
+        "de": {
+          "day": [
+            "das Feuer knistert",
+            "warme Hände, warmer Tee",
+            "schön mollig",
+            "gleich noch ein Scheit"
+          ],
+          "night": [
+            "nur das Feuer und ich",
+            "die Glut leuchtet",
+            "so gemütlich heute Abend",
+            "das Feuer reicht"
+          ]
+        },
+        "pt": {
+          "day": [
+            "a lenha estala",
+            "mãos quentes, chá quente",
+            "que quentinho",
+            "mais uma lenha daqui a pouco"
+          ],
+          "night": [
+            "só o fogo e eu",
+            "as brasas brilham",
+            "que noite aconchegante",
+            "o fogo basta"
+          ]
+        }
+      },
+      "sunlight": {
+        "en": {
+          "day": [
+            "the winter sun is so soft",
+            "sunlight on my page",
+            "cold out, warm in here",
+            "look at the dust in the light",
+            "such a clear day"
+          ],
+          "night": [
+            "a crisp, clear night",
+            "the city lights look so sharp",
+            "cold out, warm in here",
+            "sunny again tomorrow?"
+          ],
+          "dusk": [
+            "the light is turning gold",
+            "the sun sets so early",
+            "a crisp, clear evening",
+            "city lights are coming on"
+          ]
+        },
+        "ko": {
+          "day": [
+            "겨울 햇살이 참 부드러워",
+            "책장 위에 햇살",
+            "밖은 춥고 안은 따뜻해",
+            "빛 속에 먼지가 반짝여",
+            "참 맑은 날"
+          ],
+          "night": [
+            "맑고 차가운 밤",
+            "도시 불빛이 선명해",
+            "밖은 춥고 안은 따뜻해",
+            "내일도 맑을까?"
+          ],
+          "dusk": [
+            "빛이 금빛으로 변해",
+            "해가 참 빨리 지네",
+            "맑고 차가운 저녁",
+            "도시 불빛이 켜진다"
+          ]
+        },
+        "ja": {
+          "day": [
+            "冬の日差しがやわらかい",
+            "ページに陽だまり",
+            "外は寒くて中はあたたか",
+            "光の中でほこりがきらきら",
+            "よく晴れた日"
+          ],
+          "night": [
+            "澄んだ冷たい夜",
+            "街の明かりがくっきり",
+            "外は寒くて中はあたたか",
+            "明日も晴れるかな"
+          ],
+          "dusk": [
+            "光が金色になってきた",
+            "日が沈むのが早いね",
+            "澄んだ冷たい夕方",
+            "街の明かりがつき始めた"
+          ]
+        },
+        "zh-Hans": {
+          "day": [
+            "冬天的阳光好柔和",
+            "阳光落在书页上",
+            "外面冷，屋里暖",
+            "光里的灰尘在闪",
+            "好晴朗的一天"
+          ],
+          "night": [
+            "清冷晴朗的夜",
+            "城市的灯好清楚",
+            "外面冷，屋里暖",
+            "明天也会晴吗？"
+          ],
+          "dusk": [
+            "光变成金色了",
+            "太阳落得好早",
+            "清冷的傍晚",
+            "城市的灯亮起来了"
+          ]
+        },
+        "es": {
+          "day": [
+            "qué suave el sol de invierno",
+            "sol sobre mi página",
+            "frío fuera, calor dentro",
+            "mira el polvo en la luz",
+            "qué día tan claro"
+          ],
+          "night": [
+            "una noche fría y despejada",
+            "qué nítidas las luces de la ciudad",
+            "frío fuera, calor dentro",
+            "¿mañana también hará sol?"
+          ],
+          "dusk": [
+            "la luz se vuelve dorada",
+            "el sol se pone tan pronto",
+            "una tarde fría y clara",
+            "se encienden las luces de la ciudad"
+          ]
+        },
+        "fr": {
+          "day": [
+            "le soleil d'hiver est si doux",
+            "du soleil sur ma page",
+            "froid dehors, chaud ici",
+            "regarde la poussière dans la lumière",
+            "quelle journée claire"
+          ],
+          "night": [
+            "une nuit froide et claire",
+            "les lumières de la ville sont si nettes",
+            "froid dehors, chaud ici",
+            "du soleil demain aussi ?"
+          ],
+          "dusk": [
+            "la lumière devient dorée",
+            "le soleil se couche si tôt",
+            "une soirée froide et claire",
+            "les lumières de la ville s'allument"
+          ]
+        },
+        "de": {
+          "day": [
+            "die Wintersonne ist so sanft",
+            "Sonne auf meiner Seite",
+            "draußen kalt, drinnen warm",
+            "schau, der Staub im Licht",
+            "so ein klarer Tag"
+          ],
+          "night": [
+            "eine klare, kalte Nacht",
+            "die Stadtlichter sind so klar",
+            "draußen kalt, drinnen warm",
+            "morgen wieder Sonne?"
+          ],
+          "dusk": [
+            "das Licht wird golden",
+            "die Sonne geht so früh unter",
+            "ein klarer, kalter Abend",
+            "die Stadtlichter gehen an"
+          ]
+        },
+        "pt": {
+          "day": [
+            "o sol de inverno é tão suave",
+            "sol na minha página",
+            "frio lá fora, quente aqui",
+            "olha a poeira na luz",
+            "que dia limpo"
+          ],
+          "night": [
+            "uma noite fria e limpa",
+            "as luzes da cidade estão tão nítidas",
+            "frio lá fora, quente aqui",
+            "amanhã faz sol de novo?"
+          ],
+          "dusk": [
+            "a luz está ficando dourada",
+            "o sol se põe tão cedo",
+            "uma tarde fria e clara",
+            "as luzes da cidade acendem"
+          ]
+        }
+      }
+    };
+
     function themeNames(id) {
       const s = t();
       const row = THEMES.filter(function (x) { return x.id === id; })[0];
@@ -1990,6 +2733,97 @@
       const flash = document.createElement('div'); flash.className = 'fx-flash';
       [tod, rain, wet, snow, fog, overcast, sun, stars, moon, citylights, flash].forEach(function (el) { fx.appendChild(el); });
       return fx;
+    }
+
+    // ---- Winter theme overlay layers (built lazily, only for the active theme) ----
+    // Window rects in image-space percent [x0, y0, x1, y1] of the 640x360 room
+    // art (same framing in every scene and art set). r03 has a round window.
+    const WINDOW_RECTS = {
+      r01: [3, 0, 37, 62],  r02: [52, 0, 96, 50], r03: [33, 0, 59, 55, 'round'],
+      r04: [73, 0, 100, 47], r05: [37, 0, 75, 50], r06: [9, 0, 68, 51],
+      r07: [3, 0, 42, 52],  r08: [21, 0, 77, 50], r09: [14, 0, 43, 55]
+    };
+    function rr(a, b) { return a + Math.random() * (b - a); }
+    function winBox(w) {
+      return 'left:' + w[0] + '%;top:' + w[1] + '%;width:' + (w[2] - w[0]) + '%;height:' + (w[3] - w[1]) + '%';
+    }
+    function flakesHTML(n, big) {
+      let h = '<div class="th-flakes">';
+      for (let i = 0; i < n; i++) {
+        h += '<span style="left:' + rr(2, 98).toFixed(1) + '%;--r:' + rr(0.9, big ? 2.2 : 1.6).toFixed(2) + 'px;--dx:' + rr(-8, 10).toFixed(1) +
+          'px;animation-duration:' + rr(5, 11).toFixed(2) + 's;animation-delay:' + (-rr(0, 11)).toFixed(2) + 's"></span>';
+      }
+      return h + '</div>';
+    }
+    const THEME_FX = {
+      snow: function (w) {
+        return '<div class="fx-art"><div class="win' + (w[4] ? ' round' : '') + '" style="' + winBox(w) + '">' +
+          '<div class="th-snowsky"></div><div class="th-snowfield"></div><div class="th-streetglow"></div>' +
+          flakesHTML(24, true) + '<div class="th-frost"></div></div></div>';
+      },
+      christmas: function (w) {
+        const colors = [['#ff5a4e', 'rgba(255,80,60,0.35)'], ['#ffd36a', 'rgba(255,200,90,0.35)'], ['#5fe08a', 'rgba(80,220,120,0.3)'], ['#7fb6ff', 'rgba(110,170,255,0.3)']];
+        const n = 14;
+        let bulbs = '<b></b>';
+        for (let i = 0; i < n; i++) {
+          const tpos = (i + 0.5) / n;
+          const c = colors[i % colors.length];
+          const sag = Math.sin(Math.PI * ((tpos * 2) % 1));
+          bulbs += '<i style="left:' + (tpos * 100).toFixed(1) + '%;top:' + (8 + sag * 78).toFixed(1) + '%;--c:' + c[0] + ';--g:' + c[1] +
+            ';animation-duration:' + rr(1.6, 3.2).toFixed(2) + 's;animation-delay:' + (-rr(0, 3)).toFixed(2) + 's"></i>';
+        }
+        const cx = (w[0] + w[2]) / 2;
+        const gx = cx < 50 ? 82 : 16;
+        return '<div class="fx-art"><div class="win' + (w[4] ? ' round' : '') + '" style="' + winBox(w) + '">' + flakesHTML(7, false) + '</div>' +
+          '<div class="th-lights" style="left:' + w[0] + '%;width:' + (w[2] - w[0]) + '%;top:' + (w[1] + 0.5) + '%;height:' + ((w[3] - w[1]) * 0.18).toFixed(1) + '%">' + bulbs + '</div>' +
+          '<div class="th-xmasglow" style="--gx:' + gx + '%"></div></div>';
+      },
+      fireplace: function (w) {
+        const cx = (w[0] + w[2]) / 2;
+        const fx = cx < 50 ? 92 : 8;
+        let embers = '<div class="th-embers">';
+        for (let i = 0; i < 8; i++) {
+          embers += '<span style="left:' + (fx + rr(-9, 9)).toFixed(1) + '%;--dx:' + rr(-30, 30).toFixed(0) + 'px;animation-duration:' + rr(3.5, 7).toFixed(2) +
+            's;animation-delay:' + (-rr(0, 7)).toFixed(2) + 's"></span>';
+        }
+        embers += '</div>';
+        return '<div class="fx-art"><div class="win' + (w[4] ? ' round' : '') + '" style="' + winBox(w) + '"><div class="th-coolwin"></div></div>' +
+          '<div class="th-fire" style="--fx:' + fx + '%"></div><div class="th-fire2" style="--fx:' + fx + '%"></div>' + embers + '</div>';
+      },
+      sunlight: function (w) {
+        const cx = (w[0] + w[2]) / 2;
+        const skew = cx < 40 ? 34 : (cx > 60 ? -34 : 22);
+        const bw = w[2] - w[0];
+        let motes = '<div class="th-motes" style="position:absolute;left:' + w[0] + '%;top:' + w[3] * 0.6 + '%;width:' + bw + '%;height:' + (100 - w[3] * 0.6) * 0.7 + '%">';
+        for (let i = 0; i < 9; i++) {
+          motes += '<span style="left:' + rr(5, 95).toFixed(1) + '%;top:' + rr(5, 90).toFixed(1) + '%;--dx:' + rr(-16, 16).toFixed(0) + 'px;--dy:' + rr(-20, 20).toFixed(0) +
+            'px;animation-duration:' + rr(5, 10).toFixed(2) + 's;animation-delay:' + (-rr(0, 10)).toFixed(2) + 's"></span>';
+        }
+        motes += '</div>';
+        return '<div class="fx-art"><div class="win' + (w[4] ? ' round' : '') + '" style="' + winBox(w) + '"><div class="th-sunwin"></div></div>' +
+          '<div class="th-beam" style="left:' + w[0] + '%;top:' + (w[1] + (w[3] - w[1]) * 0.2).toFixed(1) + '%;width:' + bw + '%;transform:skewX(' + skew + 'deg)"></div>' +
+          motes + '</div>';
+      }
+    };
+    function syncThemeFx(vis, room) {
+      if (!vis) return;
+      const fx = vis.querySelector('.fx');
+      if (!fx) return;
+      let layer = fx.querySelector('.fx-theme');
+      const theme = visualThemeId(currentTheme);
+      const build = THEME_FX[theme];
+      const roomId = room && room.id ? room.id : '';
+      const key = build && roomId ? theme + '|' + roomId : '';
+      if ((layer ? layer.dataset.key || '' : '') === key) return;
+      if (!key) { if (layer) layer.remove(); return; }
+      if (!layer) {
+        layer = document.createElement('div');
+        layer.className = 'fx-theme';
+        const flash = fx.querySelector('.fx-flash');
+        fx.insertBefore(layer, flash || null);
+      }
+      layer.dataset.key = key;
+      layer.innerHTML = build(WINDOW_RECTS[roomId] || [30, 0, 70, 50]);
     }
 
     const grid = document.getElementById('grid');
@@ -2722,14 +3556,20 @@
     function applyResolvedTheme() {
       return setTheme(resolveActiveTheme());
     }
+    // Overlay themes: their own CSS overlays keyed on html[data-visual-theme],
+    // following the room art's local-hour periods (day / evening / night), with
+    // a fixed visual weather token (not live weather; the tile weather readout
+    // still shows live Open-Meteo data). New overlay themes just add a row.
+    const THEME_OVERLAY_WX = { moonlight: 'clear', christmas: 'xmas', snow: 'snowy', fireplace: 'fire', sunlight: 'clear' };
     function atmosphereFor(room, now) {
       // Moonlight Window keeps linkWeather/linkTime false (not live weather,
       // not the generic time-linked path). It still uses time of day so
       // daytime stays a clear sunny city and night gets the moonlight overlay.
       // Rainy Window and coming themes are unchanged: no art falls back to
       // Rainy Window visuals, and weather-unlinked themes stay fixed rain.
-      if (visualThemeId(currentTheme) === 'moonlight') {
-        if (!room) return { wx: 'clear', tod: '' };
+      const overlayWx = THEME_OVERLAY_WX[visualThemeId(currentTheme)];
+      if (overlayWx) {
+        if (!room) return { wx: overlayWx, tod: '' };
         // Use the same local-hour periods as the room art (periodForHour),
         // not live sunrise/sunset, so a daytime desk scene never gets the
         // night moonlight overlay.
@@ -2737,7 +3577,7 @@
         let tod = 'day';
         if (period === 'night' || period === 'late') tod = 'night';
         else if (period === 'evening') tod = 'evening';
-        return { wx: 'clear', tod: tod };
+        return { wx: overlayWx, tod: tod };
       }
       const useWx = themeLinksWeather() && themeHasArt(currentTheme);
       const useTod = themeLinksTime() && themeHasArt(currentTheme);
@@ -2748,6 +3588,7 @@
     function applyAtmosphereToVis(vis, room, now) {
       if (!vis) return;
       const atm = atmosphereFor(room, now);
+      syncThemeFx(vis, room);
       if (vis.dataset.wx !== atm.wx) vis.dataset.wx = atm.wx;
       if (vis.dataset.tod !== atm.tod) vis.dataset.tod = atm.tod;
     }
@@ -2889,10 +3730,23 @@
       const block = timeBlockId(hour24);
       if (block === 'night' || block === 'predawn' || Number(hour24) < 7) return [];
       let lines = (pack[block] || []).slice();
-      const moonlight = visualThemeId(currentTheme) === 'moonlight';
+      const vtheme = visualThemeId(currentTheme);
+      const moonlight = vtheme === 'moonlight';
+      const thSpeech = THEME_SPEECH[vtheme];
+      if (thSpeech) {
+        // Overlay winter themes: no rain talk, no other theme's talk; only
+        // that theme's own lines in the weather-speech blocks.
+        lines = lines.filter(function (line) { return !isRainSpeechLine(line, pack); });
+        const tp = thSpeech[currentLang] || thSpeech.en;
+        const evening = (block === 'dusk' || block === 'evening' || block === 'latenight' || block === 'owl');
+        if (WX_SPEECH_BLOCKS[block]) lines = lines.concat(block === 'dusk' && tp.dusk ? tp.dusk : (evening ? tp.night : tp.day));
+        return lines;
+      }
       if (moonlight) {
         lines = lines.filter(function (line) { return !isRainSpeechLine(line, pack); });
-        if (WX_SPEECH_BLOCKS[block] && pack.wx_clear) lines = lines.concat(pack.wx_clear);
+        // Clear-sky daytime lines ("it's bright today") only in the study
+        // blocks; after dark Moonlight uses the moon/city-light lines.
+        if ((block === 'studyam' || block === 'midday' || block === 'studypm') && pack.wx_clear) lines = lines.concat(pack.wx_clear);
         if ((block === 'dusk' || block === 'evening' || block === 'latenight' || block === 'owl') && pack.wx_moon) {
           lines = lines.concat(pack.wx_moon);
         }
@@ -3989,7 +4843,7 @@
     syncFsChrome();
 
     // Expose a tiny hook so future settings can swap room art without rewriting clocks/themes.
-    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, CHAR_NAMES, locChar, displayName, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, scheduledReadyThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, metroHubByName, coordsForCityKey, coordsForRoom, speechLinesFor, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, artFolder, sceneKey, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
+    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, CHAR_NAMES, locChar, displayName, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, scheduledReadyThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, metroHubByName, coordsForCityKey, coordsForRoom, speechLinesFor, THEME_SPEECH, THEME_FX, THEME_OVERLAY_WX, WINDOW_RECTS, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, artFolder, sceneKey, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
   })();
   </script>
 </body>

@@ -107,44 +107,52 @@ The still or clip shown in a room follows **that city's local hour**:
 | 22:00–23:59 | late | Lights-off loop. Still fallback if the clip cannot play. Plays even with reduced motion. |
 | 00:00–06:59 | night | Bed loop (breathing). Still fallback if the clip cannot play. Plays even with reduced motion. |
 
-Rainy Window uses `assets/rooms_rainy/`. Every other theme uses the base set in `assets/rooms/`. Videos are loaded lazily (`preload="none"`), one per visible cell, and are never inlined. Only card-flip/layout animations and twinkling stars respect `prefers-reduced-motion`.
+Rainy Window uses `assets/rooms_rainy/`. Every other theme uses the base set in `assets/rooms/`. Videos are loaded lazily (`preload="none"`), one per visible cell, and are never inlined. Only card-flip/layout animations and twinkle (stars, Christmas window lights) respect `prefers-reduced-motion`; rain, snow, fire flicker/embers, sunbeams and dust motes keep playing.
 
 These rules live in `periodForHour` in the page script. Tap a room to enlarge it; the panel shows the city, character, date, time zone, and a short weather-mood line for the active theme.
 
 ## Themes
 
-Themes are a data-driven list in `THEMES`, each with `{ id, name, status, linkWeather, linkTime }`. There is no theme name on the main screen. The ☰ settings panel holds a theme picker, in this order — **This week's theme (auto)**, Rainy Window, Moonlight Window, Christmas, Snow, Fireplace, Library, Cafe, Classroom — localized in all eight UI languages.
+Themes are a data-driven list in `THEMES`, each with `{ id, name, status, linkWeather, linkTime }`. There is no theme name on the main screen. The ☰ settings panel holds a theme picker, in this order — **This week's theme (auto)**, Rainy Window, Moonlight Window, Christmas, Snow, Fireplace, Winter Sunlight Window, Library, Cafe, Classroom — localized in all eight UI languages.
 
 A status line at the top of the picker reports what is actually on screen (including the Rainy Window fallback), for example “Now showing: Rainy Window”. If someone forces a coming theme with `?theme=`, it reads “Now showing: Rainy Window (Christmas coming soon)”. Auto itself stays on the last ready theme (Moonlight Window, once that week has started) until the scheduled coming theme is marked ready. A manual pick appends “(your pick)”.
 
-Only **This week's theme (auto)** and themes with `status: 'ready'` (currently Rainy Window and Moonlight Window) are radio options: they are keyboard-accessible (`role=radiogroup` / `role=radio`) and the current choice is checked. Coming themes are listed, dimmed, and not selectable; their row shows the name, a **This week** badge when that theme is the week’s scheduled one, and the shared **Coming soon** tag. If an older visit stored a coming theme id in `localStorage['ninelives.theme']`, it is cleared and treated as auto.
+Only **This week's theme (auto)** and themes with `status: 'ready'` (currently Rainy Window, Moonlight Window, Christmas, Snow, Fireplace and Winter Sunlight Window) are radio options: they are keyboard-accessible (`role=radiogroup` / `role=radio`) and the current choice is checked. Coming themes are listed, dimmed, and not selectable; their row shows the name, a **This week** badge when that theme is the week’s scheduled one, and the shared **Coming soon** tag. If an older visit stored a coming theme id in `localStorage['ninelives.theme']`, it is cleared and treated as auto.
 
 - **Rainy Window** — `status: 'ready'`, `linkWeather: false`, `linkTime: false`. The visual is fully fixed: rain on glass and the Rainy Window art and page background, with no weather-driven visual switching and no time-of-day tone layer.
 - **Moonlight Window** — `status: 'ready'`, `linkWeather: false`, `linkTime: false`. Uses the base (dry) rooms art and loops, not the rainy set. Rain streaks and wet-glass overlays are off. Daytime rooms (07:00–16:59 local) are a clear, sunny city. Evening rooms keep a dusk tone with no moonlight. Late and night rooms (22:00–06:59 local) add a CSS moonlight-through-the-window overlay plus soft city lights outside. `linkTime` stays false (this is not the generic time-linked path); overlays follow the same local-hour periods as the room art, not live sunrise/sunset.
-- **Christmas**, **Snow**, **Fireplace**, **Library**, **Cafe**, **Classroom** — `linkWeather: false`, `linkTime: true`, coming soon (no art yet). Classroom is registered in the picker only; it is not in the weekly auto schedule.
+- **Christmas**, **Snow**, **Fireplace**, **Winter Sunlight Window** (`sunlight`) — `status: 'ready'`, `linkWeather: false`, `linkTime: false`. Like Moonlight they use the base rooms art and loops and add art-agnostic CSS overlays (window, sky and light layers only, nothing baked into the character art, so another art set with the same room framing can be swapped in). Each room's window position is in `WINDOW_RECTS` (image-space %, r03 round); `.fx-art` mirrors the stills' `object-fit: cover` so the rects line up at any tile aspect. Theme layers are built per tile only for the active theme (`THEME_FX`, `syncThemeFx`); no new image or video assets. Day / evening / night follow the room art's local-hour periods via `THEME_OVERLAY_WX`.
+  - Christmas: colored string lights swagged along the top of each window (twinkle), a warm red/green/amber glow from the room corner, light snow outside, slightly wintry window.
+  - Snow: snow falling outside every window, a desaturated, brightened white city with a snowy lower band and frosted corners; cool daylight grading; at night a blue-gray snowy street with warm streetlight glow.
+  - Fireplace: flickering firelight from the low corner away from the window plus rising embers; day is subtle, evening/night darken the room to amber with a cool blue window.
+  - Winter Sunlight Window: low-angle warm beams slanting in from the window, dust motes, a crisp, slightly desaturated clear winter view (day); golden window glow at evening; a clear cold night with city lights.
+- **Library**, **Cafe**, **Classroom** — `linkWeather: false`, `linkTime: true`, coming soon (no art yet). Classroom is registered in the picker only; it is not in the weekly auto schedule.
+
+Theme bubble lines for the overlay themes live in `THEME_SPEECH[theme][lang] = { day, night, dusk? }` (all eight languages, gender-neutral wording). Under any non-rainy theme, rain/drizzle/thunder lines are dropped, and each winter theme only adds its own lines, so no theme's talk leaks into another.
 
 Every theme with `status: 'coming'` shows the shared localized **Coming soon** tag (`comingSoon`: English “Coming soon”, Korean “곧 공개”, and the same key in the other six languages) in the picker and is not selectable. Ready themes do not show the tag. Coming themes fall back to Rainy Window visuals. The generic time-of-day tone path applies only when the active theme both has art and has `linkTime: true`. Rainy Window stays fully fixed. Moonlight Window handles day and night with its own overlays, as above.
 
 ### Weekly auto schedule
 
-If the visitor has not picked a theme, the page chooses one from `THEME_SCHEDULE`. Switches happen at **Sunday 10:00 America/New_York**, the Sunday before that theme's Wednesday YouTube release. The array is the editable source of truth; each entry is an inclusive start, and the last matching start wins. Before the first entry the default is Rainy Window. Auto only applies a scheduled start once that theme is `ready`; coming entries stay in the table (and can show a **This week** badge) but do not go live or become selectable, so Moonlight continues through the Dec 2 rest week and until Christmas is ready. The schedule is computed on each visit and re-checked every minute.
+If the visitor has not picked a theme, the page chooses one from `THEME_SCHEDULE`. Switches happen at **Sunday 10:00 America/New_York**, the Sunday before that theme's Wednesday YouTube release. The array is the editable source of truth; each entry is an inclusive start, and the last matching start wins. Before the first entry the default is Rainy Window. Auto only applies a scheduled start once that theme is `ready`; coming entries stay in the table (and can show a **This week** badge) but do not go live or become selectable, so Moonlight continues through the Dec 2 rest week. All four winter themes are ready, so they go live on their dates. The schedule is computed on each visit and re-checked every minute.
 
 | From (America/New_York) | Theme |
 |---|---|
 | (before 2026-11-22 10:00) | rainy |
 | 2026-11-22 10:00 | moonlight |
 | 2026-12-02 10:00 | moonlight (rest week, no new entry) |
-| 2026-12-06 10:00 | christmas (in the table; stays moonlight until Christmas is ready) |
-| 2026-12-13 10:00 | snow (in the table; same rule) |
-| 2026-12-20 10:00 onward | fireplace (in the table; same rule) |
+| 2026-12-06 10:00 | christmas |
+| 2026-12-13 10:00 | snow |
+| 2026-12-20 10:00 | fireplace |
+| 2026-12-27 10:00 onward | sunlight (Winter Sunlight Window) |
 
-A manual pick in the ☰ panel (Rainy Window or Moonlight Window today) overrides the weekly auto and is saved in `localStorage['ninelives.theme']`. Choosing **This week's theme (auto)** clears that override. `?theme=` (including `?theme=auto`) is a test override for one page load and does not have to be written to storage. `?date=YYYY-MM-DDTHH:mm` is a query-only clock override, interpreted in `America/New_York` unless the value includes a timezone offset, so you can preview another week (for example `?date=2026-11-22T10:00`). `setTheme(id)` is exposed on `window.NineLives` for later use.
+A manual pick in the ☰ panel (any ready theme) overrides the weekly auto and is saved in `localStorage['ninelives.theme']`. Choosing **This week's theme (auto)** clears that override. `?theme=` (including `?theme=auto`) is a test override for one page load and does not have to be written to storage. `?date=YYYY-MM-DDTHH:mm` is a query-only clock override, interpreted in `America/New_York` unless the value includes a timezone offset, so you can preview another week (for example `?date=2026-11-22T10:00`). `setTheme(id)` is exposed on `window.NineLives` for later use.
 
 ## How to add a theme
 
 1. Append an entry to `THEMES`, for example `{ id: 'aurora', name: 'Aurora', nameKo: '오로라', status: 'coming', linkWeather: false, linkTime: true }`, and add localized names in `I18N.theme`.
 2. When the art is ready, set `status` to `'ready'` and add matching `moods` entries for each language in `I18N`.
-3. If the theme needs its own overlay, add CSS and honor `linkWeather` / `linkTime` in `applyAtmosphereToVis`. Leave existing themes in the list; do not replace them.
+3. If the theme needs its own overlay, add a row to `THEME_OVERLAY_WX`, a builder to `THEME_FX` (optional), lines to `THEME_SPEECH`, and CSS keyed on `html[data-visual-theme="<id>"]`. Otherwise honor `linkWeather` / `linkTime` in `applyAtmosphereToVis`. Leave existing themes in the list; do not replace them.
 4. To change the weekly auto, edit `THEME_SCHEDULE` (and `THEME_SCHEDULE_DEFAULT` / `THEME_SCHEDULE_TZ` if needed).
 5. Re-run `python3 build.py` if you are shipping the standalone `index.html`.
 
