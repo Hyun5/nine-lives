@@ -988,6 +988,12 @@
       background: radial-gradient(circle at 50% 3px, rgba(255,255,255,0.95) 0, rgba(255,255,255,0.95) var(--r, 1.3px), transparent calc(var(--r, 1.3px) + 1px)) no-repeat;
       animation: thflake linear infinite;
     }
+    .wglass .th-flakes.heavy span { width: 12px; margin-left: -6px;
+      background:
+        radial-gradient(circle at 50% 3px, #fff 0, #fff var(--r, 1.6px), transparent calc(var(--r, 1.6px) + 1px)),
+        radial-gradient(circle at 25% 36%, rgba(255,255,255,0.9) 0, rgba(255,255,255,0.9) calc(var(--r, 1.6px) * 0.8), transparent calc(var(--r, 1.6px) * 0.8 + 1px)),
+        radial-gradient(circle at 75% 69%, rgba(255,255,255,0.92) 0, rgba(255,255,255,0.92) calc(var(--r, 1.6px) * 0.9), transparent calc(var(--r, 1.6px) * 0.9 + 1px));
+      background-repeat: no-repeat; filter: drop-shadow(0 0 1px rgba(40, 50, 70, 0.6)); }
     @keyframes thflake {
       from { transform: translate3d(0, -100%, 0); }
       50% { transform: translate3d(var(--dx, 6px), 0, 0); }
@@ -1243,6 +1249,54 @@
     .vis[data-tod="evening"] .th-beam2 { background: linear-gradient(180deg, rgba(255, 170, 100, 0.26), rgba(255, 130, 70, 0.08) 60%, transparent); }
     @keyframes hbeam { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
     body.wx-paused .hearth .he span, body.wx-paused .xtree i { animation-play-state: paused; }
+
+    /* Wall-mounted hearth pieces (behind the sprite except the mantel). */
+    .hearth .hbreast {
+      position: absolute; left: -11%; right: -11%; top: -34%; bottom: 0;
+      background: linear-gradient(90deg, rgba(0, 0, 0, 0.22), transparent 12%, transparent 88%, rgba(0, 0, 0, 0.22)),
+        linear-gradient(0deg, var(--wall, #5a4636) 0%, var(--wall, #5a4636) 72%, transparent 100%);
+      filter: brightness(0.92) saturate(0.9);
+    }
+    .hearth .hbreast::after { content: ''; position: absolute; left: 0; right: 0; top: 34%; height: 1px; background: rgba(0, 0, 0, 0.18); }
+    .hearth .hshadow { position: absolute; left: -16%; right: -16%; bottom: -6%; height: 12%; background: radial-gradient(ellipse 50% 50% at 50% 50%, rgba(0, 0, 0, 0.5), transparent 75%); }
+    .hearth .hstone { position: absolute; left: -9%; right: -9%; bottom: -2.5%; height: 5%; background: linear-gradient(180deg, #8a7b6e, #5b4e45 60%, #3f3530); border-top: 1px solid rgba(255, 230, 200, 0.25); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35); }
+    .hearth .hwglow { position: absolute; left: -70%; right: -70%; top: -60%; bottom: -25%; background: radial-gradient(ellipse 50% 50% at 50% 62%, rgba(255, 150, 60, 0.42), rgba(255, 120, 40, 0.14) 45%, transparent 72%); mix-blend-mode: screen; animation: hglow 2.3s ease-in-out infinite; }
+    .hearth .hmantel { position: absolute; left: -4%; right: -4%; top: -1.5%; height: 6%; border-radius: 2px; background: linear-gradient(180deg, #8a5a36, #5e3a22 70%, #3e2615); box-shadow: 0 2px 3px rgba(0, 0, 0, 0.45); }
+    .fx-theme[data-scene="dark"] .hearth .hbreast, .fx-theme[data-scene="dark"] .hearth .hmantel, .fx-theme[data-scene="dark"] .hearth .hstone { filter: brightness(0.85); }
+    .fx-theme[data-scene="off"] .hearth .hmantel, .fx-theme[data-scene="bed"] .hearth .hmantel, .fx-theme[data-scene="off"] .hearth .hstone, .fx-theme[data-scene="bed"] .hearth .hstone { filter: brightness(0.6); }
+    .fx-theme[data-scene="off"] .hearth .hwglow, .fx-theme[data-scene="bed"] .hearth .hwglow { opacity: 1.0; }
+    /* Ondol: warm floor glow along the floor and bed base, faint heat shimmer. */
+    .ondol { position: absolute; left: 0; right: 0; bottom: 0; height: 42%; pointer-events: none; mix-blend-mode: screen;
+      background: linear-gradient(0deg, rgba(255, 140, 60, 0.34), rgba(255, 120, 50, 0.14) 40%, transparent 100%); animation: ondol 4.5s ease-in-out infinite; }
+    .fx-theme[data-scene="desk"] .ondol { opacity: 0.55; }
+    .fx-theme[data-scene="off"] .ondol, .fx-theme[data-scene="bed"] .ondol { opacity: 1; }
+    .ondol i { position: absolute; left: 0; right: 0; height: 22%; bottom: 8%; background: linear-gradient(0deg, transparent, rgba(255, 190, 120, 0.12), transparent); filter: blur(3px); animation: oshim 5s ease-in-out infinite; }
+    .ondol i:nth-child(2) { animation-delay: -1.7s; bottom: 20%; }
+    .ondol i:nth-child(3) { animation-delay: -3.4s; bottom: 32%; }
+    @keyframes ondol { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.15); } }
+    @keyframes oshim { 0% { transform: translateY(0) scaleX(1); opacity: 0; } 40% { opacity: 1; } 100% { transform: translateY(-30%) scaleX(1.04); opacity: 0; } }
+    body.wx-paused .ondol, body.wx-paused .ondol i { animation-play-state: paused; }
+    /* Snow theme: heavy overcast low cloud on the glass. */
+    .wglass .th-overcast { position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(92, 102, 118, 0.72), rgba(120, 128, 142, 0.55) 45%, rgba(150, 156, 166, 0.35) 75%, rgba(170, 175, 184, 0.25)),
+        radial-gradient(ellipse 60% 22% at 30% 18%, rgba(70, 78, 92, 0.45), transparent 70%), radial-gradient(ellipse 55% 20% at 75% 28%, rgba(80, 88, 102, 0.4), transparent 70%);
+      mix-blend-mode: normal; filter: saturate(0.6); }
+    .vis[data-tod="evening"] .wglass .th-overcast { background: linear-gradient(180deg, rgba(40, 46, 60, 0.78), rgba(58, 64, 78, 0.6) 55%, rgba(80, 84, 96, 0.4)); }
+    .vis[data-tod="night"] .wglass .th-overcast { background: linear-gradient(180deg, rgba(14, 17, 26, 0.72), rgba(26, 30, 42, 0.55) 60%, rgba(34, 38, 50, 0.4)); }
+    /* Library / Cafe / Classroom props and room tint. */
+    .tprop { position: absolute; pointer-events: none; }
+    .tprop img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); }
+    .fx-theme[data-scene="dark"] .tprop img { filter: brightness(0.85) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); }
+    .fx-theme[data-scene="off"] .tprop img, .fx-theme[data-scene="bed"] .tprop img { filter: brightness(0.55); }
+    .tplace { position: absolute; inset: 0; pointer-events: none; }
+    html[data-visual-theme="library"] .tplace { background: radial-gradient(ellipse 80% 70% at 50% 100%, rgba(255, 196, 120, 0.12), transparent 70%); mix-blend-mode: soft-light; }
+    html[data-visual-theme="cafe"] .tplace { background: linear-gradient(180deg, rgba(150, 95, 50, 0.1), rgba(255, 170, 110, 0.14)); mix-blend-mode: soft-light; }
+    html[data-visual-theme="classroom"] .tplace { background: linear-gradient(180deg, rgba(200, 225, 255, 0.12), rgba(220, 235, 255, 0.06)); mix-blend-mode: soft-light; }
+    html[data-visual-theme="library"] .page-sky .sky-wx { opacity: 1; background: radial-gradient(1000px 600px at 50% 110%, rgba(255, 190, 110, 0.14), transparent 60%), radial-gradient(900px 520px at 15% 0%, rgba(60, 120, 80, 0.12), transparent 55%); }
+    html[data-visual-theme="cafe"] .page-sky .sky-wx { opacity: 1; background: radial-gradient(1000px 600px at 50% 110%, rgba(200, 130, 70, 0.18), transparent 60%); }
+    html[data-visual-theme="classroom"] .page-sky .sky-wx { opacity: 1; background: radial-gradient(1000px 600px at 50% -10%, rgba(140, 180, 230, 0.14), transparent 60%), radial-gradient(900px 520px at 85% 0%, rgba(60, 200, 110, 0.08), transparent 55%); }
+    html[data-visual-theme="snow"] .page-sky .sky-wx { background: linear-gradient(180deg, rgba(120, 130, 146, 0.2), rgba(20, 24, 34, 0.3)); }
+    .theme-cast { font-size: 0.62rem; letter-spacing: 0.06em; padding: 1px 6px; border-radius: 999px; border: 1px solid rgba(140, 200, 255, 0.45); color: #9fd0ff; }
     /* Page sky behind the grid, per winter theme. */
     html[data-visual-theme="snow"] .page-sky .sky-wx { opacity: 1; background: linear-gradient(180deg, rgba(190, 205, 230, 0.16), rgba(20, 24, 40, 0.25)); }
     html[data-visual-theme="snow"] .page-sky[data-tod="night"] .sky-wash { background: radial-gradient(1000px 620px at 50% -10%, rgba(80, 100, 160, 0.4), transparent 60%), #05070f; }
@@ -1392,9 +1446,11 @@
       // Late Night Study Room: separate male cast (CITY_TABLE swapped at load, see STUDY_CAST),
       // own art set assets/rooms_male. Selectable only; not in THEME_SCHEDULE (no auto date).
       { id: 'studyroom',  name: 'Late Night Study Room', nameKo: '深夜 스터디 룸', status: 'ready', linkWeather: false, linkTime: false },
-      { id: 'library',    name: 'Library',           nameKo: '도서관',     status: 'coming', linkWeather: false, linkTime: true },
-      { id: 'cafe',       name: 'Cafe',              nameKo: '카페',       status: 'coming', linkWeather: false, linkTime: true },
-      { id: 'classroom',  name: 'Classroom',         nameKo: '교실',       status: 'coming', linkWeather: false, linkTime: true }
+      // Library / Cafe / Classroom: the original nine in their own rooms with a
+      // themed prop, winter lights, tree, hearth or warm floor. Selectable only.
+      { id: 'library',    name: 'Library',           nameKo: '도서관',     status: 'ready', linkWeather: false, linkTime: false },
+      { id: 'cafe',       name: 'Cafe',              nameKo: '카페',       status: 'ready', linkWeather: false, linkTime: false },
+      { id: 'classroom',  name: 'Classroom',         nameKo: '교실',       status: 'ready', linkWeather: false, linkTime: false }
     ];
     // Weekly auto theme. Switches at Sunday 10:00 America/New_York, the Sunday
     // before that theme's Wednesday YouTube release. Entries are inclusive start
@@ -1701,6 +1757,9 @@
     // optional dusk overrides night for 17:00–18:59.
     // Lines are gender-neutral so the character art can change without rewriting them.
     const THEME_SPEECH = {
+      "library": {"en": {"day": ["the reading room is so quiet", "found the book I needed", "one more chapter here", "the radiators are ticking", "returning these later"], "night": ["the library lamps are glowing", "almost closing time", "just one more page", "quiet stacks tonight"]}, "ko": {"day": ["열람실이 정말 조용해", "찾던 책 드디어 찾았다", "여기서 한 챕터만 더", "책 냄새 좋다", "이건 이따 반납해야지"], "night": ["도서관 스탠드 불빛 예쁘다", "곧 문 닫을 시간이네", "딱 한 페이지만 더", "오늘 밤 서가가 조용해"]}, "ja": {"day": ["閲覧室がとても静か", "探してた本、見つけた", "ここでもう一章だけ", "本の匂いが落ち着く", "これはあとで返却"], "night": ["図書館のランプがあたたかい", "もうすぐ閉館の時間", "あと一ページだけ", "今夜の書架は静か"]}, "zh-Hans": {"day": ["阅览室好安静", "终于找到想要的书了", "在这里再读一章", "书香真让人安心", "这些待会儿再还"], "night": ["图书馆的台灯好温暖", "快到闭馆时间了", "就再读一页", "今晚书架间好安静"]}, "es": {"day": ["la sala de lectura está muy tranquila", "encontré el libro que buscaba", "un capítulo más aquí", "me encanta el olor a libros", "los devuelvo luego"], "night": ["las lámparas de la biblioteca brillan", "ya casi cierran", "solo una página más", "qué silencio entre los estantes"]}, "fr": {"day": ["la salle de lecture est si calme", "j'ai trouvé le livre qu'il me fallait", "encore un chapitre ici", "j'adore l'odeur des livres", "je les rends plus tard"], "night": ["les lampes de la bibliothèque brillent", "bientôt l'heure de fermeture", "juste une page de plus", "les rayons sont silencieux ce soir"]}, "de": {"day": ["im Lesesaal ist es so still", "das Buch hab ich gefunden", "noch ein Kapitel hier", "ich mag den Bücherduft", "die bringe ich später zurück"], "night": ["die Bibliothekslampen leuchten", "gleich wird geschlossen", "nur noch eine Seite", "heute Abend ist es ruhig zwischen den Regalen"]}, "pt": {"day": ["a sala de leitura está tão quieta", "achei o livro que eu queria", "mais um capítulo aqui", "adoro o cheiro de livro", "devolvo esses depois"], "night": ["as luminárias da biblioteca brilham", "já vai fechar", "só mais uma página", "as estantes estão quietas hoje"]}},
+      "cafe": {"en": {"day": ["this latte is perfect", "one more refill", "love the cafe playlist", "a croissant break", "best corner seat"], "night": ["the cafe lights are so cozy", "one last cocoa", "almost closing", "warm mug, quiet street"]}, "ko": {"day": ["라떼 완벽해", "리필 한 잔만 더", "카페 음악 좋다", "크루아상 타임", "창가 자리 최고"], "night": ["카페 조명 너무 아늑해", "마지막으로 핫초코 한 잔", "곧 마감이네", "따뜻한 머그잔, 조용한 거리"]}, "ja": {"day": ["このラテ最高", "おかわりもう一杯", "カフェの音楽がいい", "クロワッサン休憩", "窓際の席がいちばん"], "night": ["カフェの灯りがあったかい", "最後にココアを一杯", "もうすぐ閉店", "あったかいマグと静かな通り"]}, "zh-Hans": {"day": ["这杯拿铁刚刚好", "再续一杯", "咖啡馆的歌真好听", "来个可颂歇一下", "靠窗的位置最棒"], "night": ["咖啡馆的灯好温馨", "最后一杯热可可", "快打烊了", "暖暖的杯子，安静的街"]}, "es": {"day": ["este latte está perfecto", "un café más", "me gusta la música de aquí", "pausa de cruasán", "el mejor rincón"], "night": ["las luces del café son tan acogedoras", "un último chocolate", "ya casi cierran", "taza caliente, calle tranquila"]}, "fr": {"day": ["ce latte est parfait", "encore une tasse", "j'aime la musique du café", "pause croissant", "le meilleur coin du café"], "night": ["les lumières du café sont si douces", "un dernier chocolat chaud", "ça va bientôt fermer", "tasse chaude, rue calme"]}, "de": {"day": ["dieser Latte ist perfekt", "noch eine Tasse", "die Café-Musik ist schön", "Croissant-Pause", "bester Eckplatz"], "night": ["das Café-Licht ist so gemütlich", "noch ein letzter Kakao", "gleich ist Schluss", "warme Tasse, stille Straße"]}, "pt": {"day": ["esse latte está perfeito", "mais uma xícara", "adoro a música do café", "pausa pro croissant", "o melhor cantinho"], "night": ["as luzes do café são tão aconchegantes", "um último chocolate quente", "já vai fechar", "caneca quente, rua tranquila"]}},
+      "classroom": {"en": {"day": ["notes from today's class", "quiz tomorrow, review now", "the chalkboard is full", "study group after lunch", "almost got this formula"], "night": ["the classroom is empty now", "staying late to review", "last problem set", "quiet hallways tonight"]}, "ko": {"day": ["오늘 수업 필기 정리", "내일 쪽지 시험, 지금 복습", "칠판이 꽉 찼어", "점심 먹고 스터디", "이 공식 거의 이해했어"], "night": ["교실이 텅 비었네", "남아서 복습 중", "마지막 문제 풀이", "오늘 밤 복도가 조용해"]}, "ja": {"day": ["今日の授業のノート整理", "明日小テスト、今のうちに復習", "黒板がいっぱい", "お昼のあとに勉強会", "この公式、もう少しでわかる"], "night": ["教室が空っぽ", "残って復習中", "最後の問題", "今夜の廊下は静か"]}, "zh-Hans": {"day": ["整理今天的课堂笔记", "明天小测，现在复习", "黑板写满了", "午饭后学习小组", "这个公式快懂了"], "night": ["教室空荡荡的", "留下来复习", "最后一道题", "今晚走廊好安静"]}, "es": {"day": ["apuntes de la clase de hoy", "examen mañana, repaso ahora", "la pizarra está llena", "grupo de estudio después de comer", "ya casi entiendo esta fórmula"], "night": ["el aula ya está vacía", "me quedo a repasar", "el último ejercicio", "pasillos tranquilos esta noche"]}, "fr": {"day": ["les notes du cours d'aujourd'hui", "contrôle demain, on révise", "le tableau est plein", "groupe de travail après le déjeuner", "je comprends presque cette formule"], "night": ["la salle de classe est vide", "je reste réviser", "le dernier exercice", "couloirs calmes ce soir"]}, "de": {"day": ["Notizen aus der heutigen Stunde", "morgen Test, jetzt wiederholen", "die Tafel ist voll", "Lerngruppe nach dem Mittag", "die Formel hab ich fast"], "night": ["das Klassenzimmer ist leer", "ich bleibe noch zum Lernen", "die letzte Aufgabe", "stille Flure heute Abend"]}, "pt": {"day": ["anotações da aula de hoje", "prova amanhã, revisão agora", "o quadro está cheio", "grupo de estudo depois do almoço", "quase entendi essa fórmula"], "night": ["a sala de aula está vazia", "fiquei pra revisar", "o último exercício", "corredores quietos hoje à noite"]}},
       "studyroom": {
         "en": {
           "day": [
@@ -3109,10 +3168,14 @@
     function winBox(w) {
       return 'left:' + w[0] + '%;top:' + w[1] + '%;width:' + (w[2] - w[0]) + '%;height:' + (w[3] - w[1]) + '%';
     }
+    function winBoxFlakes(w, n, big) {
+      // Flakes fall only across the window's own box (then clipped to the glass).
+      return '<div style="position:absolute;left:' + w[0] + '%;top:' + w[1] + '%;width:' + (w[2] - w[0]) + '%;height:' + (w[3] - w[1]) + '%">' + flakesHTML(n, big) + '</div>';
+    }
     function flakesHTML(n, big) {
-      let h = '<div class="th-flakes">';
+      let h = '<div class="th-flakes' + (big ? ' heavy' : '') + '">';
       for (let i = 0; i < n; i++) {
-        h += '<span style="left:' + rr(2, 98).toFixed(1) + '%;--r:' + rr(0.9, big ? 2.2 : 1.6).toFixed(2) + 'px;--dx:' + rr(-8, 10).toFixed(1) +
+        h += '<span style="left:' + rr(2, 98).toFixed(1) + '%;--r:' + rr(big ? 1.3 : 0.9, big ? 2.8 : 1.6).toFixed(2) + 'px;--dx:' + rr(-8, 10).toFixed(1) +
           'px;animation-duration:' + rr(5, 11).toFixed(2) + 's;animation-delay:' + (-rr(0, 11)).toFixed(2) + 's"></span>';
       }
       return h + '</div>';
@@ -3125,12 +3188,22 @@
     const VIEW_BOX = { r01: [32, 0, 268, 273], r02: [329, 0, 624, 183], r03: [217, 0, 433, 203], r04: [467, 0, 640, 198], r05: [230, 0, 496, 180] };
     const BARE_VIEW = { r05: true };
     // Hearth [left %, bottom %, width %] per art set and room; Christmas tree per room.
+    // Warmth per room (female art sets only). A wall fireplace only where the art
+    // has real open wall at floor level (flush on the back wall, clear of the
+    // name/clock labels); every other room gets WARM_ALT 'ondol' (warm floor
+    // glow + faint heat shimmer). The studyroom male set has none.
     const HEARTH_POS = {
-      rooms: { r01: [1, 91, 16], r02: [83, 91, 15], r03: [84, 92, 15], r04: [0.5, 91, 14], r05: [0.5, 89, 12], r06: [84, 92, 15], r07: [0.5, 91, 14], r08: [85, 91, 14], r09: [0.5, 91, 14] },
-      rooms_male: { r01: [0.5, 91, 12], r02: [0.5, 91, 12], r03: [0.5, 91, 12], r04: [0.5, 91, 12], r05: [28, 93, 11], r06: [0.5, 91, 12], r07: [0.5, 91, 12], r08: [0.5, 91, 12], r09: [0.5, 91, 12] }
+      rooms: { r01: [1, 80, 12], r02: [78.5, 78, 11], r05: [50, 74, 9] }
     };
     HEARTH_POS.rooms_rainy = HEARTH_POS.rooms;
-    const TREE_POS = { r01: [10, 70, 6], r02: [2, 53, 8], r03: [74.5, 82, 8], r04: [1, 60, 7.5], r05: [2, 44, 7], r06: [48, 96, 8], r07: [64, 84, 7], r08: [88, 64, 7], r09: [0.5, 72, 6] };
+    const WARM_ALT = { rooms: { r03: 'ondol', r04: 'ondol', r06: 'ondol', r07: 'ondol', r08: 'ondol', r09: 'ondol' } };
+    WARM_ALT.rooms_rainy = WARM_ALT.rooms;
+    // Chimney-breast tone sampled from the wall beside each hearth, per scene.
+    const WALL_TONE = {"rooms": {"r01": {"desk": "#685645", "dark": "#49392c", "off": "#0f1627", "bed": "#161821"}, "r02": {"desk": "#c9a582", "dark": "#9a7150", "off": "#171516", "bed": "#1e1c1d"}, "r05": {"desk": "#6c503e", "dark": "#634836", "off": "#46332c", "bed": "#25242c"}}, "rooms_rainy": {"r01": {"desk": "#544a40", "dark": "#3f3229", "off": "#0c1323", "bed": "#11141f"}, "r02": {"desk": "#b39577", "dark": "#8a6648", "off": "#141315", "bed": "#1c1a1c"}, "r05": {"desk": "#6b4d3b", "dark": "#5f4432", "off": "#453129", "bed": "#23222b"}}};
+    const TREE_POS = { r01: [56, 96, 6.5], r02: [2, 53, 8], r03: [74.5, 82, 8], r04: [1, 60, 7.5], r05: [2, 44, 7], r06: [48, 96, 8], r07: [64, 84, 7], r08: [88, 64, 7], r09: [0.5, 72, 6] };
+    // Library / Cafe / Classroom prop (book cart / chalk sign / easel board).
+    const PROP_POS = { r01: [63, 99, 9.5], r02: [44, 99, 9.5], r03: [61, 99, 9.5], r04: [29, 99, 9], r05: [32, 99, 9.5], r06: [29, 99, 9.5], r07: [55, 99, 9], r08: [66, 99, 9], r09: [59, 99, 9.5] };
+    const PROP_AR = { library: 288 / 200, cafe: 255 / 200, classroom: 298 / 200 };
     const HEARTH_AR = 249 / 260, TREE_AR = 352 / 200, ART_AR = 640 / 360;
     // Cold rule (per room, also the center YOU cell): snowy when live weather
     // reports snow, or the live temperature is <= 4.5 °C (40 °F). Without live
@@ -3138,6 +3211,26 @@
     // May–Sep south). ?wx=snow forces every room cold; any other ?wx forces warm.
     const COLD_MAX_C = 4.5;
     function winterAsset(file) { return new URL('./assets/winter/' + file, document.baseURI).href; }
+    // Snow theme: every room snows except clearly hot ones (tropics/desert
+    // |lat| < 26°, southern-hemisphere summer Nov–Mar, or live temp >= 20 °C),
+    // regardless of the 4.5 °C rule that other themes use.
+    function roomIsHot(room, now) {
+      const wx = weatherForRoom(room);
+      if (wx && typeof wx.tempC === 'number' && isFinite(wx.tempC) && wx.tempC >= 20) return true;
+      const c = coordsForRoom(room);
+      if (!c || !isFinite(c.lat)) return false;
+      const m = (now || virtualNow()).getUTCMonth() + 1;
+      if (Math.abs(c.lat) < 26) return true;
+      return c.lat < 0 && (m >= 11 || m <= 3);
+    }
+    function roomColdFor(theme, room, now) {
+      if (theme === 'snow') {
+        const ov = wxOverride();
+        if (ov) return ov === 'snow';
+        return !roomIsHot(room, now);
+      }
+      return roomIsCold(room, now);
+    }
     function roomScene(room, now) {
       return sceneKey(periodForHour(cityParts(roomZone(room), now || virtualNow()).hour24));
     }
@@ -3165,8 +3258,9 @@
       const h = p[2] * ar * ART_AR;
       return 'left:' + p[0] + '%;top:' + (p[1] - h).toFixed(2) + '%;width:' + p[2] + '%;height:' + h.toFixed(2) + '%';
     }
-    function hearthHTML(set, roomId) {
+    function hearthHTML(set, roomId, scene) {
       const p = (HEARTH_POS[set] || {})[roomId];
+      const tone = ((WALL_TONE[set] || {})[roomId] || {})[scene || 'desk'] || '#5a4636';
       if (!p) return '';
       let em = '<div class="he">';
       for (let i = 0; i < 6; i++) {
@@ -3174,8 +3268,21 @@
       }
       em += '</div>';
       const hx = (p[0] + p[2] * 0.46).toFixed(1);
+      // Stack: chimney breast + contact shadow + hearthstone + wall glow (behind),
+      // then fireplace.webp with flames/embers, then only the mantel on top.
       return '<div class="hglow" style="--hx:' + hx + '%"></div>' +
-        '<div class="hearth" style="' + spriteBox(p, HEARTH_AR) + '"><img alt="" src="' + winterAsset('fireplace.webp') + '"><div class="hf"></div><div class="hf b"></div>' + em + '</div>';
+        '<div class="hearth" style="' + spriteBox(p, HEARTH_AR) + ';--wall:' + tone + '"><div class="hwglow"></div><div class="hbreast"></div><div class="hshadow"></div><div class="hstone"></div>' +
+        '<img alt="" src="' + winterAsset('fireplace.webp') + '"><div class="hf"></div><div class="hf b"></div>' + em + '<div class="hmantel"></div></div>';
+    }
+    function warmAltHTML(set, roomId) {
+      const kind = (WARM_ALT[set] || {})[roomId];
+      if (kind !== 'ondol') return '';
+      return '<div class="ondol"><i></i><i></i><i></i></div>';
+    }
+    function propHTML(theme, roomId) {
+      const p = PROP_POS[roomId];
+      if (!p || !PROP_AR[theme]) return '';
+      return '<div class="tprop" style="' + spriteBox(p, PROP_AR[theme]) + '"><img alt="" src="' + winterAsset('prop_' + theme + '.webp') + '"></div>';
     }
     function treeHTML(roomId) {
       const p = TREE_POS[roomId];
@@ -3210,16 +3317,18 @@
     // Theme layer builders: (window rect, { room, scene, cold, set }).
     const THEME_FX = {
       snow: function (w, ctx) {
-        if (!ctx.cold) return '';
+        const mask = maskStyle('m_' + ctx.room + '_' + ctx.scene + '.webp');
+        // Overcast low-cloud sky on every window (hot rooms too); snow only if cold.
+        if (!ctx.cold) return '<div class="wglass" style="' + mask + '"><div class="th-overcast"></div></div>';
         return viewHTML(ctx.room, ctx.scene, true) +
-          '<div class="wglass" style="' + maskStyle('m_' + ctx.room + '_' + ctx.scene + '.webp') + '"><div class="th-snowsky"></div>' +
-          flakesHTML(30, true) + '<div class="th-frost"></div></div>';
+          '<div class="wglass" style="' + mask + '"><div class="th-overcast"></div><div class="th-snowsky"></div>' +
+          winBoxFlakes(w, 28, true) + '<div class="th-frost"></div></div>';
       },
       christmas: function (w, ctx) {
         const cx = (w[0] + w[2]) / 2;
         const gx = cx < 50 ? 82 : 16;
         return viewHTML(ctx.room, ctx.scene, ctx.cold) +
-          (ctx.cold ? '<div class="wglass" style="' + maskStyle('m_' + ctx.room + '_' + ctx.scene + '.webp') + '">' + flakesHTML(12, false) + '</div>' : '') +
+          (ctx.cold ? '<div class="wglass" style="' + maskStyle('m_' + ctx.room + '_' + ctx.scene + '.webp') + '">' + winBoxFlakes(w, 14, false) + '</div>' : '') +
           '<div class="wdeco" style="' + maskStyle('f_' + ctx.room + '_' + ctx.scene + '.webp') + '">' + lightsHTML(w, 18, 'full') +
           lightsHTML([w[0], Math.min(w[3] - 2, 88), w[2], Math.min(w[3] + 14, 100)], 14, '') +
           '<div class="th-xmasglow" style="--gx:' + gx + '%"></div>' + treeHTML(ctx.room) + '</div>';
@@ -3247,6 +3356,9 @@
           '</div>';
       }
     };
+    ['library', 'cafe', 'classroom'].forEach(function (t) {
+      THEME_FX[t] = function (w, ctx) { return THEME_FX.christmas(w, ctx) + '<div class="tplace"></div>' + propHTML(t, ctx.room); };
+    });
     function syncThemeFx(vis, room) {
       if (!vis) return;
       const fx = vis.querySelector('.fx');
@@ -3258,8 +3370,8 @@
       const set = artFolder();
       const now = virtualNow();
       const scene = roomId ? roomScene(room, now) : 'desk';
-      const cold = roomId ? roomIsCold(room, now) : false;
-      const hasHearth = !!(roomId && HEARTH_POS[set] && HEARTH_POS[set][roomId]);
+      const cold = roomId ? roomColdFor(theme, room, now) : false;
+      const hasHearth = !!(roomId && ((HEARTH_POS[set] && HEARTH_POS[set][roomId]) || (WARM_ALT[set] && WARM_ALT[set][roomId])));
       const key = roomId && (build || hasHearth) ? [theme, set, roomId, scene, cold ? 'c' : 'w'].join('|') : '';
       if ((layer ? layer.dataset.key || '' : '') === key) return;
       if (!key) { if (layer) layer.remove(); return; }
@@ -3274,7 +3386,7 @@
       layer.dataset.cold = cold ? '1' : '0';
       const w = WINDOW_RECTS[roomId] || [30, 0, 70, 50];
       const ctx = { w: w, room: roomId, scene: scene, cold: cold, set: set };
-      layer.innerHTML = '<div class="fx-art">' + (build && set === 'rooms' ? build(w, ctx) : '') + (hasHearth ? hearthHTML(set, roomId) : '') + '</div>';
+      layer.innerHTML = '<div class="fx-art">' + (build && set === 'rooms' ? build(w, ctx) : '') + (hasHearth ? hearthHTML(set, roomId, scene) + warmAltHTML(set, roomId) : '') + '</div>';
     }
 
     const grid = document.getElementById('grid');
@@ -3714,6 +3826,7 @@
         b.appendChild(name);
         const parts = [];
         if (id !== 'auto' && id === scheduledId) parts.push(weekBadge());
+        if (id === STUDY_THEME_ID) { const k = document.createElement('span'); k.className = 'theme-cast'; k.textContent = 'Boy'; parts.push(k); }
         appendMeta(b, parts);
         b.addEventListener('click', function () {
           if (id === 'auto') writeThemeOverride('');
@@ -4021,7 +4134,7 @@
     // following the room art's local-hour periods (day / evening / night), with
     // a fixed visual weather token (not live weather; the tile weather readout
     // still shows live Open-Meteo data). New overlay themes just add a row.
-    const THEME_OVERLAY_WX = { moonlight: 'clear', studyroom: 'clear', christmas: 'xmas', snow: 'snowy', fireplace: 'fire', sunlight: 'clear' };
+    const THEME_OVERLAY_WX = { moonlight: 'clear', studyroom: 'clear', christmas: 'xmas', snow: 'snowy', fireplace: 'fire', sunlight: 'clear', library: 'xmas', cafe: 'xmas', classroom: 'xmas' };
     function atmosphereFor(room, now) {
       // Moonlight Window keeps linkWeather/linkTime false (not live weather,
       // not the generic time-linked path). It still uses time of day so
@@ -4206,7 +4319,7 @@
         };
         // Warm cities never talk about snow; the Snow theme there uses cozy
         // fire lines. Every winter theme mixes in a couple of hearth lines.
-        const cold = roomIsCold(room);
+        const cold = roomColdFor(vtheme, room);
         if (WX_SPEECH_BLOCKS[block]) {
           let themed = (vtheme === 'snow' && !cold && THEME_SPEECH.fireplace) ? pick(THEME_SPEECH.fireplace) : pick(thSpeech);
           lines = lines.concat(themed);
@@ -5317,7 +5430,7 @@
     syncFsChrome();
 
     // Expose a tiny hook so future settings can swap room art without rewriting clocks/themes.
-    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, CHAR_NAMES, locChar, displayName, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, scheduledReadyThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, metroHubByName, coordsForCityKey, coordsForRoom, speechLinesFor, THEME_SPEECH, THEME_FX, THEME_OVERLAY_WX, WINDOW_RECTS, VIEW_BOX, HEARTH_POS, TREE_POS, roomIsCold, roomScene, COLD_MAX_C, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, artFolder, sceneKey, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
+    window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, CHAR_NAMES, locChar, displayName, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, scheduledReadyThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, metroHubByName, coordsForCityKey, coordsForRoom, speechLinesFor, THEME_SPEECH, THEME_FX, THEME_OVERLAY_WX, WINDOW_RECTS, VIEW_BOX, HEARTH_POS, WARM_ALT, PROP_POS, TREE_POS, roomIsCold, roomIsHot, roomColdFor, roomScene, COLD_MAX_C, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, artFolder, sceneKey, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
   })();
   </script>
 </body>
