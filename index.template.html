@@ -2611,8 +2611,9 @@
 
     const PLACE_SETS = { library: 'rooms_library', cafe: 'rooms_cafe', classroom: 'rooms_classroom' };
     const STILL_ONLY_SETS = { rooms_library: true, rooms_cafe: true, rooms_classroom: true };
-    // Scenes in still-only sets that do have a loop (Library daytime only for now).
-    const LOOP_SCENES = { rooms_library: { desk: true } };
+    // Scenes in these sets that have a loop (all four scenes since Nov 26).
+    const ALL_SCENES = { desk: true, dark: true, off: true, bed: true };
+    const LOOP_SCENES = { rooms_library: ALL_SCENES, rooms_cafe: ALL_SCENES, rooms_classroom: ALL_SCENES };
     function artFolder() {
       // Rainy Window uses the dedicated rainy stills and loops.
       // Every other theme uses the base (dry) set, including themes
