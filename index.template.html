@@ -2611,6 +2611,8 @@
 
     const PLACE_SETS = { library: 'rooms_library', cafe: 'rooms_cafe', classroom: 'rooms_classroom' };
     const STILL_ONLY_SETS = { rooms_library: true, rooms_cafe: true, rooms_classroom: true };
+    // Scenes in still-only sets that do have a loop (Library daytime only for now).
+    const LOOP_SCENES = { rooms_library: { desk: true } };
     function artFolder() {
       // Rainy Window uses the dedicated rainy stills and loops.
       // Every other theme uses the base (dry) set, including themes
@@ -3641,7 +3643,7 @@
       if (!vid) return;
       const scene = sceneKey(period);
       const set = artFolder();
-      if (STILL_ONLY_SETS[set]) { unloadVideo(tile); return; }
+      if (STILL_ONLY_SETS[set] && !((LOOP_SCENES[set] || {})[scene])) { unloadVideo(tile); return; }
       const url = asset(tile.room.id + '_' + scene + '.mp4');
       const poster = asset(tile.room.id + '_' + scene + '.jpg');
       const cur = vid.getAttribute('src');
