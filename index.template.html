@@ -1180,6 +1180,35 @@
     .wglass .th-flakes span { width: 8px; margin-left: -4px; }
     .th-lights.full { height: 22%; }
     .xtree { position: absolute; pointer-events: none; }
+    .xtree .gift { position: absolute; bottom: -1%; border-radius: 1px; box-shadow: 0 1px 2px rgba(0,0,0,0.45); text-decoration: none;
+      background: linear-gradient(90deg, transparent 42%, var(--rb, #ffd76a) 42% 58%, transparent 58%), linear-gradient(180deg, transparent 38%, var(--rb, #ffd76a) 38% 52%, transparent 52%), var(--gc, #c8343a); }
+    .xtree .gift::before { content: ''; position: absolute; left: 30%; width: 40%; top: -22%; height: 26%; border-radius: 50% 50% 0 0; border: 2px solid var(--rb, #ffd76a); border-bottom: 0; box-sizing: border-box; }
+    .xtree .g1 { left: -14%; width: 34%; height: 12%; --gc: #c8343a; }
+    .xtree .g2 { left: 14%; width: 24%; height: 8%; --gc: #2f8a52; --rb: #f4f1e8; }
+    .xtree .g3 { left: 62%; width: 30%; height: 10%; --gc: #2d5fae; --rb: #f2c14e; }
+    .xtree .g4 { left: 86%; width: 22%; height: 7%; --gc: #e9e2d0; --rb: #c8343a; }
+    .fx-theme[data-scene="off"] .xtree .gift, .fx-theme[data-scene="bed"] .xtree .gift { filter: brightness(0.6); }
+    .fx-theme[data-scene="dark"] .xtree .gift { filter: brightness(0.85); }
+    .hearth .hwreath { position: absolute; left: 31%; width: 38%; top: -52%; aspect-ratio: 1; border-radius: 50%;
+      background: radial-gradient(circle, transparent 38%, #1f6b3a 40%, #2e8a4c 52%, #1a5a31 64%, transparent 66%);
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.45)); }
+    .hearth .hwreath::before { content: ''; position: absolute; inset: 0; border-radius: 50%;
+      background: radial-gradient(circle at 50% 18%, #e8433f 0 5%, transparent 6%), radial-gradient(circle at 20% 44%, #e8433f 0 4%, transparent 5%), radial-gradient(circle at 80% 44%, #ffd76a 0 4%, transparent 5%), radial-gradient(circle at 30% 80%, #ffd76a 0 4%, transparent 5%), radial-gradient(circle at 72% 80%, #e8433f 0 4%, transparent 5%); }
+    .hearth .hwreath i { position: absolute; left: 36%; width: 28%; bottom: 2%; height: 20%; background: linear-gradient(135deg, transparent 30%, #c8343a 30% 70%, transparent 70%), linear-gradient(45deg, transparent 30%, #c8343a 30% 70%, transparent 70%); }
+    .hearth .hstock { position: absolute; top: 3.5%; width: 13%; height: 24%; border-radius: 2px 2px 40% 70%;
+      background: linear-gradient(180deg, #f4f1e8 0 22%, var(--sc, #c8343a) 22%); box-shadow: 0 2px 2px rgba(0,0,0,0.4); }
+    .hearth .hstock::after { content: ''; position: absolute; right: -45%; bottom: 0; width: 70%; height: 30%; border-radius: 0 60% 60% 30%; background: var(--sc, #c8343a); }
+    .hearth .s1 { left: 12%; --sc: #c8343a; }
+    .hearth .s2 { left: 43%; --sc: #2f8a52; }
+    .hearth .s3 { left: 72%; --sc: #2d5fae; }
+    .hearth .hgarland { position: absolute; left: -6%; right: -6%; top: -3%; height: 7%; border-radius: 40%;
+      background: radial-gradient(circle at 10% 50%, #ffd76a 0 6%, transparent 8%) 0 0 / 20% 100% repeat-x, linear-gradient(180deg, #2e8a4c, #1a5a31); filter: drop-shadow(0 1px 1px rgba(0,0,0,0.5)); }
+    .fx-theme[data-scene="off"] .hearth .hwreath, .fx-theme[data-scene="bed"] .hearth .hwreath, .fx-theme[data-scene="off"] .hearth .hstock, .fx-theme[data-scene="bed"] .hearth .hstock, .fx-theme[data-scene="off"] .hearth .hgarland, .fx-theme[data-scene="bed"] .hearth .hgarland { filter: brightness(0.6); }
+    .wglass .th-pile { position: absolute; pointer-events: none;
+      background: radial-gradient(ellipse 18% 70% at 8% 100%, #f4f8ff 60%, transparent 62%), radial-gradient(ellipse 22% 85% at 30% 100%, #eef4ff 60%, transparent 62%), radial-gradient(ellipse 20% 60% at 55% 100%, #f6f9ff 60%, transparent 62%), radial-gradient(ellipse 24% 90% at 80% 100%, #edf3fd 60%, transparent 62%), radial-gradient(ellipse 14% 55% at 97% 100%, #f4f8ff 60%, transparent 62%), linear-gradient(180deg, transparent 55%, #eef3fb 56%);
+      filter: drop-shadow(0 -1px 1px rgba(160, 180, 210, 0.5)); opacity: 0.92; }
+    .vis[data-tod="evening"] .wglass .th-pile { filter: brightness(0.7) drop-shadow(0 -1px 1px rgba(120, 140, 180, 0.5)); }
+    .vis[data-tod="night"] .wglass .th-pile { filter: brightness(0.48) saturate(1.3) hue-rotate(-8deg); }
     .xtree img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
     .xtree i { position: absolute; width: 7%; height: 4%; margin: -2% -3.5%; border-radius: 50%; background: radial-gradient(circle, rgba(255, 240, 180, 0.95), rgba(255, 200, 90, 0.4) 45%, transparent 70%); animation: thtwinkle ease-in-out infinite; mix-blend-mode: screen; }
     .fx-theme[data-scene="off"] .xtree img, .fx-theme[data-scene="bed"] .xtree img { filter: brightness(0.62); }
@@ -1289,9 +1318,6 @@
     .fx-theme[data-scene="dark"] .tprop img { filter: brightness(0.85) drop-shadow(0 2px 2px rgba(0, 0, 0, 0.4)); }
     .fx-theme[data-scene="off"] .tprop img, .fx-theme[data-scene="bed"] .tprop img { filter: brightness(0.55); }
     .tplace { position: absolute; inset: 0; pointer-events: none; }
-    html[data-visual-theme="library"] .tplace { background: radial-gradient(ellipse 80% 70% at 50% 100%, rgba(255, 196, 120, 0.12), transparent 70%); mix-blend-mode: soft-light; }
-    html[data-visual-theme="cafe"] .tplace { background: linear-gradient(180deg, rgba(150, 95, 50, 0.1), rgba(255, 170, 110, 0.14)); mix-blend-mode: soft-light; }
-    html[data-visual-theme="classroom"] .tplace { background: linear-gradient(180deg, rgba(200, 225, 255, 0.12), rgba(220, 235, 255, 0.06)); mix-blend-mode: soft-light; }
     html[data-visual-theme="library"] .page-sky .sky-wx { opacity: 1; background: radial-gradient(1000px 600px at 50% 110%, rgba(255, 190, 110, 0.14), transparent 60%), radial-gradient(900px 520px at 15% 0%, rgba(60, 120, 80, 0.12), transparent 55%); }
     html[data-visual-theme="cafe"] .page-sky .sky-wx { opacity: 1; background: radial-gradient(1000px 600px at 50% 110%, rgba(200, 130, 70, 0.18), transparent 60%); }
     html[data-visual-theme="classroom"] .page-sky .sky-wx { opacity: 1; background: radial-gradient(1000px 600px at 50% -10%, rgba(140, 180, 230, 0.14), transparent 60%), radial-gradient(900px 520px at 85% 0%, rgba(60, 200, 110, 0.08), transparent 55%); }
@@ -1446,8 +1472,8 @@
       // Late Night Study Room: separate male cast (CITY_TABLE swapped at load, see STUDY_CAST),
       // own art set assets/rooms_male. Selectable only; not in THEME_SCHEDULE (no auto date).
       { id: 'studyroom',  name: 'Late Night Study Room', nameKo: '深夜 스터디 룸', status: 'ready', linkWeather: false, linkTime: false },
-      // Library / Cafe / Classroom: the original nine in their own rooms with a
-      // themed prop, winter lights, tree, hearth or warm floor. Selectable only.
+      // Library / Cafe / Classroom: the original nine studying in a real library,
+      // cafe or classroom of their city (assets/rooms_<theme>, stills only). Selectable only.
       { id: 'library',    name: 'Library',           nameKo: '도서관',     status: 'ready', linkWeather: false, linkTime: false },
       { id: 'cafe',       name: 'Cafe',              nameKo: '카페',       status: 'ready', linkWeather: false, linkTime: false },
       { id: 'classroom',  name: 'Classroom',         nameKo: '교실',       status: 'ready', linkWeather: false, linkTime: false }
@@ -2583,11 +2609,16 @@
     /* __MEDIA_MAP__ */
     const MEDIA = null;
 
+    const PLACE_SETS = { library: 'rooms_library', cafe: 'rooms_cafe', classroom: 'rooms_classroom' };
+    const STILL_ONLY_SETS = { rooms_library: true, rooms_cafe: true, rooms_classroom: true };
     function artFolder() {
       // Rainy Window uses the dedicated rainy stills and loops.
       // Every other theme uses the base (dry) set, including themes
       // that do not yet have their own art.
       if (currentTheme === 'studyroom') return 'rooms_male';
+      // Library / Cafe / Classroom: the nine women in a real library, cafe or
+      // classroom (own stills per scene; no loops, see STILL_ONLY_SETS).
+      if (PLACE_SETS[currentTheme]) return PLACE_SETS[currentTheme];
       return currentTheme === 'rainy' ? 'rooms_rainy' : 'rooms';
     }
     function sceneKey(period) {
@@ -3168,6 +3199,11 @@
     function winBox(w) {
       return 'left:' + w[0] + '%;top:' + w[1] + '%;width:' + (w[2] - w[0]) + '%;height:' + (w[3] - w[1]) + '%';
     }
+    function snowPileHTML(w) {
+      // Heavy drifts banked against the bottom of the glass (clipped to it).
+      const h = Math.max(4, (w[3] - w[1]) * 0.16);
+      return '<div class="th-pile" style="left:' + w[0] + '%;width:' + (w[2] - w[0]) + '%;top:' + (w[3] - h).toFixed(2) + '%;height:' + h.toFixed(2) + '%"></div>';
+    }
     function winBoxFlakes(w, n, big) {
       // Flakes fall only across the window's own box (then clipped to the glass).
       return '<div style="position:absolute;left:' + w[0] + '%;top:' + w[1] + '%;width:' + (w[2] - w[0]) + '%;height:' + (w[3] - w[1]) + '%">' + flakesHTML(n, big) + '</div>';
@@ -3272,7 +3308,8 @@
       // then fireplace.webp with flames/embers, then only the mantel on top.
       return '<div class="hglow" style="--hx:' + hx + '%"></div>' +
         '<div class="hearth" style="' + spriteBox(p, HEARTH_AR) + ';--wall:' + tone + '"><div class="hwglow"></div><div class="hbreast"></div><div class="hshadow"></div><div class="hstone"></div>' +
-        '<img alt="" src="' + winterAsset('fireplace.webp') + '"><div class="hf"></div><div class="hf b"></div>' + em + '<div class="hmantel"></div></div>';
+        '<img alt="" src="' + winterAsset('fireplace.webp') + '"><div class="hf"></div><div class="hf b"></div>' + em + '<div class="hmantel"></div>' +
+        (visualThemeId(currentTheme) === 'christmas' ? '<div class="hwreath"><i></i></div><div class="hstock s1"></div><div class="hstock s2"></div><div class="hstock s3"></div><div class="hgarland"></div>' : '') + '</div>';
     }
     function warmAltHTML(set, roomId) {
       const kind = (WARM_ALT[set] || {})[roomId];
@@ -3291,7 +3328,10 @@
       [[40, 30], [58, 38], [34, 50], [62, 55], [45, 64], [30, 68], [68, 70], [52, 46], [50, 20]].forEach(function (sp) {
         tw += '<i style="left:' + sp[0] + '%;top:' + sp[1] + '%;animation-duration:' + rr(1.4, 2.8).toFixed(2) + 's;animation-delay:' + (-rr(0, 3)).toFixed(2) + 's"></i>';
       });
-      return '<div class="xtree" style="' + spriteBox(p, TREE_AR) + '"><img alt="" src="' + winterAsset('xmastree.webp') + '">' + tw + '</div>';
+      // Bigger tree (1.35x, same base centre) with wrapped gifts at its foot.
+      const k = 1.35, big = [Math.max(0, p[0] - p[2] * (k - 1) / 2), p[1], p[2] * k];
+      const gifts = '<u class="gift g1"></u><u class="gift g2"></u><u class="gift g3"></u><u class="gift g4"></u>';
+      return '<div class="xtree" style="' + spriteBox(big, TREE_AR) + '"><img alt="" src="' + winterAsset('xmastree.webp') + '">' + tw + gifts + '</div>';
     }
     function viewHTML(roomId, scene, cold) {
       const b = VIEW_BOX[roomId];
@@ -3322,7 +3362,7 @@
         if (!ctx.cold) return '<div class="wglass" style="' + mask + '"><div class="th-overcast"></div></div>';
         return viewHTML(ctx.room, ctx.scene, true) +
           '<div class="wglass" style="' + mask + '"><div class="th-overcast"></div><div class="th-snowsky"></div>' +
-          winBoxFlakes(w, 28, true) + '<div class="th-frost"></div></div>';
+          winBoxFlakes(w, 28, true) + '<div class="th-frost"></div>' + snowPileHTML(w) + '</div>';
       },
       christmas: function (w, ctx) {
         const cx = (w[0] + w[2]) / 2;
@@ -3356,9 +3396,6 @@
           '</div>';
       }
     };
-    ['library', 'cafe', 'classroom'].forEach(function (t) {
-      THEME_FX[t] = function (w, ctx) { return THEME_FX.christmas(w, ctx) + '<div class="tplace"></div>' + propHTML(t, ctx.room); };
-    });
     function syncThemeFx(vis, room) {
       if (!vis) return;
       const fx = vis.querySelector('.fx');
@@ -3604,6 +3641,7 @@
       if (!vid) return;
       const scene = sceneKey(period);
       const set = artFolder();
+      if (STILL_ONLY_SETS[set]) { unloadVideo(tile); return; }
       const url = asset(tile.room.id + '_' + scene + '.mp4');
       const poster = asset(tile.room.id + '_' + scene + '.jpg');
       const cur = vid.getAttribute('src');
@@ -4162,7 +4200,7 @@
     // following the room art's local-hour periods (day / evening / night), with
     // a fixed visual weather token (not live weather; the tile weather readout
     // still shows live Open-Meteo data). New overlay themes just add a row.
-    const THEME_OVERLAY_WX = { moonlight: 'clear', studyroom: 'clear', christmas: 'xmas', snow: 'snowy', fireplace: 'fire', sunlight: 'clear', library: 'xmas', cafe: 'xmas', classroom: 'xmas' };
+    const THEME_OVERLAY_WX = { moonlight: 'clear', studyroom: 'clear', christmas: 'xmas', snow: 'snowy', fireplace: 'fire', sunlight: 'clear', library: 'place', cafe: 'place', classroom: 'place' };
     function atmosphereFor(room, now) {
       // Moonlight Window keeps linkWeather/linkTime false (not live weather,
       // not the generic time-linked path). It still uses time of day so
@@ -5459,6 +5497,19 @@
 
     // Expose a tiny hook so future settings can swap room art without rewriting clocks/themes.
     window.NineLives = { SETTINGS, CURRENT_SETTING, THEMES, THEME_SCHEDULE, THEME_SCHEDULE_TZ, THEME_SCHEDULE_DEFAULT, ROOMS, CITY_TABLE, CITY_NAMES, CHAR_NAMES, locChar, displayName, periodForHour, DEFAULT_LANG, resolveLang, YOU_NAME, weatherKind, formatLocale, visitorHourCycle, roomZone, timeBlockId, hourOverride, dateOverride, virtualNow, sortOuterSlots, utcOffsetMinutes, todForRoom, effectiveWeatherKind, wxRefreshMs, setTheme, applyResolvedTheme, scheduledThemeAt, scheduledReadyThemeAt, resolveActiveTheme, readThemeOverride, writeThemeOverride, snapVisitorCity, metroHubByName, coordsForCityKey, coordsForRoom, speechLinesFor, THEME_SPEECH, THEME_FX, THEME_OVERLAY_WX, WINDOW_RECTS, VIEW_BOX, HEARTH_POS, WARM_ALT, PROP_POS, TREE_POS, roomIsCold, roomIsHot, roomColdFor, roomScene, COLD_MAX_C, METRO_HUBS, canFullscreen, fullscreenApiUsable, isIPhoneOrIPod, isIPhoneSafari, themeHasArt, visualThemeId, artFolder, sceneKey, defaultTempUnit, readTempUnit, writeTempUnit, useFahrenheit, setTempUnit, paintAllWeather };
+  })();
+  </script>
+  <script>
+  // Anonymous visit ping (no count is shown on this page). One "visit" per
+  // browser per New York day; every load is a page view.
+  (function () {
+    try {
+      if (!/^https?:$/.test(location.protocol) || /^(localhost|127\.|0\.0\.0\.0)/.test(location.hostname)) return;
+      var day = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+      var first = false;
+      try { first = localStorage.getItem('nl_visit_day') !== day; localStorage.setItem('nl_visit_day', day); } catch (e) { first = true; }
+      fetch('/api/hit', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ u: first ? 1 : 0 }), keepalive: true }).catch(function () {});
+    } catch (e) {}
   })();
   </script>
 </body>
